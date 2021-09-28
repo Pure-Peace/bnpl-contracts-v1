@@ -1,4 +1,4 @@
-// contracts/PoolTokenUpgradable.sol
+// contracts/PoolTokenUpgradeable.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -6,16 +6,16 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "./ERC20BurnableUpgradeable.sol";
 
-import "./IMintableTokenUpgradeable.sol";
+import "./IMintableBurnableTokenUpgradeable.sol";
 import "./ITokenInitializableV1.sol";
 
-contract PoolTokenUpgradable is
+contract PoolTokenUpgradeable is
     Initializable,
     AccessControlEnumerableUpgradeable,
     ERC20BurnableUpgradeable,
-    IMintableTokenUpgradeable,
+    IMintableBurnableTokenUpgradeable,
     ITokenInitializableV1
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");

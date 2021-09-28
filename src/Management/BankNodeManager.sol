@@ -1,4 +1,4 @@
-// contracts/PoolTokenUpgradable.sol
+// contracts/PoolTokenUpgradeable.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -29,18 +29,44 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
     uint32 public override bankNodeCount;
     IERC20 public override bnplToken;
 
-    address public override upBeaconBankNode;
-    address public override upBeaconBankNodeLendingPoolToken;
-
-    address public override upBeaconBankNodeStakingPool;
-    address public override upBeaconBankNodeStakingPoolToken;
+    BankNodeLendingRewards public override bankNodeLendingRewards;
 
     IBNPLProtocolConfig public override protocolConfig;
+
+    function bankNodeIdExists(uint32 bankNodeId) public view override returns (uint256) {
+        return (bankNodeId >= 1 && bankNodeId <= bankNodeCount) ? 1 : 0;
+    }
+
+    function getBankNodeContract(uint32 bankNodeId) public view override returns (address) {
+        require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
+        return bankNodes[bankNodeId].bankNodeContract;
+    }
+
+    function getBankNodeToken(uint32 bankNodeId) public view override returns (address) {
+        require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
+        return bankNodes[bankNodeId].bankNodeToken;
+    }
+
+    function getBankNodeStakingPoolContract(uint32 bankNodeId) public view override returns (address) {
+        require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
+        return bankNodes[bankNodeId].bnplStakingPoolContract;
+    }
+
+    function getBankNodeStakingPoolToken(uint32 bankNodeId) public view override returns (address) {
+        require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
+        return bankNodes[bankNodeId].bnplStakingPoolToken;
+    }
+
+    function getBankNodeLendableToken(uint32 bankNodeId) public view override returns (address) {
+        require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
+        return bankNodes[bankNodeId].lendableToken;
+    }
 
     function initialize(
         IBNPLProtocolConfig _protocolConfig,
         address _configurator,
-        uint256 _minimumBankNodeBondedAmount
+        uint256 _minimumBankNodeBondedAmount,
+        BankNodeLendingRewards _bankNodeLendingRewards
     ) public override initializer {
         require(address(_protocolConfig) != address(0), "_protocolConfig cannot be 0");
         require(_configurator != address(0), "_configurator cannot be 0");
@@ -53,26 +79,19 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
 
         protocolConfig = _protocolConfig;
 
-        upBeaconBankNode = address(protocolConfig.upBeaconBankNode());
-        upBeaconBankNodeLendingPoolToken = address(protocolConfig.upBeaconBankNodeLendingPoolToken());
-        upBeaconBankNodeStakingPool = address(protocolConfig.upBeaconBankNodeStakingPool());
-        upBeaconBankNodeStakingPoolToken = address(protocolConfig.upBeaconBankNodeStakingPoolToken());
-
-        require(upBeaconBankNode != address(0), "_upBeaconBankNode cannot be 0");
-        require(upBeaconBankNodeLendingPoolToken != address(0), "_upBeaconBankNodeLendingPoolToken cannot be 0");
-        require(upBeaconBankNodeStakingPool != address(0), "_upBeaconBankNodeStakingPool cannot be 0");
-        require(upBeaconBankNodeStakingPoolToken != address(0), "_upBeaconStakingPoolBNPLToken cannot be 0");
-
         minimumBankNodeBondedAmount = _minimumBankNodeBondedAmount;
         bankNodeCount = 0;
         bnplToken = IERC20(_protocolConfig.bnplToken());
         require(address(bnplToken) != address(0), "_bnplToken cannot be 0");
+        bankNodeLendingRewards = _bankNodeLendingRewards;
+        require(address(bankNodeLendingRewards) != address(0), "_bankNodeLendingRewards cannot be 0");
 
         _setupRole(CONFIGURE_NODE_MANAGER_ROLE, _configurator);
     }
 
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled)
         public
+        override
         onlyRole(CONFIGURE_NODE_MANAGER_ROLE)
     {
         require(address(_lendableToken.tokenContract) != address(0), "tokenContract must not be 0");
@@ -97,13 +116,18 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
         enabledLendableTokens[_lendableToken.tokenContract] = enabled;
     }
 
-    function setLendableTokenStatus(address tokenContract, uint8 enabled) public onlyRole(CONFIGURE_NODE_MANAGER_ROLE) {
+    function setLendableTokenStatus(address tokenContract, uint8 enabled)
+        public
+        override
+        onlyRole(CONFIGURE_NODE_MANAGER_ROLE)
+    {
         require(enabled == 0 || enabled == 1, "enabled 1 or 0");
         enabledLendableTokens[tokenContract] = enabled;
     }
 
     function setMinimumBankNodeBondedAmount(uint256 _minimumBankNodeBondedAmount)
         public
+        override
         onlyRole(CONFIGURE_NODE_MANAGER_ROLE)
     {
         minimumBankNodeBondedAmount = _minimumBankNodeBondedAmount;
@@ -117,7 +141,7 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
         address minter
     ) private returns (address) {
         BeaconProxy p = new BeaconProxy(
-            upBeaconBankNodeLendingPoolToken,
+            address(protocolConfig.upBeaconBankNodeLendingPoolToken()),
             abi.encodeWithSelector(
                 ITokenInitializableV1.initialize.selector,
                 //initialize(string calldata name, string calldata symbol, uint8 decimalsValue, address minterAdmin, address minter) external;
@@ -139,7 +163,7 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
         address minter
     ) private returns (address) {
         BeaconProxy p = new BeaconProxy(
-            upBeaconBankNodeStakingPool,
+            address(protocolConfig.upBeaconBankNodeStakingPool()),
             abi.encodeWithSelector(
                 ITokenInitializableV1.initialize.selector,
                 //initialize(string calldata name, string calldata symbol, uint8 decimalsValue, address minterAdmin, address minter) external;
@@ -174,8 +198,8 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
             "invalid lendable token"
         );
         require(enabledLendableTokens[lendableTokenAddress] == 1, "lendable token not enabled");
-        bankNodeContract = address(new BeaconProxy(upBeaconBankNode, ""));
-        bnplStakingPoolContract = address(new BeaconProxy(upBeaconBankNodeStakingPool, ""));
+        bankNodeContract = address(new BeaconProxy(address(protocolConfig.upBeaconBankNode()), ""));
+        bnplStakingPoolContract = address(new BeaconProxy(address(protocolConfig.upBeaconBankNodeStakingPool()), ""));
 
         bnplStakingPoolToken = _createBankNodeLendingPoolTokenClone(
             "Banking Node Pool BNPL",
@@ -224,7 +248,7 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
         address lendableTokenAddress,
         string calldata nodeName,
         string calldata website
-    ) private returns (uint256) {
+    ) public override returns (uint256) {
         require(tokensToBond >= minimumBankNodeBondedAmount && tokensToBond > 0, "Not enough tokens bonded");
         require(operator != address(0), "operator cannot be 0");
         require(lendableTokenAddress != address(0), "lendableTokenAddress cannot be 0");

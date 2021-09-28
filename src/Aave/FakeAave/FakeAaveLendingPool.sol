@@ -29,7 +29,7 @@ contract FakeAaveLendingPool is IAaveLendingPool {
         address asset,
         uint256 amount,
         address onBehalfOf,
-        uint16 referralCode
+        uint16 /*referralCode*/
     ) public override {
         require(asset != address(0), "cannot be asset == 0");
         IFakeAaveToken aaveToken = depositAssetToAaveAsset[asset];

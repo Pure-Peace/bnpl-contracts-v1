@@ -75,7 +75,7 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
 
         TransferHelper.safeTransferFrom(inputTokenAddress, msg.sender, address(this), actualAmountIn);
         tokenBalances[inputTokenAddress] += actualAmountIn;
-        TransferHelper.safeTransfer(BNPL_TOKEN_ADDRESS, msg.sender, actualAmountOut);
+        TransferHelper.safeTransfer(BNPL_TOKEN_ADDRESS, recipient, actualAmountOut);
         amountOut = actualAmountOut;
     }
 
@@ -94,7 +94,7 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
 
         TransferHelper.safeTransferFrom(BNPL_TOKEN_ADDRESS, msg.sender, address(this), bnplAmount);
         bnplBalance += bnplAmount;
-        TransferHelper.safeTransfer(outputTokenAddress, msg.sender, actualAmountOut);
+        TransferHelper.safeTransfer(outputTokenAddress, recipient, actualAmountOut);
         amountOut = actualAmountOut;
     }
 

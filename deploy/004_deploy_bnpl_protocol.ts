@@ -14,6 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const UpBeaconBNPLStakingPool = await deployments.get("UpBeaconBNPLStakingPool");
   const UpBeaconBankNodeLendingPoolToken = await deployments.get("UpBeaconBankNodeLendingPoolToken");
   const UpBeaconBankNodeStakingPoolToken = await deployments.get("UpBeaconBankNodeStakingPoolToken");
+  const UpBeaconBankNodeLendingRewards = await deployments.get("UpBeaconBankNodeLendingRewards");
 
 
 
@@ -25,11 +26,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: false,
   });
 
+  const BankNodeLendingRewardsProxy = await deploy("BankNodeLendingRewardsProxy", {
+    contract: "BeaconProxy",
+    from: protocolDeployer,
+    args: [UpBeaconBankNodeLendingRewards.address, []],
+    log: true,
+    skipIfAlreadyDeployed: false,
+  });
+
 
   const BNPLProtocolConfig = await deploy("BNPLProtocolConfig", {
     contract: "BNPLProtocolConfig",
     from: protocolDeployer,
     args: [
+      hre.network.live ? 1 : 13371337,
+      hre.network.live ? "BNPL MAINNET" : "BNPL TESTING",
       bnplToken.address,
       UpBeaconBankNodeManager.address,
 
@@ -39,6 +50,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
       UpBeaconBNPLStakingPool.address,
       UpBeaconBankNodeStakingPoolToken.address,
+      UpBeaconBankNodeLendingRewards.address,
 
       BankNodeManagerProxy.address
     ],
@@ -46,51 +58,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: false,
   });
 
-  const BankNodeManager = await getContractForEnvironment<BankNodeManager>(hre, "BankNodeManager", protocolDeployer);
-
-  await BankNodeManager.initialize(
-    BNPLProtocolConfig.address,
-    protocolAdmin,
-    "100000000000000000000000" // 100,000 BNPL Min bonding amount
-  );
 
 
-
-
-
-
-
-
-
-
-
-  /*
-
-
-          UpgradeableBeacon upBeaconBankNodeManager = new UpgradeableBeacon(params.implBankNodeManager);
-          BankNodeManager bankNodeManager = BankNodeManager(address(new BeaconProxy(address(upBeaconBankNodeManager),"")));
-          BNPLProtocolConfig protocolConfig = new BNPLProtocolConfig(
-              params.bnplToken,
-
-              upBeaconBankNodeManager,
-
-              new UpgradeableBeacon(params.implBankNode),
-              new UpgradeableBeacon(params.implBankNodeLendingPoolToken),
-
-              new UpgradeableBeacon(params.implBankNodeStakingPool),
-              new UpgradeableBeacon(params.implBankNodeStakingPoolToken),
-
-              bankNodeManager
-          );
-
-          bankNodeManager.initialize(protocolConfig, params.configurator, params.minimumBankNodeBondedAmount);
-
-
-
-          */
 
 
 };
 export default func;
 func.id = "deploy_bnpl_protocol";
-func.tags = ['BNPLProtocol'];
+func.tags = ['BNPLProtocolDeploy'];

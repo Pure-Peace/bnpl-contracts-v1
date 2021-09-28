@@ -26,8 +26,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const ImplBankNodeManager = await easyDeployProtoDep("ImplBankNodeManager", "BankNodeManager");
   const UpBeaconBankNodeManager = await easyDeployProtoDep("UpBeaconBankNodeManager", "UpgradeableBeacon", [ImplBankNodeManager.address]);
 
+  const ImplBankNodeLendingRewards = await easyDeployProtoDep("ImplBankNodeLendingRewards", "BankNodeLendingRewards");
+  const UpBeaconBankNodeLendingRewards = await easyDeployProtoDep("UpBeaconBankNodeLendingRewards", "UpgradeableBeacon", [ImplBankNodeLendingRewards.address]);
 
-  const ImplPoolTokenUpgradable = await easyDeployProtoDep("ImplPoolTokenUpgradable", "PoolTokenUpgradable");
+
 
 
   const ImplBNPLBankNode = await easyDeployProtoDep("ImplBNPLBankNode", "BNPLBankNode");
@@ -39,8 +41,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 
 
-  const UpBeaconBankNodeLendingPoolToken = await easyDeployProtoDep("UpBeaconBankNodeLendingPoolToken", "UpgradeableBeacon", [ImplPoolTokenUpgradable.address]);
-  const UpBeaconBankNodeStakingPoolToken = await easyDeployProtoDep("UpBeaconBankNodeStakingPoolToken", "UpgradeableBeacon", [ImplPoolTokenUpgradable.address]);
+  const ImplPoolTokenUpgradeable = await easyDeployProtoDep("ImplPoolTokenUpgradeable", "PoolTokenUpgradeable");
+  const UpBeaconBankNodeLendingPoolToken = await easyDeployProtoDep("UpBeaconBankNodeLendingPoolToken", "UpgradeableBeacon", [ImplPoolTokenUpgradeable.address]);
+  const UpBeaconBankNodeStakingPoolToken = await easyDeployProtoDep("UpBeaconBankNodeStakingPoolToken", "UpgradeableBeacon", [ImplPoolTokenUpgradeable.address]);
 
 
 

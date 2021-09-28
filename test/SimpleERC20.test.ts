@@ -1,14 +1,27 @@
 import { expect } from './chai-setup';
 import * as hre from 'hardhat';
 import { deployments, ethers, getNamedAccounts, getUnnamedAccounts } from 'hardhat';
-import { IERC20 } from '../typechain';
+import { BankNodeLendingRewards, BankNodeManager, BNPLProtocolConfig, BNPLToken, IAaveLendingPool, IERC20 } from '../typechain';
 import { setupUser, setupUsers } from './utils';
+import { setupMockEnvIfNeeded } from './utils/setupMockEnv';
+import { setupProtocol } from './utils/protocolSetup';
+import { getContractForEnvironment } from './utils/getContractForEnvironment';
 
 const setup = deployments.createFixture(async () => {
-  await deployments.fixture('SimpleERC20');
-  const { simpleERC20Beneficiary } = await getNamedAccounts();
+  await deployments.fixture('BNPLProtocolDeploy');
+  const { protocolAdmin, protocolDeployer } = await getNamedAccounts();
+  await setupMockEnvIfNeeded(hre);
+  await setupProtocol(hre);
+
   const contracts = {
-    SimpleERC20: <IERC20>await ethers.getContract('SimpleERC20'),
+    BNPLToken: await getContractForEnvironment<BNPLToken>(hre, "BNPLToken"),
+    BNPLProtocolConfig: await getContractForEnvironment<BNPLProtocolConfig>(hre, "BNPLProtocolConfig"),
+    BankNodeManager: await getContractForEnvironment<BankNodeManager>(hre, "BankNodeManager"),
+    BankNodeLendingRewards: await getContractForEnvironment<BankNodeLendingRewards>(hre, "BankNodeLendingRewards"),
+    AaveLendingPool: await getContractForEnvironment<IAaveLendingPool>(hre, "AaveLendingPool"),
+
+    AaveLendingPool: <IAaveLendingPool>await ethers.getContract('AaveLendingPool'),
+
   };
   const users = await setupUsers(await getUnnamedAccounts(), contracts);
   return {

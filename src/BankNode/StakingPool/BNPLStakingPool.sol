@@ -7,14 +7,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
 import "../IBNPLBankNode.sol";
-import "../../ERC20/IMintableTokenUpgradeable.sol";
+import "../../ERC20/IMintableBurnableTokenUpgradeable.sol";
 import "../../Utils/TransferHelper.sol";
 import "../../SwapMarket/IBNPLSwapMarket.sol";
 import "../../Aave/IAaveLendingPool.sol";
 import "../../Utils/Math/PRBMathUD60x18.sol";
 import "./IBNPLNodeStakingPool.sol";
+import "./UserTokenLockup.sol";
 
-contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, IBNPLNodeStakingPool {
+contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, UserTokenLockup, IBNPLNodeStakingPool {
     /**
      * @dev Emitted when user `user` is stakes `bnplStakeAmount` of BNPL tokens while receiving `poolTokensMinted` of pool tokens
      */
@@ -39,17 +40,10 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, I
     bytes32 public constant SLASHER_ADMIN_ROLE = keccak256("SLASHER_ADMIN_ROLE");
 
     IERC20 public BASE_LIQUIDITY_TOKEN; // = IERC20(0x1d1781B0017CCBb3f0341420E5952aAfD9d8C083);
-    IMintableTokenUpgradeable public POOL_LIQUIDITY_TOKEN; // = IMintableToken(0x517D01e738F8E1fB473f905BCC736aaa41226761);
+    IMintableBurnableTokenUpgradeable public POOL_LIQUIDITY_TOKEN; // = IMintableToken(0x517D01e738F8E1fB473f905BCC736aaa41226761);
 
     uint256 public baseTokenBalance;
     uint256 public poolTokensCirculating;
-
-    struct StakingTokenLockup {
-        uint64 lastUpdatedAt;
-        uint256 lockupScore;
-    }
-
-    mapping(address => StakingTokenLockup) public tokenLockups;
 
     function initialize(
         address bnplToken,
@@ -64,15 +58,20 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, I
         __ERC165_init_unchained();
         __AccessControl_init_unchained();
         __AccessControlEnumerable_init_unchained();
+        _UserTokenLockup_init_unchained();
 
         BASE_LIQUIDITY_TOKEN = IERC20(bnplToken);
-        POOL_LIQUIDITY_TOKEN = IMintableTokenUpgradeable(poolBNPLToken);
+        POOL_LIQUIDITY_TOKEN = IMintableBurnableTokenUpgradeable(poolBNPLToken);
 
         baseTokenBalance = 0;
         poolTokensCirculating = 0;
 
         _setupRole(SLASHER_ADMIN_ROLE, slasherAdmin);
         _setRoleAdmin(SLASHER_ROLE, SLASHER_ADMIN_ROLE);
+    }
+
+    function getUnstakeLockupPeriod() public pure returns (uint256) {
+        return 7 days;
     }
 
     function getPoolTotalAssetsValue() public view override returns (uint256) {
@@ -85,6 +84,41 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, I
 
     function getPoolWithdrawConversion(uint256 withdrawAmount) public view returns (uint256) {
         return (withdrawAmount * getPoolTotalAssetsValue()) / poolTokensCirculating;
+    }
+
+    function _issueUnlockedTokensToUser(address user, uint256 amount) internal override returns (uint256) {
+        require(amount != 0 && amount <= poolTokensCirculating, "poolTokenAmount cannot be 0 or more than circulating");
+
+        require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
+        require(getPoolTotalAssetsValue() != 0, "total asset value must not be 0");
+
+        uint256 baseTokensOut = getPoolWithdrawConversion(amount);
+        poolTokensCirculating -= amount;
+        require(baseTokenBalance >= baseTokensOut, "base tokens balance must be >= out");
+        baseTokenBalance -= baseTokensOut;
+        TransferHelper.safeTransfer(address(BASE_LIQUIDITY_TOKEN), user, baseTokensOut);
+        emit Unstake(user, baseTokensOut, amount);
+        return baseTokensOut;
+    }
+
+    function _removeLiquidityAndLock(
+        address user,
+        uint256 poolTokensToConsume,
+        uint256 unstakeLockupPeriod
+    ) internal returns (uint256) {
+        require(unstakeLockupPeriod != 0, "lockup period cannot be 0");
+        require(user != address(this), "user cannot be self");
+        require(user != address(0), "user cannot be null");
+
+        require(
+            poolTokensToConsume > 0 && poolTokensToConsume <= poolTokensCirculating,
+            "poolTokenAmount cannot be 0 or more than circulating"
+        );
+
+        require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
+        POOL_LIQUIDITY_TOKEN.burnFrom(user, poolTokensToConsume);
+        _createTokenLockup(user, poolTokensToConsume, uint64(block.timestamp + unstakeLockupPeriod), true);
+        return 0;
     }
 
     function _mintPoolTokensForUser(address user, uint256 mintAmount) private {
@@ -165,7 +199,7 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, I
         }
     }
 
-    function _removeLiquidity(address user, uint256 poolTokensToConsume) private returns (uint256) {
+    function _removeLiquidityNoLockup(address user, uint256 poolTokensToConsume) private returns (uint256) {
         require(user != address(this), "user cannot be self");
         require(user != address(0), "user cannot be null");
 
@@ -189,6 +223,16 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, I
         return baseTokensOut;
     }
 
+    function _removeLiquidity(address user, uint256 poolTokensToConsume) internal returns (uint256) {
+        require(poolTokensToConsume != 0, "poolTokensToConsume cannot be 0");
+        uint256 unstakeLockupPeriod = getUnstakeLockupPeriod();
+        if (unstakeLockupPeriod == 0) {
+            return _removeLiquidityNoLockup(user, poolTokensToConsume);
+        } else {
+            return _removeLiquidityAndLock(user, poolTokensToConsume, unstakeLockupPeriod);
+        }
+    }
+
     function donate(uint256 donateAmount) public override {
         require(donateAmount != 0, "donateAmount cannot be 0");
         _processDonation(msg.sender, donateAmount);
@@ -201,7 +245,6 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, I
 
     function unstakeTokens(uint256 unstakeAmount) public override {
         require(unstakeAmount != 0, "unstakeAmount cannot be 0");
-        //_approveLoanRequest(msg.sender, loanRequestId);
         _removeLiquidity(msg.sender, unstakeAmount);
     }
 
