@@ -85,7 +85,6 @@ describe('RewardsStaking', function () {
   it('3 bank nodes distrobution ', async function () {
     const { users, h } = await setup();
     const u = users;
-    console.log("it1");
 
     const bankNodeIdA = await h.setupBankNode(
       u.bankNodeMakerA,
@@ -101,8 +100,6 @@ describe('RewardsStaking', function () {
       (await bA.b.BNPLToken.balanceOf(bA.b.StakingPool.address)).eq(ms`380000*10^18`),
       "Node A should have 250,000 BNPL Staked/Bonded"
     );
-    console.log("it2");
-
 
 
     // node a total = 250k bnpl staked
@@ -123,8 +120,6 @@ describe('RewardsStaking', function () {
       (await bB.b.BNPLToken.balanceOf(bB.b.StakingPool.address)).eq(ms`360000*10^18`),
       "Node B should have 360,000 BNPL Staked/Bonded"
     );
-    console.log("it3");
-
     const bankNodeIdC = await h.setupBankNode(
       u.bankNodeMakerC,
       "USDT",
@@ -139,12 +134,29 @@ describe('RewardsStaking', function () {
       (await bC.b.BNPLToken.balanceOf(bC.b.StakingPool.address)).eq(ms`380000*10^18`),
       "Node C should have 360,000 BNPL Staked/Bonded"
     );
-    console.log("it4");
 
-    const tenMilDistro = await bC.b.BankNodeLendingRewards.getBNPLTokenDistribution(ms`1000*1000*10*10^18`);
+    const totalAmountToDistribute = ms`1000*1000*10*10^18`;
 
-    console.log("it5");
-    console.log(tenMilDistro);
+    const totalForNodes = [
+      await bA.b.BNPLToken.balanceOf(bA.b.StakingPool.address),
+      await bB.b.BNPLToken.balanceOf(bB.b.StakingPool.address),
+      await bC.b.BNPLToken.balanceOf(bC.b.StakingPool.address),
+    ];
+    const totalForAllNodes = totalForNodes.reduce((a, b) => a.add(b));
+    const nodesNormalized = totalForNodes.map(x => x.mul(totalAmountToDistribute).div(totalForAllNodes));
+    const totalForNormalizedNodes = nodesNormalized.reduce((a, b) => a.add(b));
+
+    const allFromChainCalc = await bC.b.BankNodeLendingRewards.getBNPLTokenDistribution(totalAmountToDistribute);
+    const totalForAllNodesFromChain = allFromChainCalc.reduce((a, b) => a.add(b));
+
+    expect(totalForNormalizedNodes.toString(), "total for all nodes should equal to the total produced on chain")
+      .equal(totalForAllNodesFromChain.toString());
+
+    for (let i = 0; i < totalForNodes.length; i++) {
+      expect(nodesNormalized[i].toString(), `Node ${String.fromCharCode(65 + i)} total calculated off chain should match the on chain calculation`)
+        .equal(allFromChainCalc[i].toString());
+    }
+
 
   });
 });
