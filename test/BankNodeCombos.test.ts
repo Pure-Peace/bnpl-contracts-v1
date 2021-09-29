@@ -209,7 +209,7 @@ describe('BankNodeCombos', function () {
     expect(loanAAfterPayment3.status === 1, "loanAAfterPayment3.status should be 1 (loan completed)");
   });
 
-  it('3 month loan for 25000 at 10% APR (Paid in Full)', async function () {
+  it('3 month loan for 25000 at 10% APR (Misses final payment)', async function () {
     const { users, h } = await setup();
     const u = users;
 
