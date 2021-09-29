@@ -423,7 +423,7 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
       throw new Error("Invalid Bank Node or Loan ID!");
     }
     const newTime = nextDueDate.add(offset);
-    await setBlockTime(newTime.toString());
+    await setBlockTime(newTime.toNumber());
     return {
       newTime,
       dueDate: nextDueDate,
@@ -437,14 +437,16 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     }
   }
   async function missPaymentBankNodeAndReport(_reporter: string | TUserWithContractDefs, bankNode: string | { address: string }, loanId: BigNumberish) {
-    const user = typeof _reporter === 'string' ? await getUserWithAddress(_reporter) : _reporter;
     const b = await getSubContractsForBankNodeWithSigner(bankNode);
     const loanBefore = await b.BankNode.loans(loanId);
     const financialStateBefore = await getPoolAssetReportForBankNode(b.BankNode, b.StakingPool);
 
 
+    console.log("advancing");
 
     const { newTime, dueDate } = await advanceToNextPaymentDatePlusOffset(bankNode, loanId, 1000 * 60 * 5, _reporter);
+    console.log("advanced");
+
     await b.BankNode.reportOverdueLoan(loanId);
     const financialStateAfter = await getPoolAssetReportForBankNode(b.BankNode, b.StakingPool);
 

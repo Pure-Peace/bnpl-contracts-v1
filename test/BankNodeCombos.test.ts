@@ -82,7 +82,7 @@ const setup = deployments.createFixture(async () => {
 });
 
 describe('BankNodeCombos', function () {
-  it('Node should behave normally', async function () {
+  it('3 month loan for 25000 at 10% APR (Paid in Full)', async function () {
     const { users, h } = await setup();
     const u = users;
 
@@ -193,53 +193,147 @@ describe('BankNodeCombos', function () {
     const loanAAfterPayment1 = await b.BankNode.loans(loanAId);
     const finStatesAfterLoanAPayment1 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
     expect(loanAAfterPayment1.totalAmountPaid.eq(loanAStart.amountPerPayment), "should equal one payment");
-    console.log(finStatesAfterLoanAPayment1.bankNodeFinancialState);
-
-
+    expect(loanAAfterPayment1.status === 0, "loanAAfterPayment3.status should be 0 (loan in progress)");
 
     await h.makeLoanPaymentBankNode(u.borrowerA1, bankNodeIdA, loanAId);
     const loanAAfterPayment2 = await b.BankNode.loans(loanAId);
     const finStatesAfterLoanAPayment2 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
-    expect(loanAAfterPayment2.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(2)), "should equal one payment");
-    console.log(finStatesAfterLoanAPayment2.bankNodeFinancialState);
+    expect(loanAAfterPayment2.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(2)), "should equal two payments");
+    expect(loanAAfterPayment2.status === 0, "loanAAfterPayment3.status should be 0 (loan in progress)");
 
     await h.makeLoanPaymentBankNode(u.borrowerA1, bankNodeIdA, loanAId);
     const loanAAfterPayment3 = await b.BankNode.loans(loanAId);
     const finStatesAfterLoanAPayment3 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
-    expect(loanAAfterPayment3.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(3)), "should equal one payment");
-    console.log(finStatesAfterLoanAPayment3.bankNodeFinancialState);
-    console.log(loanAAfterPayment3)
-
-
-
-    console.log("I made my payment")
-
-
-
-
+    expect(loanAAfterPayment3.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(3)), "should equal three payments");
+    expect(loanAAfterPayment3.numberOfPaymentsMade === 3, "numberOfPayment should be 3");
+    expect(loanAAfterPayment3.status === 1, "loanAAfterPayment3.status should be 1 (loan completed)");
   });
 
-  it('not enough to bond', async function () {
-    const { users, BNPLToken, DAI, BankNodeManager } = await setup();
+  it('3 month loan for 25000 at 10% APR (Paid in Full)', async function () {
+    const { users, h } = await setup();
+    const u = users;
 
-    await users.bankNodeMakerA.BNPLToken.approve(
-      BankNodeManager.address,
-      "100000000000000000000000"
+    const startBondedBNPLAmount = ms`1000000*10^18`;
+    const startStakedBNPLAmount = ms`500000*10^18`;
+    const startTotalBNPL = BigNumber.from(startBondedBNPLAmount).add(startStakedBNPLAmount);
+    const startLiquidityAmount = ms`100000*10^18`;
+    const bankNodeIdA = await h.setupBankNode(
+      u.bankNodeMakerA,
+      "DAI",
+      startBondedBNPLAmount,
+      "Test Node A",
+      "https://test-node-a.example.com"
     );
 
+    await h.stakeBNPLToBankNode(u.stakerA1, bankNodeIdA, startStakedBNPLAmount);
 
-    /*
-        await expect(
-          users.bankNodeMakerA.BankNodeManager.createBondedBankNode(
-            users.bankNodeMakerA.address,
-            "10000000000000000000000",
-            DAI.address,
-            "My First Node!",
-            "https://node1.isthebest",
-          )
-        ).to.be.revertedWith('Not enough tokens bonded');
-        */
+    await h.stakeLendingCoinToBankNode(u.lenderA1, bankNodeIdA, startLiquidityAmount, "DAI");
+    const finStatesStart = await h.getBankNodeAllFinancialStates(bankNodeIdA);
 
+    expect(finStatesStart.bankNodeFinancialState.accountsReceivableFromLoans, "No Accounts Receivable before anyone loans have been made")
+      .equals(0);
+
+    expect(finStatesStart.bankNodeFinancialState.valueOfUnusedFundsLendingDeposits, "All of the money should have gone into aave (all in unused funds lending deposits)")
+      .equals(startLiquidityAmount);
+
+    expect(finStatesStart.bankNodeFinancialState.baseTokenBalance, "All of the money should have gone into aave (no base tokens held)")
+      .equals(0);
+
+    expect(finStatesStart.bankNodeFinancialState.nodeOperatorBalance, "No operator balance before the first loan has received a payment")
+      .equals(0);
+
+    expect(finStatesStart.bankNodeFinancialState.nodeOperatorBalance, "No operator balance before the first loan has received a payment")
+      .equals(0);
+
+    expect(finStatesStart.bankNodeFinancialState.poolTotalAssetsValue, "poolTotalAssetsValue should equal the total liquidity we injected in the pool before any loans are made")
+      .equals(startLiquidityAmount);
+
+    expect(finStatesStart.bankNodeFinancialState.poolTotalLiquidAssetsValue, "poolTotalLiquidAssetsValue should equal the total liquidity we injected in the pool before any loans are made")
+      .equals(startLiquidityAmount);
+
+
+    expect(finStatesStart.stakingPoolFinancialState.baseTokenBalance, "total bnpl should be staked + bonded at the start")
+      .equals(startTotalBNPL);
+
+    expect(finStatesStart.stakingPoolFinancialState.poolTokensCirculating, "poolTokensCirculating = total bnpl staked at the start")
+      .equals(startStakedBNPLAmount);
+
+    expect(finStatesStart.stakingPoolFinancialState.poolTotalAssetsValue, "poolTotalAssetsValue = total bnpl staked + bonded at the start")
+      .equals(startTotalBNPL);
+
+    expect(finStatesStart.stakingPoolFinancialState.tokensBondedAllTime, "tokensBondedAllTime = total bnpl staked at the start")
+      .equals(startBondedBNPLAmount);
+
+
+    const loanARequest: ILoanRequest = {
+      loanAmount: ms`25000*10^18`, // 25000 USD
+      totalLoanDuration: 60 * 60 * 24 * 30 * 3, // 90 days
+      numberOfPayments: 3, // 4 payments
+      interestRatePerPayment: ms`10^18 * 0.1 / 12`, // 10% Real APR
+      messageType: 0,
+      message: "I need 25k to start a small business selling ice cream cones for dogs",
+    };
+
+    const loanARequestResult = await h.requestLoanBankNode(u.borrowerA1, bankNodeIdA, loanARequest);
+    const borrowerA1FinStatesStart = await h.getKeyUserBalancesForBankNode(u.borrowerA1, bankNodeIdA);
+
+    const loanAApprovedResult = await h.approveLoanRequestBankNode(u.bankNodeMakerA, bankNodeIdA, loanARequestResult.loanRequestId);
+    const loanAId = loanAApprovedResult.loanRequest.loanId;
+    const loanAStart = loanAApprovedResult.loan;
+
+    expect(
+      (loanAStart.borrower + "").toLowerCase() === u.borrowerA1.address.toLowerCase() &&
+      (loanAStart.status + "") === "1" &&
+      loanAStart.interestRatePerPayment.eq(loanARequest.interestRatePerPayment) &&
+      loanAStart.loanAmount.eq(loanARequest.loanAmount) &&
+      loanAStart.totalLoanDuration.eq(loanARequest.totalLoanDuration) &&
+      loanAStart.totalAmountPaid.eq(0) &&
+      (loanAStart.numberOfPayments + "") === (loanARequest.numberOfPayments + "") &&
+      loanAStart.interestRatePerPayment.eq(loanARequest.interestRatePerPayment) &&
+      (loanAStart.numberOfPaymentsMade + "") === "0"
+      , "loan A should reflect the loan request we made");
+    const borrowerA1FinStatesAfterLoanA = await h.getKeyUserBalancesForBankNode(u.borrowerA1, bankNodeIdA);
+
+
+    expect(
+      BigNumber.from(borrowerA1FinStatesAfterLoanA.baseLiquidityTokenBalance)
+        .sub(borrowerA1FinStatesStart.baseLiquidityTokenBalance),
+      "the borrower should receive exactly what he/she asked for if the loan is approved"
+    ).equals(loanARequest.loanAmount);
+
+    const finStatesAfterLoanA = await h.getBankNodeAllFinancialStates(bankNodeIdA);
+    const b = finStatesAfterLoanA.b
+
+    const deltaFromStartToAfterLoanA = h.deltaBMinusA<IBankNodeFinancialState>(
+      finStatesStart.bankNodeFinancialState,
+      finStatesAfterLoanA.bankNodeFinancialState
+    );
+    expect(deltaFromStartToAfterLoanA.accountsReceivableFromLoans, "account receivable should go up by loan amount")
+      .equals(loanARequest.loanAmount);
+    expect(deltaFromStartToAfterLoanA.poolTotalLiquidAssetsValue, "liquid assets should go down by loan amount")
+      .equals(BigNumber.from(0).sub(loanARequest.loanAmount));
+    expect(deltaFromStartToAfterLoanA.loanIndex, "loan index should be 1 after the first loan")
+      .equals(1);
+
+
+    await h.makeLoanPaymentBankNode(u.borrowerA1, bankNodeIdA, loanAId);
+    const loanAAfterPayment1 = await b.BankNode.loans(loanAId);
+    const finStatesAfterLoanAPayment1 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
+    expect(loanAAfterPayment1.totalAmountPaid.eq(loanAStart.amountPerPayment), "should equal one payment");
+
+    await h.makeLoanPaymentBankNode(u.borrowerA1, bankNodeIdA, loanAId);
+    const loanAAfterPayment2 = await b.BankNode.loans(loanAId);
+    const finStatesAfterLoanAPayment2 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
+    expect(loanAAfterPayment2.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(2)), "should equal two payments");
+    expect(loanAAfterPayment2.status === 1, "loanAAfterPayment3.status should be 3 (loan completed)");
+
+    await h.missPaymentBankNodeAndReport(u.lenderA2, bankNodeIdA, loanAId);
+    const loanAAfterPayment3Missed = await b.BankNode.loans(loanAId);
+    const finStatesAfterLoanAPayment3Missed = await h.getBankNodeAllFinancialStates(bankNodeIdA);
+
+    expect(loanAAfterPayment3Missed.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(2)), "should equal two payment");
+    expect(loanAAfterPayment3Missed.numberOfPaymentsMade === 2, "numberOfPayment should be 3");
+    expect(loanAAfterPayment3Missed.status === 2, "loanAAfterPayment3.status should be 3 (loan defaulted)");
   });
 });
 export {

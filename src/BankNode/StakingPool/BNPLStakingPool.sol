@@ -75,8 +75,9 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         BASE_LIQUIDITY_TOKEN = IERC20(bnplToken);
         POOL_LIQUIDITY_TOKEN = IMintableBurnableTokenUpgradeable(poolBNPLToken);
 
-        _setupRole(SLASHER_ADMIN_ROLE, slasherAdmin);
-        _setRoleAdmin(SLASHER_ROLE, SLASHER_ADMIN_ROLE);
+        //_setupRole(SLASHER_ADMIN_ROLE, slasherAdmin);
+        _setupRole(SLASHER_ROLE, slasherAdmin);
+        //_setRoleAdmin(SLASHER_ROLE, SLASHER_ADMIN_ROLE);
 
         require(BASE_LIQUIDITY_TOKEN.balanceOf(address(this)) >= tokensToBond, "tokens to bond not sent");
         baseTokenBalance = tokensToBond;
