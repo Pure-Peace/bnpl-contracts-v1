@@ -272,26 +272,15 @@ contract BankNodeRewardSystem is
     /* ========== MODIFIERS ========== */
 
     modifier updateReward(address account, uint32 bankNodeId) {
-        console.log("updateReward", account, "<->", bankNodeId);
-        console.log("upReward[0]: ", rewardsDuration[bankNodeId]);
         if (rewardsDuration[bankNodeId] == 0) {
-            console.log("upReward[1]: ");
             rewardsDuration[bankNodeId] = defaultRewardsDuration;
         }
-        console.log("upReward[2]: ", rewardsDuration[bankNodeId]);
         rewardPerTokenStored[bankNodeId] = rewardPerToken(bankNodeId);
-        console.log("upReward[3]: ");
         lastUpdateTime[bankNodeId] = lastTimeRewardApplicable(bankNodeId);
-        console.log("upReward[4]: ", lastUpdateTime[bankNodeId]);
         if (account != address(0)) {
             uint256 key = encodeUserBankNodeKey(msg.sender, bankNodeId);
-            console.log("upReward[5]: ", key);
-
             rewards[key] = earned(msg.sender, bankNodeId);
-            console.log("upReward[6]: ", rewards[key]);
-
             userRewardPerTokenPaid[key] = rewardPerTokenStored[bankNodeId];
-            console.log("upReward[7]: ", userRewardPerTokenPaid[key]);
         }
         _;
     }

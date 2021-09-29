@@ -1,4 +1,5 @@
-import mathjs from 'mathjs';
+import { create, all } from 'mathjs';
+const mathjs: math.MathJsStatic = create(all) as any;
 mathjs.config({
   number: 'BigNumber',      // Default type of number:
   // 'number' (default), 'BigNumber', or 'Fraction'

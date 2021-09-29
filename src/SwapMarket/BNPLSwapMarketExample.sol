@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "../Utils/TransferHelper.sol";
 import "./IBNPLSwapMarket.sol";
 import "./IBNPLPriceOracle.sol";
+import "hardhat/console.sol";
 
 contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessControl {
     bytes32 public constant PRICE_SETTER_ROLE = keccak256("PRICE_SETTER_ROLE");
@@ -75,6 +76,7 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
 
         TransferHelper.safeTransferFrom(inputTokenAddress, msg.sender, address(this), actualAmountIn);
         tokenBalances[inputTokenAddress] += actualAmountIn;
+
         TransferHelper.safeTransfer(BNPL_TOKEN_ADDRESS, recipient, actualAmountOut);
         amountOut = actualAmountOut;
     }

@@ -44,7 +44,6 @@ async function setupFakeUniswap(hre: HardhatRuntimeEnvironment, signer?: string 
 
 
   const bnplSwapMarketExample = await getContract<BNPLSwapMarketExample>("BNPLSwapMarketExample", realSigner);
-  await bnplSwapMarketExample.deployed();
 
 
   const DAI = await getContract<IERC20>("DAI", realSigner);

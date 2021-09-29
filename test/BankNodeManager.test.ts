@@ -188,20 +188,17 @@ describe('BankNodeManager', function () {
       poolAmt
     );
     const results = await bnc.protocolAdmin.BankNodeLendingRewards.getBNPLTokenDistribution(poolAmt);
-    console.log(results);
     await bnc.protocolAdmin.BankNodeLendingRewards.distributeBNPLTokensToBankNodes(poolAmt);
     await expect(bnc.lenderA1.BNPLToken.balanceOf(bnc.lenderA1.address)).eventually.equals(BigNumber.from(0));
     await hre.ethers.provider.send("evm_increaseTime", [60 * 60 * 24 * 3.5])
 
     await bnc.lenderA1.BankNodeLendingRewards.withdraw(1, loanConfig.lender1Amount);
 
-    console.log(await bnc.lenderA1.BNPLToken.balanceOf(bnc.lenderA1.address))
 
     try {
       await bnc.lenderA1.BankNodeLendingRewards.getReward(1);
 
     } catch (err1) { console.error("ERR1: ", 2) }
-    console.log(await bnc.lenderA1.BNPLToken.balanceOf(bnc.lenderA1.address))
 
     await expect(bnc.lenderA1.BNPLToken.balanceOf(bnc.lenderA1.address)).eventually.not.eq(BigNumber.from(0));
 

@@ -27,7 +27,7 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
      */
     event Unstake(address indexed user, uint256 bnplUnstakeAmount, uint256 poolTokensBurned);
 
-    /**
+    /*
      * @dev Emitted when user `user` donates `donationAmount` of base liquidity tokens to the pool
      */
     event Donation(address indexed user, uint256 donationAmount);
@@ -50,7 +50,8 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
 
     uint256 public baseTokenBalance;
     uint256 public tokensBondedAllTime;
-    uint256 public poolTokensCirculating;
+    uint256 public poolTokenEffectiveSupply;
+    uint256 public virtualPoolTokensCount;
 
     function initialize(
         address bnplToken,
@@ -74,16 +75,19 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         BASE_LIQUIDITY_TOKEN = IERC20(bnplToken);
         POOL_LIQUIDITY_TOKEN = IMintableBurnableTokenUpgradeable(poolBNPLToken);
 
-        baseTokenBalance = 0;
-        poolTokensCirculating = 0;
-
         _setupRole(SLASHER_ADMIN_ROLE, slasherAdmin);
         _setRoleAdmin(SLASHER_ROLE, SLASHER_ADMIN_ROLE);
 
         require(BASE_LIQUIDITY_TOKEN.balanceOf(address(this)) >= tokensToBond, "tokens to bond not sent");
-        baseTokenBalance += tokensToBond;
-        tokensBondedAllTime += tokensToBond;
+        baseTokenBalance = tokensToBond;
+        tokensBondedAllTime = tokensToBond;
+        poolTokenEffectiveSupply = tokensToBond;
+        virtualPoolTokensCount = tokensToBond;
         emit Bond(tokenBonder, tokensToBond);
+    }
+
+    function poolTokensCirculating() public view returns (uint256) {
+        return poolTokenEffectiveSupply - virtualPoolTokensCount;
     }
 
     function getUnstakeLockupPeriod() public pure returns (uint256) {
@@ -95,21 +99,24 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
     }
 
     function getPoolDepositConversion(uint256 depositAmount) public view returns (uint256) {
-        return (depositAmount * poolTokensCirculating) / getPoolTotalAssetsValue();
+        return (depositAmount * poolTokenEffectiveSupply) / getPoolTotalAssetsValue();
     }
 
     function getPoolWithdrawConversion(uint256 withdrawAmount) public view returns (uint256) {
-        return (withdrawAmount * getPoolTotalAssetsValue()) / poolTokensCirculating;
+        return (withdrawAmount * getPoolTotalAssetsValue()) / poolTokenEffectiveSupply;
     }
 
     function _issueUnlockedTokensToUser(address user, uint256 amount) internal override returns (uint256) {
-        require(amount != 0 && amount <= poolTokensCirculating, "poolTokenAmount cannot be 0 or more than circulating");
+        require(
+            amount != 0 && amount <= poolTokenEffectiveSupply,
+            "poolTokenAmount cannot be 0 or more than circulating"
+        );
 
-        require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
+        require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
         require(getPoolTotalAssetsValue() != 0, "total asset value must not be 0");
 
         uint256 baseTokensOut = getPoolWithdrawConversion(amount);
-        poolTokensCirculating -= amount;
+        poolTokenEffectiveSupply -= amount;
         require(baseTokenBalance >= baseTokensOut, "base tokens balance must be >= out");
         baseTokenBalance -= baseTokensOut;
         TransferHelper.safeTransfer(address(BASE_LIQUIDITY_TOKEN), user, baseTokensOut);
@@ -127,11 +134,11 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         require(user != address(0), "user cannot be null");
 
         require(
-            poolTokensToConsume > 0 && poolTokensToConsume <= poolTokensCirculating,
+            poolTokensToConsume > 0 && poolTokensToConsume <= poolTokenEffectiveSupply,
             "poolTokenAmount cannot be 0 or more than circulating"
         );
 
-        require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
+        require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
         POOL_LIQUIDITY_TOKEN.burnFrom(user, poolTokensToConsume);
         _createTokenLockup(user, poolTokensToConsume, uint64(block.timestamp + unstakeLockupPeriod), true);
         return 0;
@@ -141,10 +148,10 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         require(user != address(this), "user cannot be self");
         require(user != address(0), "user cannot be null");
         require(mintAmount != 0, "mint amount cannot be 0");
-        uint256 newMintTokensCirculating = poolTokensCirculating + mintAmount;
-        poolTokensCirculating = newMintTokensCirculating;
+        uint256 newMintTokensCirculating = poolTokenEffectiveSupply + mintAmount;
+        poolTokenEffectiveSupply = newMintTokensCirculating;
         POOL_LIQUIDITY_TOKEN.mint(user, mintAmount);
-        require(poolTokensCirculating == newMintTokensCirculating);
+        require(poolTokenEffectiveSupply == newMintTokensCirculating);
     }
 
     function _processDonation(address sender, uint256 depositAmount) private {
@@ -152,7 +159,7 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         require(sender != address(0), "sender cannot be null");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
-        require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
+        require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
         TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), sender, address(this), depositAmount);
         baseTokenBalance += depositAmount;
         emit Donation(sender, depositAmount);
@@ -163,7 +170,7 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         require(sender != address(0), "sender cannot be null");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
-        require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
+        require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
         TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), sender, address(this), depositAmount);
         baseTokenBalance += depositAmount;
         tokensBondedAllTime += depositAmount;
@@ -175,12 +182,12 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         require(user != address(0), "user cannot be null");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
-        require(poolTokensCirculating == 0, "poolTokensCirculating must be 0");
+        require(poolTokenEffectiveSupply == 0, "poolTokenEffectiveSupply must be 0");
         uint256 totalAssetValue = getPoolTotalAssetsValue();
 
         TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), user, address(this), depositAmount);
 
-        require(poolTokensCirculating == 0, "poolTokensCirculating must be 0");
+        require(poolTokenEffectiveSupply == 0, "poolTokenEffectiveSupply must be 0");
         require(getPoolTotalAssetsValue() == totalAssetValue, "total asset value must not change");
 
         baseTokenBalance += depositAmount;
@@ -198,11 +205,11 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         require(user != address(0), "user cannot be null");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
-        require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
+        require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
         require(getPoolTotalAssetsValue() != 0, "total asset value must not be 0");
 
         TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), user, address(this), depositAmount);
-        require(poolTokensCirculating != 0, "poolTokensCirculating cannot be 0");
+        require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply cannot be 0");
 
         uint256 totalAssetValue = getPoolTotalAssetsValue();
         require(totalAssetValue != 0, "total asset value cannot be 0");
@@ -220,7 +227,7 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         require(user != address(0), "user cannot be null");
 
         require(depositAmount != 0, "depositAmount cannot be 0");
-        if (poolTokensCirculating == 0) {
+        if (poolTokenEffectiveSupply == 0) {
             return _setupLiquidityFirst(user, depositAmount);
         } else {
             return _addLiquidityNormal(user, depositAmount);
@@ -232,15 +239,15 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         require(user != address(0), "user cannot be null");
 
         require(
-            poolTokensToConsume != 0 && poolTokensToConsume <= poolTokensCirculating,
+            poolTokensToConsume != 0 && poolTokensToConsume <= poolTokenEffectiveSupply,
             "poolTokenAmount cannot be 0 or more than circulating"
         );
 
-        require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
+        require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
         require(getPoolTotalAssetsValue() != 0, "total asset value must not be 0");
 
         uint256 baseTokensOut = getPoolWithdrawConversion(poolTokensToConsume);
-        poolTokensCirculating -= poolTokensToConsume;
+        poolTokenEffectiveSupply -= poolTokensToConsume;
         //_ensureBaseBalance(baseTokensOut);
         require(baseTokenBalance >= baseTokensOut, "base tokens balance must be >= out");
         TransferHelper.safeTransferFrom(address(POOL_LIQUIDITY_TOKEN), user, address(this), poolTokensToConsume);
