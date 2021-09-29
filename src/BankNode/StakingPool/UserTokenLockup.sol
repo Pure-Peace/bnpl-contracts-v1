@@ -212,12 +212,4 @@ contract UserTokenLockup is Initializable {
         _issueUnlockedTokensToUser(user, totalAmountToClaim);
         return totalAmountToClaim;
     }
-
-    function claimTokenLockup(address user) public returns (uint256) {
-        return _claimNextTokenLockup(user);
-    }
-
-    function claimTokenNextNLockups(address user, uint32 maxNumberOfClaims) public returns (uint256) {
-        return _claimUpToNextNTokenLockups(user, maxNumberOfClaims);
-    }
 }

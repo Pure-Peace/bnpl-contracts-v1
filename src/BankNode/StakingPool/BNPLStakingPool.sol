@@ -15,8 +15,15 @@ import "../../Aave/IAaveLendingPool.sol";
 import "../../Utils/Math/PRBMathUD60x18.sol";
 import "./IBNPLNodeStakingPool.sol";
 import "./UserTokenLockup.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, UserTokenLockup, IBNPLNodeStakingPool {
+contract BNPLStakingPool is
+    Initializable,
+    ReentrancyGuardUpgradeable,
+    AccessControlEnumerableUpgradeable,
+    UserTokenLockup,
+    IBNPLNodeStakingPool
+{
     /**
      * @dev Emitted when user `user` is stakes `bnplStakeAmount` of BNPL tokens while receiving `poolTokensMinted` of pool tokens
      */
@@ -59,13 +66,14 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         address slasherAdmin,
         address tokenBonder,
         uint256 tokensToBond
-    ) public override initializer {
+    ) public override initializer nonReentrant {
         require(bnplToken != address(0), "bnplToken cannot be 0");
         require(poolBNPLToken != address(0), "poolBNPLToken cannot be 0");
         require(slasherAdmin != address(0), "slasherAdmin cannot be 0");
         require(tokenBonder != address(0), "slasherAdmin cannot be 0");
         require(tokensToBond > 0, "tokensToBond cannot be 0");
 
+        __ReentrancyGuard_init_unchained();
         __Context_init_unchained();
         __ERC165_init_unchained();
         __AccessControl_init_unchained();
@@ -269,23 +277,23 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         }
     }
 
-    function donate(uint256 donateAmount) public override {
+    function donate(uint256 donateAmount) public override nonReentrant {
         require(donateAmount != 0, "donateAmount cannot be 0");
         _processDonation(msg.sender, donateAmount);
     }
 
-    function bondTokens(uint256 bondAmount) public override {
+    function bondTokens(uint256 bondAmount) public override nonReentrant {
         require(bondAmount != 0, "bondAmount cannot be 0");
         _processBondTokens(msg.sender, bondAmount);
         tokensBondedAllTime += bondAmount;
     }
 
-    function stakeTokens(uint256 stakeAmount) public override {
+    function stakeTokens(uint256 stakeAmount) public override nonReentrant {
         require(stakeAmount != 0, "stakeAmount cannot be 0");
         _addLiquidity(msg.sender, stakeAmount);
     }
 
-    function unstakeTokens(uint256 unstakeAmount) public override {
+    function unstakeTokens(uint256 unstakeAmount) public override nonReentrant {
         require(unstakeAmount != 0, "unstakeAmount cannot be 0");
         _removeLiquidity(msg.sender, unstakeAmount);
     }
@@ -297,7 +305,7 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         emit Slash(recipient, slashAmount);
     }
 
-    function slash(uint256 slashAmount) public override onlyRole(SLASHER_ROLE) {
+    function slash(uint256 slashAmount) public override onlyRole(SLASHER_ROLE) nonReentrant {
         _slash(slashAmount, msg.sender);
     }
 
@@ -311,5 +319,13 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
             prevNodeBalance * PRBMathUD60x18.scale()
         );
         return (poolBalance * slashRatio) / PRBMathUD60x18.scale();
+    }
+
+    function claimTokenLockup(address user) public nonReentrant returns (uint256) {
+        return _claimNextTokenLockup(user);
+    }
+
+    function claimTokenNextNLockups(address user, uint32 maxNumberOfClaims) public nonReentrant returns (uint256) {
+        return _claimUpToNextNTokenLockups(user, maxNumberOfClaims);
     }
 }

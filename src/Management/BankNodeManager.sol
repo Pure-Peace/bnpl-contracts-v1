@@ -14,8 +14,14 @@ import "../BankNode/StakingPool/IBNPLNodeStakingPool.sol";
 import "../ERC20/ITokenInitializableV1.sol";
 import "./IBankNodeManager.sol";
 import "../ProtocolDeploy/IBNPLProtocolConfig.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, IBankNodeManager {
+contract BankNodeManager is
+    Initializable,
+    AccessControlEnumerableUpgradeable,
+    ReentrancyGuardUpgradeable,
+    IBankNodeManager
+{
     bytes32 public constant CONFIGURE_NODE_MANAGER_ROLE = keccak256("CONFIGURE_NODE_MANAGER_ROLE");
 
     mapping(address => uint8) public override enabledLendableTokens;
@@ -67,7 +73,7 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
         address _configurator,
         uint256 _minimumBankNodeBondedAmount,
         BankNodeLendingRewards _bankNodeLendingRewards
-    ) public override initializer {
+    ) public override initializer nonReentrant {
         require(address(_protocolConfig) != address(0), "_protocolConfig cannot be 0");
         require(_configurator != address(0), "_configurator cannot be 0");
         require(_minimumBankNodeBondedAmount > 0, "_minimumBankNodeBondedAmount cannot be 0");
@@ -76,6 +82,7 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
         __ERC165_init_unchained();
         __AccessControl_init_unchained();
         __AccessControlEnumerable_init_unchained();
+        __ReentrancyGuard_init_unchained();
 
         protocolConfig = _protocolConfig;
 
@@ -92,6 +99,7 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled)
         public
         override
+        nonReentrant
         onlyRole(CONFIGURE_NODE_MANAGER_ROLE)
     {
         require(address(_lendableToken.tokenContract) != address(0), "tokenContract must not be 0");
@@ -253,7 +261,7 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
         address lendableTokenAddress,
         string calldata nodeName,
         string calldata website
-    ) public override returns (uint256) {
+    ) public override nonReentrant returns (uint256) {
         require(tokensToBond >= minimumBankNodeBondedAmount && tokensToBond > 0, "Not enough tokens bonded");
         require(operator != address(0), "operator cannot be 0");
         require(lendableTokenAddress != address(0), "lendableTokenAddress cannot be 0");

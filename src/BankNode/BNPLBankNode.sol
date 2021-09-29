@@ -13,8 +13,9 @@ import "./IBNPLBankNode.sol";
 import "../ERC20/IMintableBurnableTokenUpgradeable.sol";
 import "../Utils/TransferHelper.sol";
 import "../Utils/Math/PRBMathUD60x18.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNPLBankNode {
+contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, ReentrancyGuardUpgradeable, IBNPLBankNode {
     /**
      * @dev Emitted when user `user` is adds `depositAmount` of liquidity while receiving `issueAmount` of pool tokens
      */
@@ -134,13 +135,14 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
     mapping(uint256 => uint256) public override interestPaidForLoan;
     mapping(uint256 => uint256) public override loanBondedAmount;
 
-    function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig) public override initializer {
+    function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig) public override nonReentrant initializer {
         require(
             bankNodeInitConfig.unusedFundsLendingMode == 1,
             "unused funds lending mode currently only supports aave (1)"
         );
 
         __Context_init_unchained();
+        __ReentrancyGuard_init_unchained();
         __ERC165_init_unchained();
         __AccessControl_init_unchained();
         __AccessControlEnumerable_init_unchained();
@@ -390,17 +392,17 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
         return baseTokensOut;
     }
 
-    function donate(uint256 depositAmount) public override {
+    function donate(uint256 depositAmount) public override nonReentrant {
         require(depositAmount != 0, "depositAmount cannot be 0");
         _processDonation(msg.sender, depositAmount);
     }
 
-    function addLiquidity(uint256 depositAmount) public override {
+    function addLiquidity(uint256 depositAmount) public override nonReentrant {
         require(depositAmount != 0, "depositAmount cannot be 0");
         _addLiquidity(msg.sender, depositAmount);
     }
 
-    function removeLiquidity(uint256 poolTokensToConsume) public override {
+    function removeLiquidity(uint256 poolTokensToConsume) public override nonReentrant {
         _removeLiquidity(msg.sender, poolTokensToConsume);
     }
 
@@ -454,7 +456,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
         uint256 interestRatePerPayment,
         uint8 messageType,
         string memory message
-    ) public override {
+    ) public override nonReentrant {
         _requestLoan(
             msg.sender,
             loanAmount,
@@ -530,11 +532,11 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
         emit LoanDenied(loanRequest.borrower, loanRequestId, operator);
     }
 
-    function denyLoanRequest(uint256 loanRequestId) public override onlyRole(OPERATOR_ROLE) {
+    function denyLoanRequest(uint256 loanRequestId) public override nonReentrant onlyRole(OPERATOR_ROLE) {
         _denyLoanRequest(msg.sender, loanRequestId);
     }
 
-    function approveLoanRequest(uint256 loanRequestId) public override onlyRole(OPERATOR_ROLE) {
+    function approveLoanRequest(uint256 loanRequestId) public override nonReentrant onlyRole(OPERATOR_ROLE) {
         _approveLoanRequest(msg.sender, loanRequestId);
     }
 
@@ -618,7 +620,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
         //uint256 lossAmount = accountsReceivableLoss+amountPaidToBNPLMarketBuy;
     }
 
-    function reportOverdueLoan(uint256 loanId) public override {
+    function reportOverdueLoan(uint256 loanId) public override nonReentrant {
         _markLoanAsWriteOff(loanId);
     }
 
@@ -677,7 +679,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
         emit LoanPayment(loan.borrower, loanId, amountPerPayment);
     }
 
-    function makeLoanPayment(uint256 loanId) public override {
+    function makeLoanPayment(uint256 loanId) public override nonReentrant {
         _makeLoanPayment(msg.sender, loanId);
     }
 }
