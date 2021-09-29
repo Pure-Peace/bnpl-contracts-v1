@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -653,11 +654,11 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
         require(bondedInterest > 0);
         require(marketBuyInterest > 0);
         require(amountPerPayment > interestAmount);
-
         TransferHelper.safeTransferFrom(address(baseLiquidityToken), payer, address(this), amountPerPayment);
         loan.totalAmountPaid += amountPerPayment;
         loan.remainingBalance -= amountPerPayment;
-        accountsReceivableFromLoans -= amountPerPayment - interestAmount;
+        // rounding errors can sometimes cause this to integer overflow, so we add a Math.min around the accountsReceivableFromLoans update
+        accountsReceivableFromLoans -= Math.min(amountPerPayment - interestAmount, accountsReceivableFromLoans);
         interestPaidForLoan[loanId] += interestAmount;
         loan.numberOfPaymentsMade = loan.numberOfPaymentsMade + 1;
         loanBondedAmount[loanId] += bondedInterest;

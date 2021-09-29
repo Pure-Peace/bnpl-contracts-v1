@@ -34,6 +34,9 @@ const setup = deployments.createFixture(async () => {
     "lenderA1": { DAI: "100000000000000000000000" },
     "lenderA2": { DAI: "100000000000000000000000" },
 
+    "borrowerA1": { DAI: "5000000000000000000000" },
+    "borrowerA2": { DAI: "5000000000000000000000" },
+
     "stakerA1": { BNPLToken: "8000000000000000000000000" },
     "stakerA2": { BNPLToken: "2000000000000000000000000" },
     "stakerA3": { BNPLToken: "1000000000000000000000000" },
@@ -147,8 +150,21 @@ describe('BankNodeCombos', function () {
     const loanARequestResult = await h.requestLoanBankNode(u.borrowerA1, bankNodeIdA, loanARequest);
     const borrowerA1FinStatesStart = await h.getKeyUserBalancesForBankNode(u.borrowerA1, bankNodeIdA);
 
-    await h.approveLoanRequestBankNode(u.bankNodeMakerA, bankNodeIdA, loanARequestResult.loanRequestId);
+    const loanAApprovedResult = await h.approveLoanRequestBankNode(u.bankNodeMakerA, bankNodeIdA, loanARequestResult.loanRequestId);
+    const loanAId = loanAApprovedResult.loanRequest.loanId;
+    const loanAStart = loanAApprovedResult.loan;
 
+    expect(
+      (loanAStart.borrower + "").toLowerCase() === u.borrowerA1.address.toLowerCase() &&
+      (loanAStart.status + "") === "1" &&
+      loanAStart.interestRatePerPayment.eq(loanARequest.interestRatePerPayment) &&
+      loanAStart.loanAmount.eq(loanARequest.loanAmount) &&
+      loanAStart.totalLoanDuration.eq(loanARequest.totalLoanDuration) &&
+      loanAStart.totalAmountPaid.eq(0) &&
+      (loanAStart.numberOfPayments + "") === (loanARequest.numberOfPayments + "") &&
+      loanAStart.interestRatePerPayment.eq(loanARequest.interestRatePerPayment) &&
+      (loanAStart.numberOfPaymentsMade + "") === "0"
+      , "loan A should reflect the loan request we made");
     const borrowerA1FinStatesAfterLoanA = await h.getKeyUserBalancesForBankNode(u.borrowerA1, bankNodeIdA);
 
 
@@ -159,6 +175,7 @@ describe('BankNodeCombos', function () {
     ).equals(loanARequest.loanAmount);
 
     const finStatesAfterLoanA = await h.getBankNodeAllFinancialStates(bankNodeIdA);
+    const b = finStatesAfterLoanA.b
 
     const deltaFromStartToAfterLoanA = h.deltaBMinusA<IBankNodeFinancialState>(
       finStatesStart.bankNodeFinancialState,
@@ -171,6 +188,31 @@ describe('BankNodeCombos', function () {
     expect(deltaFromStartToAfterLoanA.loanIndex, "loan index should be 1 after the first loan")
       .equals(1);
 
+
+    await h.makeLoanPaymentBankNode(u.borrowerA1, bankNodeIdA, loanAId);
+    const loanAAfterPayment1 = await b.BankNode.loans(loanAId);
+    const finStatesAfterLoanAPayment1 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
+    expect(loanAAfterPayment1.totalAmountPaid.eq(loanAStart.amountPerPayment), "should equal one payment");
+    console.log(finStatesAfterLoanAPayment1.bankNodeFinancialState);
+
+
+
+    await h.makeLoanPaymentBankNode(u.borrowerA1, bankNodeIdA, loanAId);
+    const loanAAfterPayment2 = await b.BankNode.loans(loanAId);
+    const finStatesAfterLoanAPayment2 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
+    expect(loanAAfterPayment2.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(2)), "should equal one payment");
+    console.log(finStatesAfterLoanAPayment2.bankNodeFinancialState);
+
+    await h.makeLoanPaymentBankNode(u.borrowerA1, bankNodeIdA, loanAId);
+    const loanAAfterPayment3 = await b.BankNode.loans(loanAId);
+    const finStatesAfterLoanAPayment3 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
+    expect(loanAAfterPayment3.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(3)), "should equal one payment");
+    console.log(finStatesAfterLoanAPayment3.bankNodeFinancialState);
+    console.log(loanAAfterPayment3)
+
+
+
+    console.log("I made my payment")
 
 
 
