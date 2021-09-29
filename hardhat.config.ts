@@ -2,9 +2,11 @@ import 'dotenv/config';
 import { HardhatUserConfig } from 'hardhat/types';
 import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers';
+import "@nomiclabs/hardhat-waffle";
 import 'hardhat-gas-reporter';
 import '@typechain/hardhat';
 import 'solidity-coverage';
+//import "@atixlabs/hardhat-time-n-mine";
 import { node_url, accounts } from './utils/network';
 
 // While waiting for hardhat PR: https://github.com/nomiclabs/hardhat/pull/1542
@@ -12,7 +14,7 @@ if (process.env.HARDHAT_FORK) {
   process.env['HARDHAT_DEPLOY_FORK'] = process.env.HARDHAT_FORK;
 }
 
-const config: HardhatUserConfig = {
+const config = {
   solidity: {
     version: '0.8.4',
     settings: {
@@ -28,7 +30,41 @@ const config: HardhatUserConfig = {
     mockContractsDeployer: 2,
     protocolDeployer: 2,
     protocolAdmin: 3,
-    bankNodeMaker1: 4,
+    bankNodeMakerA: 4,
+    bankNodeMakerB: 5,
+    bankNodeMakerC: 6,
+
+
+    lenderA1: 7,
+    lenderA2: 8,
+    borrowerA1: 9,
+    borrowerA2: 10,
+    stakerA1: 11,
+    stakerA2: 12,
+    stakerA3: 13,
+
+
+    lenderB1: 14,
+    lenderB2: 15,
+    borrowerB1: 16,
+    borrowerB2: 17,
+    stakerB1: 18,
+    stakerB2: 19,
+    stakerB3: 20,
+
+
+
+    lenderC1: 21,
+    lenderC2: 22,
+    borrowerC1: 23,
+    borrowerC2: 24,
+    stakerC1: 25,
+    stakerC2: 26,
+    stakerC3: 27,
+
+
+
+
 
   },
   networks: {

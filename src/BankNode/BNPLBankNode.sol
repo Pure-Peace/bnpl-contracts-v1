@@ -90,7 +90,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant OPERATOR_ADMIN_ROLE = keccak256("OPERATOR_ADMIN_ROLE");
     //TODO: Source
-    uint256 public constant AAVE_MIN_DEPOSIT_SIZE = 1;
+    uint256 public constant UNUSED_FUNDS_MIN_DEPOSIT_SIZE = 1;
 
     uint256 public constant MIN_LOAN_DURATION = 10; //30 days;
 
@@ -168,16 +168,16 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
         }
     }
 
-    function getValueOfAaveDeposits() public view returns (uint256) {
+    function getValueOfUnusedFundsLendingDeposits() public view returns (uint256) {
         return unusedFundsLendingToken.balanceOf(address(this));
     }
 
     function getPoolTotalAssetsValue() public view returns (uint256) {
-        return baseTokenBalance + getValueOfAaveDeposits() + accountsReceivableFromLoans;
+        return baseTokenBalance + getValueOfUnusedFundsLendingDeposits() + accountsReceivableFromLoans;
     }
 
     function getPoolTotalLiquidAssetsValue() public view returns (uint256) {
-        return baseTokenBalance + getValueOfAaveDeposits();
+        return baseTokenBalance + getValueOfUnusedFundsLendingDeposits();
     }
 
     function getPoolDepositConversion(uint256 depositAmount) public view returns (uint256) {
@@ -281,8 +281,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, IBNP
     }
 
     function _processMigrateUnusedFundsToLendingPool() private {
-        require(AAVE_MIN_DEPOSIT_SIZE > 0, "AAVE_MIN_DEPOSIT_SIZE > 0");
-        if (baseTokenBalance >= AAVE_MIN_DEPOSIT_SIZE) {
+        require(UNUSED_FUNDS_MIN_DEPOSIT_SIZE > 0, "UNUSED_FUNDS_MIN_DEPOSIT_SIZE > 0");
+        if (baseTokenBalance >= UNUSED_FUNDS_MIN_DEPOSIT_SIZE) {
             _depositToAaveFromBaseBalance(baseTokenBalance);
         }
     }

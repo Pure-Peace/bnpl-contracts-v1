@@ -37,10 +37,12 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "../../Management/IBankNodeManager.sol";
 import "./BankNodeRewardSystem.sol";
 
+import "hardhat/console.sol";
+
 contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
     using SafeERC20 for IERC20;
 
-    function initalize(
+    function initialize(
         uint256 _defaultRewardsDuration,
         address _rewardsToken,
         address _bankNodeManager,
@@ -70,15 +72,20 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         uint256 amt = 0;
         uint256 total = 0;
         while (i < nodeCount) {
+            console.log("read: ", (i + 1));
             amt = rewardsToken.balanceOf(
                 _ensureContractAddressNot0(bankNodeManager.getBankNodeStakingPoolContract(i + 1))
             );
+            console.log("amt ", i, " = ", amt);
             bnplTokensPerNode[i] = amt;
             total += amt;
+            i += 1;
         }
+        console.log("total = ", total);
         i = 0;
         while (i < nodeCount) {
             bnplTokensPerNode[i] = (bnplTokensPerNode[i] * amount) / total;
+            i += 1;
         }
         return bnplTokensPerNode;
     }
@@ -88,24 +95,29 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         onlyRole(REWARDS_DISTRIBUTOR_ROLE)
         returns (uint256)
     {
+        require(amount > 0, "cannot send 0");
+        rewardsToken.safeTransferFrom(msg.sender, address(this), amount);
         uint32 nodeCount = bankNodeManager.bankNodeCount();
         uint256[] memory bnplTokensPerNode = new uint256[](nodeCount);
         uint32 i = 0;
         uint256 amt = 0;
         uint256 total = 0;
         while (i < nodeCount) {
+            console.log("readB: ", (i + 1));
             amt = rewardsToken.balanceOf(
                 _ensureContractAddressNot0(bankNodeManager.getBankNodeStakingPoolContract(i + 1))
             );
             bnplTokensPerNode[i] = amt;
             total += amt;
+            i += 1;
         }
         i = 0;
         while (i < nodeCount) {
             amt = (bnplTokensPerNode[i] * amount) / total;
             if (amt != 0) {
-                _notifyRewardAmount(i, amt);
+                _notifyRewardAmount(i + 1, amt);
             }
+            i += 1;
         }
         return total;
     }
@@ -123,6 +135,7 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
             total += rewardsToken.balanceOf(
                 _ensureContractAddressNot0(bankNodeManager.getBankNodeStakingPoolContract(i + 1))
             );
+            i += 1;
         }
         i = 0;
         while (i < nodeCount) {
@@ -132,8 +145,9 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
                 ) * amount) /
                 total;
             if (amt != 0) {
-                _notifyRewardAmount(i, amt);
+                _notifyRewardAmount(i + 1, amt);
             }
+            i += 1;
         }
         return total;
     }

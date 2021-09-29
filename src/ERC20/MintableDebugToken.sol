@@ -11,7 +11,7 @@ import "./ERC20BurnableUpgradeable.sol";
 import "./IMintableBurnableTokenUpgradeable.sol";
 import "./ITokenInitializableV1.sol";
 
-contract PoolTokenUpgradeable is
+contract MintableDebugToken is
     Initializable,
     AccessControlEnumerableUpgradeable,
     ERC20BurnableUpgradeable,

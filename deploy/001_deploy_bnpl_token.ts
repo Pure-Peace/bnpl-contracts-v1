@@ -7,13 +7,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const shouldDeployFakeBNPLToken = !hre.network.live;
   if (shouldDeployFakeBNPLToken) {
     const { bnplTokenDeployer, } = await getNamedAccounts();
-
+    /*
+        await deploy('BNPLToken', {
+          from: bnplTokenDeployer,
+          args: [],
+          log: true,
+          skipIfAlreadyDeployed: false,
+        });
+    */
     await deploy('BNPLToken', {
       from: bnplTokenDeployer,
+      contract: "MintableDebugToken",
       args: [],
       log: true,
       skipIfAlreadyDeployed: false,
     });
+
   }
 };
 export default func;

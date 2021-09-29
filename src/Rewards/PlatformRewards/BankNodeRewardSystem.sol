@@ -33,8 +33,12 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../../Management/IBankNodeManager.sol";
+import "hardhat/console.sol";
 
 contract BankNodeRewardSystem is
     Initializable,
@@ -43,6 +47,7 @@ contract BankNodeRewardSystem is
     AccessControlUpgradeable
 {
     using SafeERC20 for IERC20;
+    using SafeMath for uint256;
     bytes32 public constant REWARDS_DISTRIBUTOR_ROLE = keccak256("REWARDS_DISTRIBUTOR_ROLE");
     bytes32 public constant REWARDS_DISTRIBUTOR_ADMIN_ROLE = keccak256("REWARDS_DISTRIBUTOR_ADMIN_ROLE");
 
@@ -149,9 +154,19 @@ contract BankNodeRewardSystem is
             return rewardPerTokenStored[bankNodeId];
         }
         return
+            rewardPerTokenStored[bankNodeId].add(
+                lastTimeRewardApplicable(bankNodeId)
+                    .sub(lastUpdateTime[bankNodeId])
+                    .mul(rewardRate[bankNodeId])
+                    .mul(1e18)
+                    .div(_totalSupply[bankNodeId])
+            );
+
+        /*
+        return
             rewardPerTokenStored[bankNodeId] +
             (lastTimeRewardApplicable(bankNodeId) -
-                ((lastUpdateTime[bankNodeId] * rewardRate[bankNodeId] * 1e18) / (_totalSupply[bankNodeId])));
+                ((lastUpdateTime[bankNodeId] * rewardRate[bankNodeId] * 1e18) / (_totalSupply[bankNodeId])));*/
     }
 
     function earned(address account, uint32 bankNodeId) public view returns (uint256) {
@@ -189,9 +204,15 @@ contract BankNodeRewardSystem is
 
     function getReward(uint32 bankNodeId) public nonReentrant updateReward(msg.sender, bankNodeId) {
         uint256 reward = rewards[encodeUserBankNodeKey(msg.sender, bankNodeId)];
+        console.log("getReward", bankNodeId, "<->", reward);
+
+        //console.log("reward ", msg.sender, " for node ", bankNodeId, " = ", reward);
+        console.log("getReward[1]: ", reward);
         if (reward > 0) {
             rewards[encodeUserBankNodeKey(msg.sender, bankNodeId)] = 0;
-            getStakingTokenForBankNode(bankNodeId).safeTransfer(msg.sender, reward);
+            console.log("getReward[2]: ", reward);
+            console.log("getReward[2b]: ", address(rewardsToken));
+            rewardsToken.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, bankNodeId, reward);
         }
     }
@@ -251,16 +272,26 @@ contract BankNodeRewardSystem is
     /* ========== MODIFIERS ========== */
 
     modifier updateReward(address account, uint32 bankNodeId) {
+        console.log("updateReward", account, "<->", bankNodeId);
+        console.log("upReward[0]: ", rewardsDuration[bankNodeId]);
         if (rewardsDuration[bankNodeId] == 0) {
+            console.log("upReward[1]: ");
             rewardsDuration[bankNodeId] = defaultRewardsDuration;
         }
+        console.log("upReward[2]: ", rewardsDuration[bankNodeId]);
         rewardPerTokenStored[bankNodeId] = rewardPerToken(bankNodeId);
+        console.log("upReward[3]: ");
         lastUpdateTime[bankNodeId] = lastTimeRewardApplicable(bankNodeId);
+        console.log("upReward[4]: ", lastUpdateTime[bankNodeId]);
         if (account != address(0)) {
             uint256 key = encodeUserBankNodeKey(msg.sender, bankNodeId);
+            console.log("upReward[5]: ", key);
 
             rewards[key] = earned(msg.sender, bankNodeId);
+            console.log("upReward[6]: ", rewards[key]);
+
             userRewardPerTokenPaid[key] = rewardPerTokenStored[bankNodeId];
+            console.log("upReward[7]: ", userRewardPerTokenPaid[key]);
         }
         _;
     }

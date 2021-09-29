@@ -1,23 +1,24 @@
 import { Signer, Contract } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { genGetContractWith } from "./genHelpers";
 type THardHatLookupHelper<T> = (hre: HardhatRuntimeEnvironment, contractSlug: string, signer?: string | Signer | undefined) => Promise<T>;
 function generateEnvNameContractDefHelper(networkToContract: { [networkName: string]: string }, { abiName, lookupName }: { abiName?: string, lookupName?: string } = {}): THardHatLookupHelper<any> {
 
 
   return async (hre: HardhatRuntimeEnvironment, contractSlug: string, signer?: string | Signer | undefined) => {
+    const { getContract, getContractAt } = genGetContractWith(hre);
     const addressOrAbi = (Object.prototype.hasOwnProperty.call(networkToContract, hre.network.name) && networkToContract[hre.network.name]) ? networkToContract[hre.network.name] : null;
     const contractAddressOverride = (addressOrAbi && addressOrAbi.substring(0, 2) === "0x") ? addressOrAbi : null;
     const contractAbiName = contractAddressOverride ? (abiName || contractSlug) : (contractAddressOverride || abiName || contractSlug);
-
     if (contractAddressOverride) {
-      return hre.ethers.getContractAt((lookupName || contractAbiName), contractAddressOverride, signer);
+      return getContractAt((lookupName || contractAbiName), contractAddressOverride, signer);
     } else {
       if (abiName && lookupName && lookupName !== abiName) {
-        const realContract = await hre.ethers.getContract(lookupName);
-        return hre.ethers.getContractAt(contractAbiName, realContract.address, signer);
+        const realContract = await getContract(lookupName);
+        return getContractAt(contractAbiName, realContract.address, signer);
       } else {
 
-        return hre.ethers.getContract(contractAbiName, signer);
+        return getContract(contractAbiName, signer);
       }
     }
   }
@@ -46,7 +47,7 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       "hardhat": "FakeAaveLendingPool",
       "kovan": "0xE0fBa4Fc209b4948668006B2bE61711b7f465bAe",
       "mainnet": "0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9",
-    }
+    }, { abiName: "FakeAaveLendingPool" }
   ),
   "UniswapV3Router": generateEnvNameContractDefHelper(
     {
@@ -55,7 +56,7 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       //"kovan": "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       "mainnet": "0xE592427A0AEce92De3Edee1F18E0157C05861564",
 
-    }
+    }, { abiName: "BNPLSwapMarketExample" }
   ),
 
   "DAI": generateEnvNameContractDefHelper(
@@ -113,7 +114,9 @@ type TContractSlug = keyof typeof DEF_GET_CONTRACT_FOR_ENVIRONMENT;
 async function getContractForEnvironment<T>(hre: HardhatRuntimeEnvironment, contractSlug: TContractSlug, signer?: string | Signer | undefined): Promise<T> {
   return DEF_GET_CONTRACT_FOR_ENVIRONMENT[contractSlug](hre, contractSlug, signer);
 }
-
+export type {
+  TContractSlug,
+}
 export {
   getContractForEnvironment,
 }

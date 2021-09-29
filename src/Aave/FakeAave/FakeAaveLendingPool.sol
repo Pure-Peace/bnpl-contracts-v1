@@ -18,7 +18,7 @@ contract FakeAaveLendingPool is IAaveLendingPool {
         );
         require(address(aaveAssetToDepositAsset[aaveAsset]) == address(0), "this aave asset is already registered");
         depositAssetToAaveAsset[depositAsset] = IFakeAaveToken(aaveAsset);
-        aaveAssetToDepositAsset[aaveAsset] = IERC20(aaveAsset);
+        aaveAssetToDepositAsset[aaveAsset] = IERC20(depositAsset);
     }
 
     function addAssetPair(address depositAsset, address aaveAsset) public {
@@ -47,12 +47,11 @@ contract FakeAaveLendingPool is IAaveLendingPool {
         address to
     ) public override {
         require(asset != address(0), "cannot be asset == 0");
-        IERC20 depositAsset = aaveAssetToDepositAsset[asset];
-
-        require(address(depositAsset) != address(0), "aave asset not supported");
+        IFakeAaveToken aaveAsset = depositAssetToAaveAsset[asset];
+        require(address(aaveAsset) != address(0), "aave asset not supported");
         require(amount != 0, "amount cannot be 0");
         require(to != address(0), "cannot be asset == 0");
-        IFakeAaveToken(asset).internalAaveBurnFor(msg.sender, amount);
+        aaveAsset.internalAaveBurnFor(msg.sender, amount);
         TransferHelper.safeTransfer(asset, to, amount);
     }
 }

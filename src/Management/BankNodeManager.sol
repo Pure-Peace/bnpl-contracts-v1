@@ -181,6 +181,7 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
         uint32 bankNodeId,
         address operatorAdmin,
         address operator,
+        uint256 tokensToBond,
         address lendableTokenAddress
     )
         private
@@ -209,10 +210,14 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
             bnplStakingPoolContract
         );
 
+        TransferHelper.safeTransferFrom(address(bnplToken), msg.sender, bnplStakingPoolContract, tokensToBond);
+
         IBNPLNodeStakingPool(bnplStakingPoolContract).initialize(
             address(bnplToken),
             bnplStakingPoolToken,
-            bankNodeContract
+            bankNodeContract,
+            msg.sender,
+            tokensToBond
         );
 
         bankNodeToken = _createBankNodeLendingPoolTokenClone(
@@ -252,7 +257,6 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
         require(tokensToBond >= minimumBankNodeBondedAmount && tokensToBond > 0, "Not enough tokens bonded");
         require(operator != address(0), "operator cannot be 0");
         require(lendableTokenAddress != address(0), "lendableTokenAddress cannot be 0");
-        TransferHelper.safeTransferFrom(address(bnplToken), msg.sender, address(this), tokensToBond);
 
         bankNodeCount = bankNodeCount + 1;
         uint32 bankNodeId = bankNodeCount;
@@ -262,7 +266,7 @@ contract BankNodeManager is Initializable, AccessControlEnumerableUpgradeable, I
             address bankNodeToken,
             address bnplStakingPoolContract,
             address bnplStakingPoolToken
-        ) = _createBankNodeContracts(bankNodeId, operator, operator, lendableTokenAddress);
+        ) = _createBankNodeContracts(bankNodeId, operator, operator, tokensToBond, lendableTokenAddress);
 
         BankNode storage bankNode = bankNodes[bankNodeId];
         bankNodeAddressToId[bankNodeContract] = bankNodeId;

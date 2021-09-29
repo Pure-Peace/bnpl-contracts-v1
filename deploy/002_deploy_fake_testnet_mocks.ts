@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
 
     const aDAI = await deploy('aDAI', {
-      contract: "FakeUSDToken",
+      contract: "FakeAaveUSDToken",
       from: mockContractsDeployer,
       args: ["FAKE aDAI", "aDAI", 18],
       log: true,
@@ -32,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
 
     const aUSDT = await deploy('aUSDT', {
-      contract: "FakeUSDToken",
+      contract: "FakeAaveUSDToken",
       from: mockContractsDeployer,
       args: ["FAKE aUSDT", "aUSDT", 6],
       log: true,
@@ -46,7 +46,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
 
     const aUSDC = await deploy('aUSDC', {
-      contract: "FakeUSDToken",
+      contract: "FakeAaveUSDToken",
       from: mockContractsDeployer,
       args: ["FAKE aUSDC", "aUSDC", 6],
       log: true,

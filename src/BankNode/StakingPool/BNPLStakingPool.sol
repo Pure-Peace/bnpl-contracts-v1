@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
@@ -32,6 +33,11 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
     event Donation(address indexed user, uint256 donationAmount);
 
     /**
+     * @dev Emitted when user `user` bonds `bondAmount` of base liquidity tokens to the pool
+     */
+    event Bond(address indexed user, uint256 bondAmount);
+
+    /**
      * @dev Emitted when user `user` donates `donationAmount` of base liquidity tokens to the pool
      */
     event Slash(address indexed recipient, uint256 slashAmount);
@@ -43,16 +49,21 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
     IMintableBurnableTokenUpgradeable public POOL_LIQUIDITY_TOKEN; // = IMintableToken(0x517D01e738F8E1fB473f905BCC736aaa41226761);
 
     uint256 public baseTokenBalance;
+    uint256 public tokensBondedAllTime;
     uint256 public poolTokensCirculating;
 
     function initialize(
         address bnplToken,
         address poolBNPLToken,
-        address slasherAdmin
+        address slasherAdmin,
+        address tokenBonder,
+        uint256 tokensToBond
     ) public override initializer {
         require(bnplToken != address(0), "bnplToken cannot be 0");
         require(poolBNPLToken != address(0), "poolBNPLToken cannot be 0");
         require(slasherAdmin != address(0), "slasherAdmin cannot be 0");
+        require(tokenBonder != address(0), "slasherAdmin cannot be 0");
+        require(tokensToBond > 0, "tokensToBond cannot be 0");
 
         __Context_init_unchained();
         __ERC165_init_unchained();
@@ -68,6 +79,11 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
 
         _setupRole(SLASHER_ADMIN_ROLE, slasherAdmin);
         _setRoleAdmin(SLASHER_ROLE, SLASHER_ADMIN_ROLE);
+
+        require(BASE_LIQUIDITY_TOKEN.balanceOf(address(this)) >= tokensToBond, "tokens to bond not sent");
+        baseTokenBalance += tokensToBond;
+        tokensBondedAllTime += tokensToBond;
+        emit Bond(tokenBonder, tokensToBond);
     }
 
     function getUnstakeLockupPeriod() public pure returns (uint256) {
@@ -140,6 +156,18 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
         TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), sender, address(this), depositAmount);
         baseTokenBalance += depositAmount;
         emit Donation(sender, depositAmount);
+    }
+
+    function _processBondTokens(address sender, uint256 depositAmount) private {
+        require(sender != address(this), "sender cannot be self");
+        require(sender != address(0), "sender cannot be null");
+        require(depositAmount != 0, "depositAmount cannot be 0");
+
+        require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
+        TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), sender, address(this), depositAmount);
+        baseTokenBalance += depositAmount;
+        tokensBondedAllTime += depositAmount;
+        emit Bond(sender, depositAmount);
     }
 
     function _setupLiquidityFirst(address user, uint256 depositAmount) private returns (uint256) {
@@ -236,6 +264,12 @@ contract BNPLStakingPool is Initializable, AccessControlEnumerableUpgradeable, U
     function donate(uint256 donateAmount) public override {
         require(donateAmount != 0, "donateAmount cannot be 0");
         _processDonation(msg.sender, donateAmount);
+    }
+
+    function bondTokens(uint256 bondAmount) public override {
+        require(bondAmount != 0, "bondAmount cannot be 0");
+        _processBondTokens(msg.sender, bondAmount);
+        tokensBondedAllTime += bondAmount;
     }
 
     function stakeTokens(uint256 stakeAmount) public override {
