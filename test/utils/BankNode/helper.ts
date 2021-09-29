@@ -442,10 +442,8 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     const financialStateBefore = await getPoolAssetReportForBankNode(b.BankNode, b.StakingPool);
 
 
-    console.log("advancing");
 
     const { newTime, dueDate } = await advanceToNextPaymentDatePlusOffset(bankNode, loanId, 1000 * 60 * 5, _reporter);
-    console.log("advanced");
 
     await b.BankNode.reportOverdueLoan(loanId);
     const financialStateAfter = await getPoolAssetReportForBankNode(b.BankNode, b.StakingPool);

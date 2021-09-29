@@ -72,16 +72,13 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         uint256 amt = 0;
         uint256 total = 0;
         while (i < nodeCount) {
-            console.log("read: ", (i + 1));
             amt = rewardsToken.balanceOf(
                 _ensureContractAddressNot0(bankNodeManager.getBankNodeStakingPoolContract(i + 1))
             );
-            console.log("amt ", i, " = ", amt);
             bnplTokensPerNode[i] = amt;
             total += amt;
             i += 1;
         }
-        console.log("total = ", total);
         i = 0;
         while (i < nodeCount) {
             bnplTokensPerNode[i] = (bnplTokensPerNode[i] * amount) / total;
@@ -103,7 +100,6 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         uint256 amt = 0;
         uint256 total = 0;
         while (i < nodeCount) {
-            console.log("readB: ", (i + 1));
             amt = rewardsToken.balanceOf(
                 _ensureContractAddressNot0(bankNodeManager.getBankNodeStakingPoolContract(i + 1))
             );

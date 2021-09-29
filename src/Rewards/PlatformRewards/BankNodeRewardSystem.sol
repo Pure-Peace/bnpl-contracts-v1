@@ -204,14 +204,9 @@ contract BankNodeRewardSystem is
 
     function getReward(uint32 bankNodeId) public nonReentrant updateReward(msg.sender, bankNodeId) {
         uint256 reward = rewards[encodeUserBankNodeKey(msg.sender, bankNodeId)];
-        console.log("getReward", bankNodeId, "<->", reward);
 
-        //console.log("reward ", msg.sender, " for node ", bankNodeId, " = ", reward);
-        console.log("getReward[1]: ", reward);
         if (reward > 0) {
             rewards[encodeUserBankNodeKey(msg.sender, bankNodeId)] = 0;
-            console.log("getReward[2]: ", reward);
-            console.log("getReward[2b]: ", address(rewardsToken));
             rewardsToken.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, bankNodeId, reward);
         }
