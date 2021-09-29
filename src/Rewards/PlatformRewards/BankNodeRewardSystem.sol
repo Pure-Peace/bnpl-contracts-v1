@@ -38,7 +38,6 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../../Management/IBankNodeManager.sol";
-import "hardhat/console.sol";
 
 contract BankNodeRewardSystem is
     Initializable,

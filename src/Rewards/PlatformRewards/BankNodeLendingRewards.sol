@@ -37,8 +37,6 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "../../Management/IBankNodeManager.sol";
 import "./BankNodeRewardSystem.sol";
 
-import "hardhat/console.sol";
-
 contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
     using SafeERC20 for IERC20;
 
