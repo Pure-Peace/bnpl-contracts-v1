@@ -134,14 +134,22 @@ contract BankNodeRewardSystem is
         return _ensureAddressIERC20Not0(bankNodeManager.getBankNodeToken(bankNodeId));
     }
 
+    function getInternalValueForStakedTokenAmount(uint256 amount) internal pure returns (uint256) {
+        return amount * 1000000;
+    }
+
+    function getStakedTokenAmountForInternalValue(uint256 amount) internal pure returns (uint256) {
+        return amount / 1000000;
+    }
+
     /* ========== VIEWS ========== */
 
     function totalSupply(uint32 bankNodeId) external view returns (uint256) {
-        return _totalSupply[bankNodeId];
+        return getStakedTokenAmountForInternalValue(_totalSupply[bankNodeId]);
     }
 
     function balanceOf(address account, uint32 bankNodeId) external view returns (uint256) {
-        return _balances[encodeUserBankNodeKey(account, bankNodeId)];
+        return getStakedTokenAmountForInternalValue(_balances[encodeUserBankNodeKey(account, bankNodeId)]);
     }
 
     function lastTimeRewardApplicable(uint32 bankNodeId) public view returns (uint256) {
@@ -180,25 +188,32 @@ contract BankNodeRewardSystem is
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function stake(uint32 bankNodeId, uint256 amount)
+    function stake(uint32 bankNodeId, uint256 tokenAmount)
         external
         nonReentrant
         whenNotPaused
         updateReward(msg.sender, bankNodeId)
     {
+        require(tokenAmount > 0, "Cannot stake 0");
+        uint256 amount = getInternalValueForStakedTokenAmount(tokenAmount);
         require(amount > 0, "Cannot stake 0");
+        require(getStakedTokenAmountForInternalValue(amount) == tokenAmount, "token amount too high!");
         _totalSupply[bankNodeId] += amount;
         _balances[encodeUserBankNodeKey(msg.sender, bankNodeId)] += amount;
-        getStakingTokenForBankNode(bankNodeId).safeTransferFrom(msg.sender, address(this), amount);
-        emit Staked(msg.sender, bankNodeId, amount);
+        getStakingTokenForBankNode(bankNodeId).safeTransferFrom(msg.sender, address(this), tokenAmount);
+        emit Staked(msg.sender, bankNodeId, tokenAmount);
     }
 
-    function withdraw(uint32 bankNodeId, uint256 amount) public nonReentrant updateReward(msg.sender, bankNodeId) {
+    function withdraw(uint32 bankNodeId, uint256 tokenAmount) public nonReentrant updateReward(msg.sender, bankNodeId) {
+        require(tokenAmount > 0, "Cannot withdraw 0");
+        uint256 amount = getInternalValueForStakedTokenAmount(tokenAmount);
         require(amount > 0, "Cannot withdraw 0");
+        require(getStakedTokenAmountForInternalValue(amount) == tokenAmount, "token amount too high!");
+
         _totalSupply[bankNodeId] -= amount;
         _balances[encodeUserBankNodeKey(msg.sender, bankNodeId)] -= amount;
-        getStakingTokenForBankNode(bankNodeId).safeTransfer(msg.sender, amount);
-        emit Withdrawn(msg.sender, bankNodeId, amount);
+        getStakingTokenForBankNode(bankNodeId).safeTransfer(msg.sender, tokenAmount);
+        emit Withdrawn(msg.sender, bankNodeId, tokenAmount);
     }
 
     function getReward(uint32 bankNodeId) public nonReentrant updateReward(msg.sender, bankNodeId) {
@@ -212,7 +227,10 @@ contract BankNodeRewardSystem is
     }
 
     function exit(uint32 bankNodeId) external {
-        withdraw(bankNodeId, _balances[encodeUserBankNodeKey(msg.sender, bankNodeId)]);
+        withdraw(
+            bankNodeId,
+            getStakedTokenAmountForInternalValue(_balances[encodeUserBankNodeKey(msg.sender, bankNodeId)])
+        );
         getReward(bankNodeId);
     }
 
@@ -234,7 +252,9 @@ contract BankNodeRewardSystem is
         // This keeps the reward rate in the right range, preventing overflows due to
         // very high values of rewardRate in the earned and rewardsPerToken functions;
         // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        uint256 balance = getStakingTokenForBankNode(bankNodeId).balanceOf(address(this));
+        uint256 balance = getInternalValueForStakedTokenAmount(
+            getStakingTokenForBankNode(bankNodeId).balanceOf(address(this))
+        );
         require(rewardRate[bankNodeId] <= (balance / rewardsDuration[bankNodeId]), "Provided reward too high");
 
         lastUpdateTime[bankNodeId] = block.timestamp;
