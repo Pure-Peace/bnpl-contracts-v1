@@ -36,7 +36,7 @@ async function addLendableTokens(hre: HardhatRuntimeEnvironment) {
     tokenContract: (await getContractForEnvironment<IERC20>(hre, "USDC")).address,
     swapMarket: UniswapV3Router.address,
     swapMarketPoolFee: 3000,
-    decimals: 18,
+    decimals: 6,
     valueMultiplier: "1000000000000000000",
     unusedFundsLendingMode: 1,
     unusedFundsLendingContract: AaveLendingPool.address,

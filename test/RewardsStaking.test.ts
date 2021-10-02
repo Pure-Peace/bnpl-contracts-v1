@@ -97,7 +97,7 @@ describe('RewardsStaking', function () {
     await h.stakeBNPLToBankNode(u.stakerA2, bankNodeIdA, ms`100000*10^18`);
 
     expect(
-      (await bA.b.BNPLToken.balanceOf(bA.b.StakingPool.address)).eq(ms`380000*10^18`),
+      (await bA.b.BNPLToken.balanceOf(bA.b.StakingPool.address)).eq(ms`250000*10^18`),
       "Node A should have 250,000 BNPL Staked/Bonded"
     );
 
@@ -142,7 +142,9 @@ describe('RewardsStaking', function () {
       await bB.b.BNPLToken.balanceOf(bB.b.StakingPool.address),
       await bC.b.BNPLToken.balanceOf(bC.b.StakingPool.address),
     ];
+    console.log("balances: ", totalForNodes.map(x => x.toString()))
     const totalForAllNodes = totalForNodes.reduce((a, b) => a.add(b));
+    console.log("total bnpl staked across all three: ", totalForAllNodes.toString());
     const nodesNormalized = totalForNodes.map(x => x.mul(totalAmountToDistribute).div(totalForAllNodes));
     const totalForNormalizedNodes = nodesNormalized.reduce((a, b) => a.add(b));
 
@@ -156,6 +158,10 @@ describe('RewardsStaking', function () {
       expect(nodesNormalized[i].toString(), `Node ${String.fromCharCode(65 + i)} total calculated off chain should match the on chain calculation`)
         .equal(allFromChainCalc[i].toString());
     }
+
+
+
+    console.log("chain calculation distribution", allFromChainCalc.map(x => x.toString()))
 
 
   });

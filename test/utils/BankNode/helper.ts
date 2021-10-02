@@ -276,6 +276,17 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     return { contract, };
 
   }
+  async function donateLendingCoinToBankNode(_from: string | { address: string }, _bankNode: string | { address: string }, amount: string, tokenName: "DAI" | "USDT" | "USDC") {
+
+    const bankNodeAddress = await getBankNodeAddressFromString(_bankNode);
+    const from = typeof _from === 'string' ? (await getAddress(_from)) : _from.address;
+
+    const contract = await getContractAt<BNPLBankNode>("BNPLBankNode", bankNodeAddress, await hre.ethers.getSigner(from));
+    await approveToken(from, contract, tokenName, amount);
+    await contract.donate(amount);
+
+    return { contract, };
+  }
   async function stakeLendingCoinToBankNode(_from: string | { address: string }, _bankNode: string | { address: string }, amount: string, tokenName: "DAI" | "USDT" | "USDC") {
 
     const bankNodeAddress = await getBankNodeAddressFromString(_bankNode);
@@ -298,6 +309,25 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     return { contract, };
   }
 
+  async function bondTokensToBankNode(_from: string | { address: string }, _bankNode: string | { address: string }, amount: string) {
+    //const bankNodeAddress = typeof _bankNode === 'string' ? (await getAddress(_bankNode)) : _bankNode.address;
+    //const from = typeof _from === 'string' ? (await getAddress(_from)) : _from.address;
+    const b = await getSubContractsForBankNodeWithSigner(_bankNode, _from);
+    await b.BNPLToken.approve(b.StakingPool.address, amount);
+    await b.StakingPool.bondTokens(amount);
+
+    return { b, };
+  }
+
+  async function donateBNPLToBankNode(_from: string | { address: string }, _bankNode: string | { address: string }, amount: string) {
+    //const bankNodeAddress = typeof _bankNode === 'string' ? (await getAddress(_bankNode)) : _bankNode.address;
+    //const from = typeof _from === 'string' ? (await getAddress(_from)) : _from.address;
+    const b = await getSubContractsForBankNodeWithSigner(_bankNode, _from);
+    await b.BNPLToken.approve(b.StakingPool.address, amount);
+    await b.StakingPool.donate(amount);
+
+    return { b, };
+  }
   async function stakeBNPLToBankNode(_from: string | { address: string }, _bankNode: string | { address: string }, amount: string) {
     //const bankNodeAddress = typeof _bankNode === 'string' ? (await getAddress(_bankNode)) : _bankNode.address;
     //const from = typeof _from === 'string' ? (await getAddress(_from)) : _from.address;
@@ -505,8 +535,11 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     deltaBMinusA,
     getBankNodeAllFinancialStates,
 
+    bondTokensToBankNode,
     sendToken,
     approveToken,
+    donateBNPLToBankNode,
+    donateLendingCoinToBankNode,
     stakeLendingCoinToBankNode,
     unstakeLendingCoinFromBankNode,
     stakeBNPLToBankNode,
