@@ -392,11 +392,13 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         return baseTokensOut;
     }
 
+    /// @notice Allows users to lend tokens to the bank node
     function donate(uint256 depositAmount) public override nonReentrant {
         require(depositAmount != 0, "depositAmount cannot be 0");
         _processDonation(msg.sender, depositAmount);
     }
 
+    /// @notice Allows users to lend tokens to the bank node
     function addLiquidity(uint256 depositAmount) public override nonReentrant {
         require(depositAmount != 0, "depositAmount cannot be 0");
         _addLiquidity(msg.sender, depositAmount);
@@ -449,6 +451,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         emit LoanRequested(borrower, loanAmount, currentLoanRequestId);
     }
 
+    /// @notice Allows users to request a loan from the bank node
     function requestLoan(
         uint256 loanAmount,
         uint64 totalLoanDuration,
@@ -532,10 +535,12 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         emit LoanDenied(loanRequest.borrower, loanRequestId, operator);
     }
 
+    /// @notice Allows admins with role "OPERATOR_ROLE" to deny a loan request with id `loanRequestId`
     function denyLoanRequest(uint256 loanRequestId) public override nonReentrant onlyRole(OPERATOR_ROLE) {
         _denyLoanRequest(msg.sender, loanRequestId);
     }
 
+    /// @notice Allows admins with role "OPERATOR_ROLE" to approve a loan request with id `loanRequestId` (this also sends the lending token requested to the borrower)
     function approveLoanRequest(uint256 loanRequestId) public override nonReentrant onlyRole(OPERATOR_ROLE) {
         _approveLoanRequest(msg.sender, loanRequestId);
     }
@@ -620,6 +625,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         //uint256 lossAmount = accountsReceivableLoss+amountPaidToBNPLMarketBuy;
     }
 
+    /// @notice Report a loan with id `loanId` as being overdue
     function reportOverdueLoan(uint256 loanId) public override nonReentrant {
         _markLoanAsWriteOff(loanId);
     }
@@ -679,6 +685,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         emit LoanPayment(loan.borrower, loanId, amountPerPayment);
     }
 
+    /// @notice Make a loan payment for loan with id `loanId`
     function makeLoanPayment(uint256 loanId) public override nonReentrant {
         _makeLoanPayment(msg.sender, loanId);
     }

@@ -142,9 +142,9 @@ describe('RewardsStaking', function () {
       await bB.b.BNPLToken.balanceOf(bB.b.StakingPool.address),
       await bC.b.BNPLToken.balanceOf(bC.b.StakingPool.address),
     ];
-    console.log("balances: ", totalForNodes.map(x => x.toString()))
+    //console.log("balances: ", totalForNodes.map(x => x.toString()))
     const totalForAllNodes = totalForNodes.reduce((a, b) => a.add(b));
-    console.log("total bnpl staked across all three: ", totalForAllNodes.toString());
+    //console.log("total bnpl staked across all three: ", totalForAllNodes.toString());
     const nodesNormalized = totalForNodes.map(x => x.mul(totalAmountToDistribute).div(totalForAllNodes));
     const totalForNormalizedNodes = nodesNormalized.reduce((a, b) => a.add(b));
 
@@ -161,7 +161,7 @@ describe('RewardsStaking', function () {
 
 
 
-    console.log("chain calculation distribution", allFromChainCalc.map(x => x.toString()))
+    //console.log("chain calculation distribution", allFromChainCalc.map(x => x.toString()))
 
 
   });
@@ -183,7 +183,6 @@ describe('RewardsStaking', function () {
       (await bA.b.BNPLToken.balanceOf(bA.b.StakingPool.address)).eq(ms`380000*10^18`),
       "Node A should have 250,000 BNPL Staked/Bonded"
     );
-    console.log("1")
 
     await h.stakeLendingCoinToBankNode(u.lenderA1, bankNodeIdA, ms`100000*10^18`, "DAI");
     await h.stakeLendingCoinToBankNode(u.lenderA2, bankNodeIdA, ms`50000*10^18`, "DAI");
@@ -197,7 +196,6 @@ describe('RewardsStaking', function () {
     await h.stakeAllBankNodePoolTokensToRewards(u.lenderA1, bankNodeIdA, ms`100000*10^18`);
     await h.stakeAllBankNodePoolTokensToRewards(u.lenderA2, bankNodeIdA, ms`50000*10^18`);
 
-    console.log("2")
     expect(
       bA.b.PoolLiquidityToken.balanceOf(u.lenderA1.address),
       "A1 Lending Pool Token Balance should be 0 after staking to the rewards pool"
@@ -230,18 +228,15 @@ describe('RewardsStaking', function () {
     await h.stakeLendingCoinToBankNode(u.lenderB1, bankNodeIdB, ms`100000*10^18`, "DAI");
     await h.stakeLendingCoinToBankNode(u.lenderB2, bankNodeIdB, ms`50000*10^18`, "DAI");
 
-    console.log("3")
     const nodeBLendingPoolCoinBalancesPreRewards = [
       await bB.b.PoolLiquidityToken.balanceOf(u.lenderB1.address),
       await bB.b.PoolLiquidityToken.balanceOf(u.lenderB2.address),
     ];
 
-    console.log("4")
     await h.stakeAllBankNodePoolTokensToRewards(u.lenderB1, bankNodeIdB, ms`100000*10^18`);
     await h.stakeAllBankNodePoolTokensToRewards(u.lenderB2, bankNodeIdB, ms`50000*10^18`);
 
 
-    console.log("5")
 
     expect(
       bB.b.PoolLiquidityToken.balanceOf(u.lenderB1.address),
@@ -268,11 +263,9 @@ describe('RewardsStaking', function () {
       "Node C should have 360,000 BNPL Staked/Bonded"
     );
 
-    console.log("6")
     await h.stakeLendingCoinToBankNode(u.lenderC1, bankNodeIdC, ms`100000*10^18`, "USDT");
     await h.stakeLendingCoinToBankNode(u.lenderC2, bankNodeIdC, ms`50000*10^18`, "USDT");
 
-    console.log("7")
     const nodeCLendingPoolCoinBalances = [
       await bC.b.PoolLiquidityToken.balanceOf(u.lenderC1.address),
       await bC.b.PoolLiquidityToken.balanceOf(u.lenderC2.address),
@@ -283,7 +276,6 @@ describe('RewardsStaking', function () {
     await h.stakeAllBankNodePoolTokensToRewards(u.lenderC2, bankNodeIdC, ms`50000*10^18`);
 
 
-    console.log("8")
     expect(
       bC.b.PoolLiquidityToken.balanceOf(u.lenderC1.address),
       "C1 Lending Pool Token Balance should be 0 after staking to the rewards pool"
@@ -294,7 +286,6 @@ describe('RewardsStaking', function () {
     ).eventually.equal(BigNumber.from(0));
 
 
-    console.log("9")
     const totalAmountToDistribute = ms`1000*10*10^18`;
 
     const totalForNodes = [
@@ -307,10 +298,10 @@ describe('RewardsStaking', function () {
     const totalForNormalizedNodes = nodesNormalized.reduce((a, b) => a.add(b));
 
     const allFromChainCalc = await bC.b.BankNodeLendingRewards.getBNPLTokenDistribution(totalAmountToDistribute);
-    console.log("allFromChainCalc", allFromChainCalc.map(x => x.toString()))
+    //console.log("allFromChainCalc", allFromChainCalc.map(x => x.toString()))
     const totalForAllNodesFromChain = allFromChainCalc.reduce((a, b) => a.add(b));
 
-    console.log("totalForAllNodesFromChain", totalForAllNodesFromChain.toString());
+    //console.log("totalForAllNodesFromChain", totalForAllNodesFromChain.toString());
 
     expect(totalForNormalizedNodes.toString(), "total for all nodes should equal to the total produced on chain")
       .equal(totalForAllNodesFromChain.toString());
@@ -320,31 +311,22 @@ describe('RewardsStaking', function () {
         .equal(allFromChainCalc[i].toString());
     }
     await h.sendToken(u.protocolAdmin, "BNPLToken", totalAmountToDistribute, u.bnplTokenDeployer);
-    console.log("10");
 
     await u.protocolAdmin.BNPLToken.approve(u.protocolAdmin.BankNodeLendingRewards.address, totalAmountToDistribute);
-    console.log("11");
 
     await u.protocolAdmin.BankNodeLendingRewards.distributeBNPLTokensToBankNodes(totalAmountToDistribute);
 
-    console.log("12");
 
     await u.lenderA1.BankNodeLendingRewards.exit(bankNodeIdA);
-    console.log("13");
     await u.lenderA2.BankNodeLendingRewards.exit(bankNodeIdA);
-    console.log("14");
 
 
     await u.lenderB1.BankNodeLendingRewards.exit(bankNodeIdB);
-    console.log("15");
     await u.lenderB2.BankNodeLendingRewards.exit(bankNodeIdB);
 
-    console.log("16");
 
     await u.lenderC1.BankNodeLendingRewards.exit(bankNodeIdC);
-    console.log("17");
     await u.lenderC2.BankNodeLendingRewards.exit(bankNodeIdC);
-    console.log("18");
 
 
     const endBalancesNodeA = [
@@ -362,13 +344,13 @@ describe('RewardsStaking', function () {
       await h.getKeyUserBalancesForBankNode(u.lenderC1, bankNodeIdC),
       await h.getKeyUserBalancesForBankNode(u.lenderC2, bankNodeIdC),
     ];
-
-    const totalActuallyRewardedToNodeALenders = endBalancesNodeA.map(x => x.bnplTokenBalance).reduce((a, b) => a.add(b));
-    const totalActuallyRewardedToNodeBLenders = endBalancesNodeB.map(x => x.bnplTokenBalance).reduce((a, b) => a.add(b));
-    const totalActuallyRewardedToNodeCLenders = endBalancesNodeC.map(x => x.bnplTokenBalance).reduce((a, b) => a.add(b));
-
-    console.log(totalActuallyRewardedToNodeALenders.toString(), totalActuallyRewardedToNodeBLenders.toString(), totalActuallyRewardedToNodeCLenders.toString());
-    console.log("sum: ", totalActuallyRewardedToNodeALenders.add(totalActuallyRewardedToNodeBLenders).add(totalActuallyRewardedToNodeCLenders).toString());
+    /*
+        const totalActuallyRewardedToNodeALenders = endBalancesNodeA.map(x => x.bnplTokenBalance).reduce((a, b) => a.add(b));
+        const totalActuallyRewardedToNodeBLenders = endBalancesNodeB.map(x => x.bnplTokenBalance).reduce((a, b) => a.add(b));
+        const totalActuallyRewardedToNodeCLenders = endBalancesNodeC.map(x => x.bnplTokenBalance).reduce((a, b) => a.add(b));
+    */
+    //console.log(totalActuallyRewardedToNodeALenders.toString(), totalActuallyRewardedToNodeBLenders.toString(), totalActuallyRewardedToNodeCLenders.toString());
+    //console.log("sum: ", totalActuallyRewardedToNodeALenders.add(totalActuallyRewardedToNodeBLenders).add(totalActuallyRewardedToNodeCLenders).toString());
     /*
 
         expect(
@@ -388,7 +370,6 @@ describe('RewardsStaking', function () {
 
 
 
-    console.log("done")
   });
 });
 export {

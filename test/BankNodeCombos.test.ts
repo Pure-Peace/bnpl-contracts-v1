@@ -104,7 +104,7 @@ describe('BankNodeCombos', function () {
 
     await h.stakeLendingCoinToBankNode(u.lenderA1, bankNodeIdA, startLiquidityAmount, "DAI");
     const finStatesStart = await h.getBankNodeAllFinancialStates(bankNodeIdA);
-    console.log(finStatesStart);
+    //console.log(finStatesStart);
 
     expect(finStatesStart.bankNodeFinancialState.accountsReceivableFromLoans, "No Accounts Receivable before anyone loans have been made")
       .equals(0);
@@ -179,7 +179,7 @@ describe('BankNodeCombos', function () {
 
     const finStatesAfterLoanA = await h.getBankNodeAllFinancialStates(bankNodeIdA);
     const b = finStatesAfterLoanA.b
-    console.log([finStatesAfterLoanA.bankNodeFinancialState, finStatesAfterLoanA.stakingPoolFinancialState], 0, 2);
+    //console.log([finStatesAfterLoanA.bankNodeFinancialState, finStatesAfterLoanA.stakingPoolFinancialState], 0, 2);
 
 
     const deltaFromStartToAfterLoanA = h.deltaBMinusA<IBankNodeFinancialState>(
@@ -230,8 +230,8 @@ describe('BankNodeCombos', function () {
       "https://test-node-a.example.com"
     );
 
-    console.log("default occurred!")
-    function toNiceObj(o: any) {
+    //console.log("default occurred!")
+    /*function toNiceObj(o: any) {
       const out: any = {};
       Object.keys(o).forEach(k => out[k] = (o[k] + ""));
       console.log(out);
@@ -244,12 +244,12 @@ describe('BankNodeCombos', function () {
       console.log("FINSTATEN-END: ", name);
 
 
-    }
+    }*/
     await h.stakeBNPLToBankNode(u.stakerA1, bankNodeIdA, startStakedBNPLAmount);
 
     await h.stakeLendingCoinToBankNode(u.lenderA1, bankNodeIdA, startLiquidityAmount, "DAI");
     const finStatesStart = await h.getBankNodeAllFinancialStates(bankNodeIdA);
-    printFinState("finStatesStart", finStatesStart);
+    //printFinState("finStatesStart", finStatesStart);
 
     expect(finStatesStart.bankNodeFinancialState.accountsReceivableFromLoans, "No Accounts Receivable before anyone loans have been made")
       .equals(0);
@@ -324,14 +324,14 @@ describe('BankNodeCombos', function () {
 
     const finStatesAfterLoanA = await h.getBankNodeAllFinancialStates(bankNodeIdA);
     const b = finStatesAfterLoanA.b
-    printFinState("finStatesAfterLoanA", finStatesAfterLoanA);
+    //printFinState("finStatesAfterLoanA", finStatesAfterLoanA);
 
     const deltaFromStartToAfterLoanA = h.deltaBMinusA<IBankNodeFinancialState>(
       finStatesStart.bankNodeFinancialState,
       finStatesAfterLoanA.bankNodeFinancialState
     );
-    console.log("DELTA")
-    toNiceObj(deltaFromStartToAfterLoanA);
+    //console.log("DELTA")
+    //toNiceObj(deltaFromStartToAfterLoanA);
 
     expect(deltaFromStartToAfterLoanA.accountsReceivableFromLoans, "account receivable should go up by loan amount")
       .equals(loanARequest.loanAmount);
@@ -345,19 +345,19 @@ describe('BankNodeCombos', function () {
     const loanAAfterPayment1 = await b.BankNode.loans(loanAId);
     const finStatesAfterLoanAPayment1 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
     expect(loanAAfterPayment1.totalAmountPaid.eq(loanAStart.amountPerPayment), "should equal one payment");
-    printFinState("finStatesAfterLoanAPayment1", finStatesAfterLoanAPayment1);
+    //printFinState("finStatesAfterLoanAPayment1", finStatesAfterLoanAPayment1);
 
     await h.makeLoanPaymentBankNode(u.borrowerA1, bankNodeIdA, loanAId);
     const loanAAfterPayment2 = await b.BankNode.loans(loanAId);
     const finStatesAfterLoanAPayment2 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
     expect(loanAAfterPayment2.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(2)), "should equal two payments");
     expect(loanAAfterPayment2.status === 1, "loanAAfterPayment3.status should be 3 (loan completed)");
-    printFinState("finStatesAfterLoanAPayment2", finStatesAfterLoanAPayment2);
+    //printFinState("finStatesAfterLoanAPayment2", finStatesAfterLoanAPayment2);
 
     await h.missPaymentBankNodeAndReport(u.lenderA2, bankNodeIdA, loanAId);
     const loanAAfterPayment3Missed = await b.BankNode.loans(loanAId);
     const finStatesAfterLoanAPayment3Missed = await h.getBankNodeAllFinancialStates(bankNodeIdA);
-    printFinState("finStatesAfterLoanAPayment3Missed", finStatesAfterLoanAPayment3Missed);
+    //printFinState("finStatesAfterLoanAPayment3Missed", finStatesAfterLoanAPayment3Missed);
 
     expect(loanAAfterPayment3Missed.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(2)), "should equal two payment");
     expect(loanAAfterPayment3Missed.numberOfPaymentsMade === 2, "numberOfPayment should be 3");
@@ -367,7 +367,7 @@ describe('BankNodeCombos', function () {
     await h.donateLendingCoinToBankNode(u.bankNodeMakerA, bankNodeIdA, ms`12000*10^18`, "DAI");
     await h.donateBNPLToBankNode(u.bankNodeMakerA, bankNodeIdA, ms`150000*10^18`);
     const finStatesAfterDonation1 = await h.getBankNodeAllFinancialStates(bankNodeIdA);
-    printFinState("finStatesAfterDonation1", finStatesAfterDonation1);
+    //printFinState("finStatesAfterDonation1", finStatesAfterDonation1);
 
 
 

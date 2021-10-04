@@ -277,22 +277,26 @@ contract BNPLStakingPool is
         }
     }
 
+    /// @notice Allows a user to donate `donateAmount` of BNPL to the pool (user must first approve)
     function donate(uint256 donateAmount) public override nonReentrant {
         require(donateAmount != 0, "donateAmount cannot be 0");
         _processDonation(msg.sender, donateAmount);
     }
 
+    /// @notice Allows a user to bond `bondAmount` of BNPL to the pool (user must first approve)
     function bondTokens(uint256 bondAmount) public override nonReentrant {
         require(bondAmount != 0, "bondAmount cannot be 0");
         _processBondTokens(msg.sender, bondAmount);
         tokensBondedAllTime += bondAmount;
     }
 
+    /// @notice Allows a user to stake `unstakeAmount` of BNPL to the pool (user must first approve)
     function stakeTokens(uint256 stakeAmount) public override nonReentrant {
         require(stakeAmount != 0, "stakeAmount cannot be 0");
         _addLiquidity(msg.sender, stakeAmount);
     }
 
+    /// @notice Allows a user to unstake `unstakeAmount` of BNPL from the pool (puts it into a lock up for a 7 day cool down period)
     function unstakeTokens(uint256 unstakeAmount) public override nonReentrant {
         require(unstakeAmount != 0, "unstakeAmount cannot be 0");
         _removeLiquidity(msg.sender, unstakeAmount);
@@ -305,10 +309,12 @@ contract BNPLStakingPool is
         emit Slash(recipient, slashAmount);
     }
 
+    /// @notice Allows an authenticated contract/user (in this case, only BNPLBankNode) to slash `slashAmount` of BNPL from the pool
     function slash(uint256 slashAmount) public override onlyRole(SLASHER_ROLE) nonReentrant {
         _slash(slashAmount, msg.sender);
     }
 
+    /// @notice Calculates the amount of BNPL to slash from the pool given a Bank Node loss of `nodeLoss` with a previous balance of `prevNodeBalance` and the current pool balance containing `poolBalance` BNPL
     function calculateSlashAmount(
         uint256 prevNodeBalance,
         uint256 nodeLoss,
@@ -321,10 +327,12 @@ contract BNPLStakingPool is
         return (poolBalance * slashRatio) / PRBMathUD60x18.scale();
     }
 
+    /// @notice Allows user `user` to claim the next token lockup vault they have locked up in the contract
     function claimTokenLockup(address user) public nonReentrant returns (uint256) {
         return _claimNextTokenLockup(user);
     }
 
+    /// @notice Allows user `user` to claim the next `maxNumberOfClaims` token lockup vaults they have locked up in the contract
     function claimTokenNextNLockups(address user, uint32 maxNumberOfClaims) public nonReentrant returns (uint256) {
         return _claimUpToNextNTokenLockups(user, maxNumberOfClaims);
     }

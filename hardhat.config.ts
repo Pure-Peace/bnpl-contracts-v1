@@ -6,6 +6,7 @@ import "@nomiclabs/hardhat-waffle";
 import 'hardhat-gas-reporter';
 import '@typechain/hardhat';
 import 'solidity-coverage';
+import 'hardhat-docgen';
 //import "@atixlabs/hardhat-time-n-mine";
 import { node_url, accounts } from './utils/network';
 
@@ -128,6 +129,11 @@ const config = {
   },
   mocha: {
     timeout: 0,
+  },
+  docgen: {
+    path: './docs',
+    clear: true,
+    runOnCompile: true,
   },
 };
 

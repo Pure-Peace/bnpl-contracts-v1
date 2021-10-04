@@ -96,6 +96,7 @@ contract BankNodeManager is
         _setupRole(CONFIGURE_NODE_MANAGER_ROLE, _configurator);
     }
 
+    /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to add support for a new ERC20 token to be used as lendable tokens for new bank nodes
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled)
         public
         override
@@ -124,6 +125,7 @@ contract BankNodeManager is
         enabledLendableTokens[_lendableToken.tokenContract] = enabled;
     }
 
+    /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to enable/disable support for ERC20 tokens to be used as lendable tokens for new bank nodes (does not effect existing nodes)
     function setLendableTokenStatus(address tokenContract, uint8 enabled)
         public
         override
@@ -133,6 +135,7 @@ contract BankNodeManager is
         enabledLendableTokens[tokenContract] = enabled;
     }
 
+    /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to set the minimum BNPL to bond per node
     function setMinimumBankNodeBondedAmount(uint256 _minimumBankNodeBondedAmount)
         public
         override
@@ -255,6 +258,12 @@ contract BankNodeManager is
         );
     }
 
+    /// @notice creates a new bonded bank node
+    /// @param operator The node operator who will be assigned the permissions of bank node admin for the newly created bank node
+    /// @param tokensToBond The number of BNPL tokens to bond for the node
+    /// @param lendableTokenAddress Which lendable token will be lent to borrowers for this bank node (ex. the address of USDT's erc20 smart contract)
+    /// @param nodeName the official name of the bank node
+    /// @param website the official website of the bank node
     function createBondedBankNode(
         address operator,
         uint256 tokensToBond,
