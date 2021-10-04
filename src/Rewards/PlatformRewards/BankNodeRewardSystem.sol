@@ -135,11 +135,11 @@ contract BankNodeRewardSystem is
     }
 
     function getInternalValueForStakedTokenAmount(uint256 amount) internal pure returns (uint256) {
-        return amount * 1000000;
+        return amount;
     }
 
     function getStakedTokenAmountForInternalValue(uint256 amount) internal pure returns (uint256) {
-        return amount / 1000000;
+        return amount;
     }
 
     /* ========== VIEWS ========== */
