@@ -545,6 +545,19 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         _approveLoanRequest(msg.sender, loanRequestId);
     }
 
+    function withdrawNodeOperatorBalance(uint256 amount, address to)
+        public
+        override
+        nonReentrant
+        onlyRole(OPERATOR_ROLE)
+    {
+        require(nodeOperatorBalance >= amount, "cannot withdraw more than nodeOperatorBalance");
+        _ensureBaseBalance(amount);
+        require(nodeOperatorBalance >= amount, "cannot withdraw more than nodeOperatorBalance");
+        nodeOperatorBalance -= amount;
+        TransferHelper.safeTransfer(address(baseLiquidityToken), to, amount);
+    }
+
     function _marketBuyBNPLForStakingPool(uint256 amountInBaseToken) private {
         require(amountInBaseToken > 0);
         //_ensureBaseBalance(amountInBaseToken);

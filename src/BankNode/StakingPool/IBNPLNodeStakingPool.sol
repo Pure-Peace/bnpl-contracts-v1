@@ -30,4 +30,6 @@ interface IBNPLNodeStakingPool is IBankNodeStakingPoolInitializableV1 {
     function slash(uint256 slashAmount) external;
 
     function getPoolTotalAssetsValue() external view returns (uint256);
+
+    function claimNodeOwnerPoolTokenRewards(address to) external;
 }

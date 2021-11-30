@@ -43,6 +43,12 @@ export function getMnemonic(networkName?: string): string {
   return mnemonic;
 }
 
-export function accounts(networkName?: string): { count: number, mnemonic: string } {
+export function accounts(networkName?: string): any {
+  const privKeysStr = process.env['PRIV_KEYS_' + (networkName || "").toUpperCase()];
+  if (privKeysStr) {
+    const accs = privKeysStr.split(",");
+    return accs;
+  }
   return { mnemonic: getMnemonic(networkName), count: 50 };
 }
+

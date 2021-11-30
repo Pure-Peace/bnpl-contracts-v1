@@ -19,3 +19,5 @@ contractsInfo.json
 deployments/hardhat
 deployments/localhost
 docs/
+
+abibuild/

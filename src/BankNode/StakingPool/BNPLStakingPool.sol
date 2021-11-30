@@ -50,7 +50,8 @@ contract BNPLStakingPool is
     event Slash(address indexed recipient, uint256 slashAmount);
 
     bytes32 public constant SLASHER_ROLE = keccak256("SLASHER_ROLE");
-    bytes32 public constant SLASHER_ADMIN_ROLE = keccak256("SLASHER_ADMIN_ROLE");
+    bytes32 public constant NODE_REWARDS_MANAGER_ROLE = keccak256("NODE_REWARDS_MANAGER_ROLE");
+    //bytes32 public constant SLASHER_ADMIN_ROLE = keccak256("SLASHER_ADMIN_ROLE");
 
     IERC20 public BASE_LIQUIDITY_TOKEN; // = IERC20(0x1d1781B0017CCBb3f0341420E5952aAfD9d8C083);
     IMintableBurnableTokenUpgradeable public POOL_LIQUIDITY_TOKEN; // = IMintableToken(0x517D01e738F8E1fB473f905BCC736aaa41226761);
@@ -58,7 +59,6 @@ contract BNPLStakingPool is
     uint256 public baseTokenBalance;
     uint256 public tokensBondedAllTime;
     uint256 public poolTokenEffectiveSupply;
-    uint256 public virtualPoolTokensCount;
 
     function initialize(
         address bnplToken,
@@ -70,7 +70,7 @@ contract BNPLStakingPool is
         require(bnplToken != address(0), "bnplToken cannot be 0");
         require(poolBNPLToken != address(0), "poolBNPLToken cannot be 0");
         require(slasherAdmin != address(0), "slasherAdmin cannot be 0");
-        require(tokenBonder != address(0), "slasherAdmin cannot be 0");
+        require(tokenBonder != address(0), "tokenBonder cannot be 0");
         require(tokensToBond > 0, "tokensToBond cannot be 0");
 
         __ReentrancyGuard_init_unchained();
@@ -85,18 +85,19 @@ contract BNPLStakingPool is
 
         //_setupRole(SLASHER_ADMIN_ROLE, slasherAdmin);
         _setupRole(SLASHER_ROLE, slasherAdmin);
+        _setupRole(NODE_REWARDS_MANAGER_ROLE, tokenBonder);
         //_setRoleAdmin(SLASHER_ROLE, SLASHER_ADMIN_ROLE);
 
         require(BASE_LIQUIDITY_TOKEN.balanceOf(address(this)) >= tokensToBond, "tokens to bond not sent");
         baseTokenBalance = tokensToBond;
         tokensBondedAllTime = tokensToBond;
         poolTokenEffectiveSupply = tokensToBond;
-        virtualPoolTokensCount = tokensToBond;
+        POOL_LIQUIDITY_TOKEN.mint(address(this), tokensToBond);
         emit Bond(tokenBonder, tokensToBond);
     }
 
     function poolTokensCirculating() public view returns (uint256) {
-        return poolTokenEffectiveSupply - virtualPoolTokensCount;
+        return poolTokenEffectiveSupply;
     }
 
     function getUnstakeLockupPeriod() public pure returns (uint256) {
@@ -278,26 +279,26 @@ contract BNPLStakingPool is
     }
 
     /// @notice Allows a user to donate `donateAmount` of BNPL to the pool (user must first approve)
-    function donate(uint256 donateAmount) public override nonReentrant {
+    function donate(uint256 donateAmount) external override nonReentrant {
         require(donateAmount != 0, "donateAmount cannot be 0");
         _processDonation(msg.sender, donateAmount);
     }
 
     /// @notice Allows a user to bond `bondAmount` of BNPL to the pool (user must first approve)
-    function bondTokens(uint256 bondAmount) public override nonReentrant {
+    function bondTokens(uint256 bondAmount) external override nonReentrant {
         require(bondAmount != 0, "bondAmount cannot be 0");
         _processBondTokens(msg.sender, bondAmount);
         tokensBondedAllTime += bondAmount;
     }
 
     /// @notice Allows a user to stake `unstakeAmount` of BNPL to the pool (user must first approve)
-    function stakeTokens(uint256 stakeAmount) public override nonReentrant {
+    function stakeTokens(uint256 stakeAmount) external override nonReentrant {
         require(stakeAmount != 0, "stakeAmount cannot be 0");
         _addLiquidity(msg.sender, stakeAmount);
     }
 
     /// @notice Allows a user to unstake `unstakeAmount` of BNPL from the pool (puts it into a lock up for a 7 day cool down period)
-    function unstakeTokens(uint256 unstakeAmount) public override nonReentrant {
+    function unstakeTokens(uint256 unstakeAmount) external override nonReentrant {
         require(unstakeAmount != 0, "unstakeAmount cannot be 0");
         _removeLiquidity(msg.sender, unstakeAmount);
     }
@@ -310,8 +311,36 @@ contract BNPLStakingPool is
     }
 
     /// @notice Allows an authenticated contract/user (in this case, only BNPLBankNode) to slash `slashAmount` of BNPL from the pool
-    function slash(uint256 slashAmount) public override onlyRole(SLASHER_ROLE) nonReentrant {
+    function slash(uint256 slashAmount) external override onlyRole(SLASHER_ROLE) nonReentrant {
         _slash(slashAmount, msg.sender);
+    }
+
+    function getNodeOwnerPoolTokenRewards() public view returns (uint256) {
+        uint256 equivalentPoolTokens = getPoolDepositConversion(tokensBondedAllTime);
+        uint256 ownerPoolTokens = POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
+        if (equivalentPoolTokens > ownerPoolTokens) {
+            return equivalentPoolTokens - ownerPoolTokens;
+        }
+        return 0;
+    }
+
+    function getNodeOwnerBNPLRewards() external view returns (uint256) {
+        uint256 rewardsAmount = getNodeOwnerPoolTokenRewards();
+        if (rewardsAmount != 0) {
+            return getPoolWithdrawConversion(rewardsAmount);
+        }
+        return 0;
+    }
+
+    function claimNodeOwnerPoolTokenRewards(address to)
+        external
+        override
+        onlyRole(NODE_REWARDS_MANAGER_ROLE)
+        nonReentrant
+    {
+        uint256 poolTokenRewards = getNodeOwnerPoolTokenRewards();
+        require(poolTokenRewards > 0, "cannot claim 0 rewards");
+        POOL_LIQUIDITY_TOKEN.transfer(to, poolTokenRewards);
     }
 
     /// @notice Calculates the amount of BNPL to slash from the pool given a Bank Node loss of `nodeLoss` with a previous balance of `prevNodeBalance` and the current pool balance containing `poolBalance` BNPL
@@ -328,12 +357,12 @@ contract BNPLStakingPool is
     }
 
     /// @notice Allows user `user` to claim the next token lockup vault they have locked up in the contract
-    function claimTokenLockup(address user) public nonReentrant returns (uint256) {
+    function claimTokenLockup(address user) external nonReentrant returns (uint256) {
         return _claimNextTokenLockup(user);
     }
 
     /// @notice Allows user `user` to claim the next `maxNumberOfClaims` token lockup vaults they have locked up in the contract
-    function claimTokenNextNLockups(address user, uint32 maxNumberOfClaims) public nonReentrant returns (uint256) {
+    function claimTokenNextNLockups(address user, uint32 maxNumberOfClaims) external nonReentrant returns (uint256) {
         return _claimUpToNextNTokenLockups(user, maxNumberOfClaims);
     }
 }

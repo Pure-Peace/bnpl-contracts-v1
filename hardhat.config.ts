@@ -7,6 +7,7 @@ import 'hardhat-gas-reporter';
 import '@typechain/hardhat';
 import 'solidity-coverage';
 import 'hardhat-docgen';
+import 'hardhat-abi-exporter';
 //import "@atixlabs/hardhat-time-n-mine";
 import { node_url, accounts } from './utils/network';
 
@@ -14,6 +15,7 @@ import { node_url, accounts } from './utils/network';
 if (process.env.HARDHAT_FORK) {
   process.env['HARDHAT_DEPLOY_FORK'] = process.env.HARDHAT_FORK;
 }
+
 
 const config = {
   solidity: {
@@ -135,6 +137,14 @@ const config = {
     clear: true,
     runOnCompile: true,
   },
+  abiExporter: {
+    path: './abibuild',
+    clear: true,
+    flat: true,
+    only: [':BNPLStakingPool$', ':BNPLBankNode$', ':PoolTokenUpgradeable$', ':BankNodeManager$', ':BankNodeLendingRewards$', ':BNPLSwapMarketExample$', ':BankNodeManager$'],
+    spacing: 2,
+    pretty: true,
+  }
 };
 
 export default config;
