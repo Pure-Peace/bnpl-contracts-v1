@@ -59,6 +59,7 @@ contract BNPLStakingPool is
     uint256 public baseTokenBalance;
     uint256 public tokensBondedAllTime;
     uint256 public poolTokenEffectiveSupply;
+    uint256 public virtualPoolTokensCount;
 
     function initialize(
         address bnplToken,
@@ -92,12 +93,13 @@ contract BNPLStakingPool is
         baseTokenBalance = tokensToBond;
         tokensBondedAllTime = tokensToBond;
         poolTokenEffectiveSupply = tokensToBond;
+        virtualPoolTokensCount = tokensToBond;
         POOL_LIQUIDITY_TOKEN.mint(address(this), tokensToBond);
         emit Bond(tokenBonder, tokensToBond);
     }
 
     function poolTokensCirculating() public view returns (uint256) {
-        return poolTokenEffectiveSupply;
+        return poolTokenEffectiveSupply - POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
     }
 
     function getUnstakeLockupPeriod() public pure returns (uint256) {
@@ -155,7 +157,7 @@ contract BNPLStakingPool is
     }
 
     function _mintPoolTokensForUser(address user, uint256 mintAmount) private {
-        require(user != address(this), "user cannot be self");
+        //require(user != address(this), "user cannot be self");
         require(user != address(0), "user cannot be null");
         require(mintAmount != 0, "mint amount cannot be 0");
         uint256 newMintTokensCirculating = poolTokenEffectiveSupply + mintAmount;
@@ -184,6 +186,9 @@ contract BNPLStakingPool is
         TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), sender, address(this), depositAmount);
         baseTokenBalance += depositAmount;
         tokensBondedAllTime += depositAmount;
+        uint256 selfMint = getPoolDepositConversion(depositAmount);
+        _mintPoolTokensForUser(address(this), selfMint);
+        virtualPoolTokensCount += selfMint;
         emit Bond(sender, depositAmount);
     }
 
@@ -288,7 +293,6 @@ contract BNPLStakingPool is
     function bondTokens(uint256 bondAmount) external override nonReentrant {
         require(bondAmount != 0, "bondAmount cannot be 0");
         _processBondTokens(msg.sender, bondAmount);
-        tokensBondedAllTime += bondAmount;
     }
 
     /// @notice Allows a user to stake `unstakeAmount` of BNPL to the pool (user must first approve)
@@ -340,6 +344,7 @@ contract BNPLStakingPool is
     {
         uint256 poolTokenRewards = getNodeOwnerPoolTokenRewards();
         require(poolTokenRewards > 0, "cannot claim 0 rewards");
+        virtualPoolTokensCount -= poolTokenRewards;
         POOL_LIQUIDITY_TOKEN.transfer(to, poolTokenRewards);
     }
 

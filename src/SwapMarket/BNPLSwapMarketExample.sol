@@ -62,22 +62,26 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
         address inputTokenAddress,
         uint256 inputTokenAmount,
         address recipient
-    ) private returns (uint256 amountOut) {
+    ) private returns (uint256) {
         require(inputTokenAddress != BNPL_TOKEN_ADDRESS);
-        require(bnplPrices[inputTokenAddress] != 0, "token not supported");
+        uint256 bnplPrice = bnplPrices[inputTokenAddress];
+
+        require(bnplPrice != 0, "token not supported");
         require(inputTokenAmount != 0, "inputTokenAmount cannot be 0");
-        uint256 actualAmountOut = inputTokenAmount / bnplPrices[inputTokenAddress];
-        uint256 actualAmountIn = actualAmountOut * bnplPrices[inputTokenAddress];
-        require(actualAmountIn <= inputTokenAmount && actualAmountIn != 0, "actualAmountIn cannot be 0");
-        require(actualAmountOut != 0, "actualAmountOut cannot be 0");
+
+        uint256 outTokens = inputTokenAmount / bnplPrice;
+        require(outTokens != 0, "actualAmountOut cannot be 0");
+
+        uint256 actualAmountOut = outTokens * ERC20(BNPL_TOKEN_ADDRESS).decimals();
+
         require(bnplBalance >= actualAmountOut, "not enough bnpl");
         bnplBalance -= actualAmountOut;
 
-        TransferHelper.safeTransferFrom(inputTokenAddress, msg.sender, address(this), actualAmountIn);
-        tokenBalances[inputTokenAddress] += actualAmountIn;
+        TransferHelper.safeTransferFrom(inputTokenAddress, msg.sender, address(this), inputTokenAmount);
+        tokenBalances[inputTokenAddress] += inputTokenAmount;
 
         TransferHelper.safeTransfer(BNPL_TOKEN_ADDRESS, recipient, actualAmountOut);
-        amountOut = actualAmountOut;
+        return actualAmountOut;
     }
 
     function _swapBNPLForToken(

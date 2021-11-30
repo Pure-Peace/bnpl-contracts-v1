@@ -80,6 +80,6 @@
     "fork:deploy": "node ./_scripts.js fork:deploy",
     "fork:dev": "node ./_scripts.js fork:dev",
     "fork:node": "node ./_scripts.js fork:node",
-    "fork:test": "node ./_scripts.js fork:test"
+    "fork:test": "echo hi && node ./_scripts.js fork:test"
   }
 }
