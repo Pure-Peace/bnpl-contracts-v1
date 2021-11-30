@@ -24,6 +24,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [UpBeaconBankNodeManager.address, []],
     log: true,
     skipIfAlreadyDeployed: false,
+    gasLimit: 5500000,
   });
 
   const BankNodeLendingRewardsProxy = await deploy("BankNodeLendingRewardsProxy", {
@@ -32,6 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [UpBeaconBankNodeLendingRewards.address, []],
     log: true,
     skipIfAlreadyDeployed: false,
+    gasLimit: 5500000,
   });
 
 
@@ -56,6 +58,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
     log: true,
     skipIfAlreadyDeployed: false,
+    gasLimit: 5500000,
   });
 
 

@@ -5,9 +5,10 @@ import { MintableDebugToken } from '../typechain/MintableDebugToken';
 import { mstr } from '../utils/math';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  console.log("hiiiii")
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-  const shouldDeployFakeBNPLToken = !hre.network.live;
+  const shouldDeployFakeBNPLToken = true;//!hre.network.live;
   if (shouldDeployFakeBNPLToken) {
     const { bnplTokenDeployer, } = await getNamedAccounts();
     /*
@@ -24,6 +25,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       args: [],
       log: true,
       skipIfAlreadyDeployed: false,
+      gasLimit: 5500000
+
     });
     const { getContract, getContractAt } = genGetContractWith(hre);
     const bnplToken = await getContractAt<MintableDebugToken>("MintableDebugToken", bnplTokenOG.address, bnplTokenDeployer);
@@ -32,9 +35,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       "BNPL",
       18,
       bnplTokenDeployer,
-      bnplTokenDeployer
+      bnplTokenDeployer,
+      { gasLimit: 5500000 }
     );
-    await bnplToken.mint(bnplTokenDeployer, mstr`10000000000*10^18`);
+    await bnplToken.mint(bnplTokenDeployer, mstr`10000000000*10^18`,
+      { gasLimit: 5500000 });
 
 
 

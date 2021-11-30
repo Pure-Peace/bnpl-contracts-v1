@@ -15,6 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: mockContractsDeployer,
       args: ["FAKE DAI", "DAI", 18],
       log: true,
+      gasLimit: 5500000,
     });
 
     const aDAI = await deploy('aDAI', {
@@ -22,6 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: mockContractsDeployer,
       args: ["FAKE aDAI", "aDAI", 18],
       log: true,
+      gasLimit: 5500000,
     });
 
     const USDT = await deploy('USDT', {
@@ -29,6 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: mockContractsDeployer,
       args: ["FAKE USDT", "USDT", 6],
       log: true,
+      gasLimit: 5500000,
     });
 
     const aUSDT = await deploy('aUSDT', {
@@ -36,6 +39,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: mockContractsDeployer,
       args: ["FAKE aUSDT", "aUSDT", 6],
       log: true,
+      gasLimit: 5500000,
     });
 
     const USDC = await deploy('USDC', {
@@ -43,6 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: mockContractsDeployer,
       args: ["FAKE USDC", "USDC", 6],
       log: true,
+      gasLimit: 5500000,
     });
 
     const aUSDC = await deploy('aUSDC', {
@@ -50,11 +55,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: mockContractsDeployer,
       args: ["FAKE aUSDC", "aUSDC", 6],
       log: true,
+      gasLimit: 5500000,
     });
 
     const FakeAaveLendingPool = await deploy('FakeAaveLendingPool', {
       from: mockContractsDeployer,
       log: true,
+      gasLimit: 5500000,
     });
   }
   if (shouldSetupFakeUniswap(hre)) {
@@ -63,6 +70,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: mockContractsDeployer,
       log: true,
       args: [bnplToken.address],
+      gasLimit: 5500000,
     });
   }
 

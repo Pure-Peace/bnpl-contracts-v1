@@ -72,7 +72,7 @@ const config = {
   },
   networks: {
     hardhat: {
-      initialBaseFeePerGas: 0, // to fix : https://github.com/sc-forks/solidity-coverage/issues/652, see https://github.com/sc-forks/solidity-coverage/issues/652#issuecomment-896330136
+      initialBaseFeePerGas: 10, // to fix : https://github.com/sc-forks/solidity-coverage/issues/652, see https://github.com/sc-forks/solidity-coverage/issues/652#issuecomment-896330136
       // process.env.HARDHAT_FORK will specify the network that the fork is made from.
       // this line ensure the use of the corresponding accounts
       accounts: accounts(process.env.HARDHAT_FORK),
@@ -114,6 +114,11 @@ const config = {
       url: node_url('goerli'),
       accounts: accounts('goerli'),
     },
+    ropsten: {
+      url: node_url('ropsten'),
+      accounts: accounts('ropsten'),
+
+    }
   },
   paths: {
     sources: 'src',

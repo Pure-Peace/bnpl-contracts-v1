@@ -18,6 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       args: args,
       log: true,
       skipIfAlreadyDeployed: false,
+      gasLimit: 5500000,
     });
     return result;
 

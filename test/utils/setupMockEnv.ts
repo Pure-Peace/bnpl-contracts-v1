@@ -6,10 +6,10 @@ import { getContractForEnvironment } from "./getContractForEnvironment";
 import { ms } from '../../utils/math';
 
 function shouldSetupFakeAave(hre: HardhatRuntimeEnvironment) {
-  return !hre.network.live;
+  return true;
 }
 function shouldSetupFakeUniswap(hre: HardhatRuntimeEnvironment) {
-  return !hre.network.live;
+  return true;
 }
 
 async function setupFakeAave(hre: HardhatRuntimeEnvironment, signer?: string | Signer | undefined) {
