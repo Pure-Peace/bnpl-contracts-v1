@@ -92,7 +92,8 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
         require(outputTokenAddress != BNPL_TOKEN_ADDRESS);
         require(bnplPrices[outputTokenAddress] != 0, "token not supported");
         require(bnplAmount != 0, "bnplAmount cannot be 0");
-        uint256 actualAmountOut = bnplPrices[outputTokenAddress] * bnplAmount;
+        uint256 actualAmountOut = (bnplPrices[outputTokenAddress] * bnplAmount) /
+            10**ERC20(BNPL_TOKEN_ADDRESS).decimals();
         require(actualAmountOut != 0, "actualAmountOut cannot be 0");
         require(tokenBalances[outputTokenAddress] >= actualAmountOut, "not enough output token");
         tokenBalances[outputTokenAddress] -= actualAmountOut;
