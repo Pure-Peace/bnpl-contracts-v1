@@ -607,11 +607,12 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             "cannot make the loan payment on same block loan is created"
         );
         require(loan.remainingBalance > 0, "loan must not be paid off");
-        require(loan.status == 0 || loan.status == 2, "loan must not be paid off or already overdue");
+        require(loan.status == 0 || loan.status != 2, "loan must not be paid off or already overdue");
 
         require(getLoanNextDueDate(loanId) < uint64(block.timestamp), "loan must be overdue to write off");
         require(loan.loanAmount > loan.totalAmountPaid);
         uint256 startPoolTotalAssetValue = getPoolTotalAssetsValue();
+        loan.status = 2;
 
         //loan.loanAmount-principalPaidForLoan[loanId]
         //uint256 total3rdPartyInterestPaid = loanBondedAmount[loanId]; // bnpl market buy is the same amount as the amount bonded, this must change if they are not equal

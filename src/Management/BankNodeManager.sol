@@ -216,7 +216,7 @@ contract BankNodeManager is
         bnplStakingPoolToken = _createBankNodeLendingPoolTokenClone(
             "Banking Node Pool BNPL",
             "pBNPL",
-            lendableToken.decimals,
+            18,
             address(0),
             bnplStakingPoolContract
         );
@@ -234,7 +234,7 @@ contract BankNodeManager is
         bankNodeToken = _createBankNodeLendingPoolTokenClone(
             lendableToken.poolSymbol,
             lendableToken.poolSymbol,
-            18,
+            lendableToken.decimals,
             address(0),
             bankNodeContract
         );
