@@ -1,0 +1,194 @@
+{
+  "address": "0x860ff23b060cA66614B27346EDc4F0D5F5D151Da",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "aaveAssetToDepositAsset",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "depositAsset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "aaveAsset",
+          "type": "address"
+        }
+      ],
+      "name": "addAssetPair",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "onBehalfOf",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "depositAssetToAaveAsset",
+      "outputs": [
+        {
+          "internalType": "contract IFakeAaveToken",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x479e01c7c569730e69742b9d6ac61c794a61913e29e49e99ea807b8b43510d64",
+  "receipt": {
+    "to": null,
+    "from": "0x2Cfc39B9D40A346990e3838e119Ed115c46c6cb3",
+    "contractAddress": "0x860ff23b060cA66614B27346EDc4F0D5F5D151Da",
+    "transactionIndex": 11,
+    "gasUsed": "577674",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x7b4458a6aa92f7118cfc8a83465e592b71ddfdb08b767ae263b1d75afaa0bd7f",
+    "transactionHash": "0x479e01c7c569730e69742b9d6ac61c794a61913e29e49e99ea807b8b43510d64",
+    "logs": [],
+    "blockNumber": 11525579,
+    "cumulativeGasUsed": "2630476",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "1ea8a523a0ea379748ee8243d1ba5420",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.4+commit.c7e474f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"aaveAssetToDepositAsset\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"depositAsset\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"aaveAsset\",\"type\":\"address\"}],\"name\":\"addAssetPair\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"onBehalfOf\",\"type\":\"address\"},{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"depositAssetToAaveAsset\",\"outputs\":[{\"internalType\":\"contract IFakeAaveToken\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/Aave/FakeAave/FakeAaveLendingPool.sol\":\"FakeAaveLendingPool\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Returns the amount of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the amount of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves `amount` tokens from the caller's account to `recipient`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address recipient, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Moves `amount` tokens from `sender` to `recipient` using the\\n     * allowance mechanism. `amount` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(\\n        address sender,\\n        address recipient,\\n        uint256 amount\\n    ) external returns (bool);\\n\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n}\\n\",\"keccak256\":\"0x027b891937d20ccf213fdb9c31531574256de774bda99d3a70ecef6e1913ed2a\",\"license\":\"MIT\"},\"src/Aave/FakeAave/FakeAaveLendingPool.sol\":{\"content\":\"// contracts/FakeAaveLendingPool.sol\\n// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\n\\nimport \\\"../IAaveLendingPool.sol\\\";\\nimport \\\"./IFakeAaveToken.sol\\\";\\nimport \\\"../../Utils/TransferHelper.sol\\\";\\n\\ncontract FakeAaveLendingPool is IAaveLendingPool {\\n    mapping(address => IFakeAaveToken) public depositAssetToAaveAsset;\\n    mapping(address => IERC20) public aaveAssetToDepositAsset;\\n\\n    function _addAssetPair(address depositAsset, address aaveAsset) private {\\n        require(\\n            address(depositAssetToAaveAsset[depositAsset]) == address(0),\\n            \\\"this deposit asset is already registered\\\"\\n        );\\n        require(address(aaveAssetToDepositAsset[aaveAsset]) == address(0), \\\"this aave asset is already registered\\\");\\n        depositAssetToAaveAsset[depositAsset] = IFakeAaveToken(aaveAsset);\\n        aaveAssetToDepositAsset[aaveAsset] = IERC20(depositAsset);\\n    }\\n\\n    function addAssetPair(address depositAsset, address aaveAsset) public {\\n        _addAssetPair(depositAsset, aaveAsset);\\n    }\\n\\n    function deposit(\\n        address asset,\\n        uint256 amount,\\n        address onBehalfOf,\\n        uint16 /*referralCode*/\\n    ) public override {\\n        require(asset != address(0), \\\"cannot be asset == 0\\\");\\n        IFakeAaveToken aaveToken = depositAssetToAaveAsset[asset];\\n\\n        require(address(aaveToken) != address(0), \\\"deposit asset not supported\\\");\\n        require(amount != 0, \\\"amount cannot be 0\\\");\\n        require(onBehalfOf != address(0), \\\"cannot be onBehalfOf == 0\\\");\\n        TransferHelper.safeTransferFrom(asset, msg.sender, address(this), amount);\\n        aaveToken.internalAaveMintFor(onBehalfOf, amount);\\n    }\\n\\n    function withdraw(\\n        address asset,\\n        uint256 amount,\\n        address to\\n    ) public override {\\n        require(asset != address(0), \\\"cannot be asset == 0\\\");\\n        IFakeAaveToken aaveAsset = depositAssetToAaveAsset[asset];\\n        require(address(aaveAsset) != address(0), \\\"aave asset not supported\\\");\\n        require(amount != 0, \\\"amount cannot be 0\\\");\\n        require(to != address(0), \\\"cannot be asset == 0\\\");\\n        aaveAsset.internalAaveBurnFor(msg.sender, amount);\\n        TransferHelper.safeTransfer(asset, to, amount);\\n    }\\n}\\n\",\"keccak256\":\"0xde59c7dec129a11c677302893da23e712b02011807ceb7c7d9104bc0ac443f46\",\"license\":\"MIT\"},\"src/Aave/FakeAave/IFakeAaveToken.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\n/**\\n * @dev Interface of the ScrollToken standard \\n */\\ninterface IFakeAaveToken is IERC20 {\\n    function internalAaveMintFor(address to, uint256 amount) external;\\n    function internalAaveBurnFor(address to, uint256 amount) external;\\n}\\n\",\"keccak256\":\"0x4823bfee15f806d594f87664dbea58da058b0a462af35cb93caf0d6778382ddb\",\"license\":\"MIT\"},\"src/Aave/IAaveLendingPool.sol\":{\"content\":\"// contracts/IAaveLendingPool.sol\\n// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface IAaveLendingPool {\\n    function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external;\\n    function withdraw(address asset, uint256 amount, address to) external;\\n}\",\"keccak256\":\"0xb1e3b0e240c5e922f94d039deabc1709c730c8679a0f8790f4b280a9b5d1aaa8\",\"license\":\"MIT\"},\"src/Utils/TransferHelper.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-or-later\\npragma solidity ^0.8.0;\\n\\n// helper methods for interacting with ERC20 tokens and sending ETH that do not consistently return true/false\\nlibrary TransferHelper {\\n    function safeApprove(\\n        address token,\\n        address to,\\n        uint256 value\\n    ) internal {\\n        // bytes4(keccak256(bytes(\\\"approve(address,uint256)\\\")));\\n        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, value));\\n        require(\\n            success && (data.length == 0 || abi.decode(data, (bool))),\\n            \\\"TransferHelper::safeApprove: approve failed\\\"\\n        );\\n    }\\n\\n    function safeTransfer(\\n        address token,\\n        address to,\\n        uint256 value\\n    ) internal {\\n        // bytes4(keccak256(bytes(\\\"transfer(address,uint256)\\\")));\\n        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0xa9059cbb, to, value));\\n        require(\\n            success && (data.length == 0 || abi.decode(data, (bool))),\\n            \\\"TransferHelper::safeTransfer: transfer failed\\\"\\n        );\\n    }\\n\\n    function safeTransferFrom(\\n        address token,\\n        address from,\\n        address to,\\n        uint256 value\\n    ) internal {\\n        // bytes4(keccak256(bytes(\\\"transferFrom(address,address,uint256)\\\")));\\n        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));\\n        require(\\n            success && (data.length == 0 || abi.decode(data, (bool))),\\n            \\\"TransferHelper::transferFrom: transferFrom failed\\\"\\n        );\\n    }\\n\\n    function safeTransferETH(address to, uint256 value) internal {\\n        (bool success, ) = to.call{value: value}(new bytes(0));\\n        require(success, \\\"TransferHelper::safeTransferETH: ETH transfer failed\\\");\\n    }\\n}\\n\",\"keccak256\":\"0x3d947fc4fbe7a3b691fbe777c3a530674e1691db24612a3c8aa4dbc1387c8b08\",\"license\":\"GPL-3.0-or-later\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5061097d806100206000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c8063253f5d881461005c5780635b5b2b83146100a157806366bcf156146100b657806369328dec146100df578063e8eda9df146100f2575b600080fd5b61008561006a3660046107de565b6001602052600090815260409020546001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b6100b46100af3660046107ff565b610105565b005b6100856100c43660046107de565b6000602081905290815260409020546001600160a01b031681565b6100b46100ed366004610831565b610113565b6100b461010036600461086c565b610283565b61010f828261041e565b5050565b6001600160a01b0383166101425760405162461bcd60e51b815260040161013990610919565b60405180910390fd5b6001600160a01b0380841660009081526020819052604090205416806101aa5760405162461bcd60e51b815260206004820152601860248201527f61617665206173736574206e6f7420737570706f7274656400000000000000006044820152606401610139565b826101ec5760405162461bcd60e51b81526020600482015260126024820152710616d6f756e742063616e6e6f7420626520360741b6044820152606401610139565b6001600160a01b0382166102125760405162461bcd60e51b815260040161013990610919565b604051635a71967760e01b8152336004820152602481018490526001600160a01b03821690635a71967790604401600060405180830381600087803b15801561025a57600080fd5b505af115801561026e573d6000803e3d6000fd5b5050505061027d848385610553565b50505050565b6001600160a01b0384166102a95760405162461bcd60e51b815260040161013990610919565b6001600160a01b0380851660009081526020819052604090205416806103115760405162461bcd60e51b815260206004820152601b60248201527f6465706f736974206173736574206e6f7420737570706f7274656400000000006044820152606401610139565b836103535760405162461bcd60e51b81526020600482015260126024820152710616d6f756e742063616e6e6f7420626520360741b6044820152606401610139565b6001600160a01b0383166103a95760405162461bcd60e51b815260206004820152601960248201527f63616e6e6f74206265206f6e426568616c664f66203d3d2030000000000000006044820152606401610139565b6103b585333087610684565b60405163a55b427360e01b81526001600160a01b0384811660048301526024820186905282169063a55b427390604401600060405180830381600087803b1580156103ff57600080fd5b505af1158015610413573d6000803e3d6000fd5b505050505050505050565b6001600160a01b0382811660009081526020819052604090205416156104975760405162461bcd60e51b815260206004820152602860248201527f74686973206465706f73697420617373657420697320616c726561647920726560448201526719da5cdd195c995960c21b6064820152608401610139565b6001600160a01b03818116600090815260016020526040902054161561050d5760405162461bcd60e51b815260206004820152602560248201527f74686973206161766520617373657420697320616c72656164792072656769736044820152641d195c995960da1b6064820152608401610139565b6001600160a01b039182166000818152602081815260408083208054969095166001600160a01b0319968716811790955593825260019052919091208054909216179055565b604080516001600160a01b038481166024830152604480830185905283518084039091018152606490920183526020820180516001600160e01b031663a9059cbb60e01b17905291516000928392908716916105af91906108e0565b6000604051808303816000865af19150503d80600081146105ec576040519150601f19603f3d011682016040523d82523d6000602084013e6105f1565b606091505b509150915081801561061b57508051158061061b57508080602001905181019061061b91906108c0565b61067d5760405162461bcd60e51b815260206004820152602d60248201527f5472616e7366657248656c7065723a3a736166655472616e736665723a20747260448201526c185b9cd9995c8819985a5b1959609a1b6064820152608401610139565b5050505050565b604080516001600160a01b0385811660248301528481166044830152606480830185905283518084039091018152608490920183526020820180516001600160e01b03166323b872dd60e01b17905291516000928392908816916106e891906108e0565b6000604051808303816000865af19150503d8060008114610725576040519150601f19603f3d011682016040523d82523d6000602084013e61072a565b606091505b509150915081801561075457508051158061075457508080602001905181019061075491906108c0565b6107ba5760405162461bcd60e51b815260206004820152603160248201527f5472616e7366657248656c7065723a3a7472616e7366657246726f6d3a207472604482015270185b9cd9995c919c9bdb4819985a5b1959607a1b6064820152608401610139565b505050505050565b80356001600160a01b03811681146107d957600080fd5b919050565b6000602082840312156107ef578081fd5b6107f8826107c2565b9392505050565b60008060408385031215610811578081fd5b61081a836107c2565b9150610828602084016107c2565b90509250929050565b600080600060608486031215610845578081fd5b61084e846107c2565b925060208401359150610863604085016107c2565b90509250925092565b60008060008060808587031215610881578081fd5b61088a856107c2565b93506020850135925061089f604086016107c2565b9150606085013561ffff811681146108b5578182fd5b939692955090935050565b6000602082840312156108d1578081fd5b815180151581146107f8578182fd5b60008251815b8181101561090057602081860181015185830152016108e6565b8181111561090e5782828501525b509190910192915050565b602080825260149082015273063616e6e6f74206265206173736574203d3d20360641b60408201526060019056fea2646970667358221220949a86f6e40569b6b3d6b7760e9c7b65d55b8e0ac292847b618a41497ad5353c64736f6c63430008040033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100575760003560e01c8063253f5d881461005c5780635b5b2b83146100a157806366bcf156146100b657806369328dec146100df578063e8eda9df146100f2575b600080fd5b61008561006a3660046107de565b6001602052600090815260409020546001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b6100b46100af3660046107ff565b610105565b005b6100856100c43660046107de565b6000602081905290815260409020546001600160a01b031681565b6100b46100ed366004610831565b610113565b6100b461010036600461086c565b610283565b61010f828261041e565b5050565b6001600160a01b0383166101425760405162461bcd60e51b815260040161013990610919565b60405180910390fd5b6001600160a01b0380841660009081526020819052604090205416806101aa5760405162461bcd60e51b815260206004820152601860248201527f61617665206173736574206e6f7420737570706f7274656400000000000000006044820152606401610139565b826101ec5760405162461bcd60e51b81526020600482015260126024820152710616d6f756e742063616e6e6f7420626520360741b6044820152606401610139565b6001600160a01b0382166102125760405162461bcd60e51b815260040161013990610919565b604051635a71967760e01b8152336004820152602481018490526001600160a01b03821690635a71967790604401600060405180830381600087803b15801561025a57600080fd5b505af115801561026e573d6000803e3d6000fd5b5050505061027d848385610553565b50505050565b6001600160a01b0384166102a95760405162461bcd60e51b815260040161013990610919565b6001600160a01b0380851660009081526020819052604090205416806103115760405162461bcd60e51b815260206004820152601b60248201527f6465706f736974206173736574206e6f7420737570706f7274656400000000006044820152606401610139565b836103535760405162461bcd60e51b81526020600482015260126024820152710616d6f756e742063616e6e6f7420626520360741b6044820152606401610139565b6001600160a01b0383166103a95760405162461bcd60e51b815260206004820152601960248201527f63616e6e6f74206265206f6e426568616c664f66203d3d2030000000000000006044820152606401610139565b6103b585333087610684565b60405163a55b427360e01b81526001600160a01b0384811660048301526024820186905282169063a55b427390604401600060405180830381600087803b1580156103ff57600080fd5b505af1158015610413573d6000803e3d6000fd5b505050505050505050565b6001600160a01b0382811660009081526020819052604090205416156104975760405162461bcd60e51b815260206004820152602860248201527f74686973206465706f73697420617373657420697320616c726561647920726560448201526719da5cdd195c995960c21b6064820152608401610139565b6001600160a01b03818116600090815260016020526040902054161561050d5760405162461bcd60e51b815260206004820152602560248201527f74686973206161766520617373657420697320616c72656164792072656769736044820152641d195c995960da1b6064820152608401610139565b6001600160a01b039182166000818152602081815260408083208054969095166001600160a01b0319968716811790955593825260019052919091208054909216179055565b604080516001600160a01b038481166024830152604480830185905283518084039091018152606490920183526020820180516001600160e01b031663a9059cbb60e01b17905291516000928392908716916105af91906108e0565b6000604051808303816000865af19150503d80600081146105ec576040519150601f19603f3d011682016040523d82523d6000602084013e6105f1565b606091505b509150915081801561061b57508051158061061b57508080602001905181019061061b91906108c0565b61067d5760405162461bcd60e51b815260206004820152602d60248201527f5472616e7366657248656c7065723a3a736166655472616e736665723a20747260448201526c185b9cd9995c8819985a5b1959609a1b6064820152608401610139565b5050505050565b604080516001600160a01b0385811660248301528481166044830152606480830185905283518084039091018152608490920183526020820180516001600160e01b03166323b872dd60e01b17905291516000928392908816916106e891906108e0565b6000604051808303816000865af19150503d8060008114610725576040519150601f19603f3d011682016040523d82523d6000602084013e61072a565b606091505b509150915081801561075457508051158061075457508080602001905181019061075491906108c0565b6107ba5760405162461bcd60e51b815260206004820152603160248201527f5472616e7366657248656c7065723a3a7472616e7366657246726f6d3a207472604482015270185b9cd9995c919c9bdb4819985a5b1959607a1b6064820152608401610139565b505050505050565b80356001600160a01b03811681146107d957600080fd5b919050565b6000602082840312156107ef578081fd5b6107f8826107c2565b9392505050565b60008060408385031215610811578081fd5b61081a836107c2565b9150610828602084016107c2565b90509250929050565b600080600060608486031215610845578081fd5b61084e846107c2565b925060208401359150610863604085016107c2565b90509250925092565b60008060008060808587031215610881578081fd5b61088a856107c2565b93506020850135925061089f604086016107c2565b9150606085013561ffff811681146108b5578182fd5b939692955090935050565b6000602082840312156108d1578081fd5b815180151581146107f8578182fd5b60008251815b8181101561090057602081860181015185830152016108e6565b8181111561090e5782828501525b509190910192915050565b602080825260149082015273063616e6e6f74206265206173736574203d3d20360641b60408201526060019056fea2646970667358221220949a86f6e40569b6b3d6b7760e9c7b65d55b8e0ac292847b618a41497ad5353c64736f6c63430008040033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 13521,
+        "contract": "src/Aave/FakeAave/FakeAaveLendingPool.sol:FakeAaveLendingPool",
+        "label": "depositAssetToAaveAsset",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_address,t_contract(IFakeAaveToken)13981)"
+      },
+      {
+        "astId": 13526,
+        "contract": "src/Aave/FakeAave/FakeAaveLendingPool.sol:FakeAaveLendingPool",
+        "label": "aaveAssetToDepositAsset",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_address,t_contract(IERC20)4115)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IERC20)4115": {
+        "encoding": "inplace",
+        "label": "contract IERC20",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IFakeAaveToken)13981": {
+        "encoding": "inplace",
+        "label": "contract IFakeAaveToken",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_contract(IERC20)4115)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => contract IERC20)",
+        "numberOfBytes": "32",
+        "value": "t_contract(IERC20)4115"
+      },
+      "t_mapping(t_address,t_contract(IFakeAaveToken)13981)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => contract IFakeAaveToken)",
+        "numberOfBytes": "32",
+        "value": "t_contract(IFakeAaveToken)13981"
+      }
+    }
+  }
+}
