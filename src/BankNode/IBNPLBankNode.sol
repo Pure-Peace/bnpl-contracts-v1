@@ -79,6 +79,8 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
 
     function totalDonatedAllTime() external view returns (uint256);
 
+    function totalLoansDefaulted() external view returns (uint256);
+
     function loanRequests(uint256 _loanRequestId)
         external
         view

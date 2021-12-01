@@ -135,6 +135,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     mapping(uint256 => uint256) public override interestPaidForLoan;
     mapping(uint256 => uint256) public override loanBondedAmount;
     uint256 public override totalLossAllTime;
+    uint256 public override totalLoansDefaulted;
 
     uint256 public override totalDonatedAllTime;
 
@@ -629,6 +630,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
         uint256 prevBalanceEquivalent = startPoolTotalAssetValue - interestRecirculated;
         totalLossAllTime += prevBalanceEquivalent - getPoolTotalAssetsValue();
+        totalLoansDefaulted += 1;
         require(prevBalanceEquivalent > getPoolTotalAssetsValue());
         uint256 poolBalance = nodeStakingPool.getPoolTotalAssetsValue();
         require(poolBalance > 0);
