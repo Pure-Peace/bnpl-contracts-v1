@@ -60,6 +60,8 @@ contract BNPLStakingPool is
     uint256 public tokensBondedAllTime;
     uint256 public poolTokenEffectiveSupply;
     uint256 public virtualPoolTokensCount;
+    uint256 public totalDonatedAllTime;
+    uint256 public totalSlashedAllTime;
 
     function initialize(
         address bnplToken,
@@ -174,6 +176,7 @@ contract BNPLStakingPool is
         require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
         TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), sender, address(this), depositAmount);
         baseTokenBalance += depositAmount;
+        totalDonatedAllTime += depositAmount;
         emit Donation(sender, depositAmount);
     }
 
@@ -310,6 +313,7 @@ contract BNPLStakingPool is
     function _slash(uint256 slashAmount, address recipient) private {
         require(slashAmount < getPoolTotalAssetsValue(), "cannot slash more than the pool balance");
         baseTokenBalance -= slashAmount;
+        totalSlashedAllTime += slashAmount;
         TransferHelper.safeTransfer(address(BASE_LIQUIDITY_TOKEN), recipient, slashAmount);
         emit Slash(recipient, slashAmount);
     }

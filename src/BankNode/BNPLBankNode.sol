@@ -134,6 +134,9 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
     mapping(uint256 => uint256) public override interestPaidForLoan;
     mapping(uint256 => uint256) public override loanBondedAmount;
+    uint256 public override totalLossAllTime;
+
+    uint256 public override totalDonatedAllTime;
 
     function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig) public override nonReentrant initializer {
         require(
@@ -308,6 +311,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
         TransferHelper.safeTransferFrom(address(baseLiquidityToken), sender, address(this), depositAmount);
         baseTokenBalance += depositAmount;
+        totalDonatedAllTime += depositAmount;
         emit Donation(sender, depositAmount);
     }
 
@@ -624,6 +628,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         loanBondedAmount[loanId] = 0;
 
         uint256 prevBalanceEquivalent = startPoolTotalAssetValue - interestRecirculated;
+        totalLossAllTime += prevBalanceEquivalent - getPoolTotalAssetsValue();
         require(prevBalanceEquivalent > getPoolTotalAssetsValue());
         uint256 poolBalance = nodeStakingPool.getPoolTotalAssetsValue();
         require(poolBalance > 0);
