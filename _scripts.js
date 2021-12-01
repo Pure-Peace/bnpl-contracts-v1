@@ -64,7 +64,6 @@ function execute(command) {
 }
 
 async function performAction(rawArgs) {
-  console.log("pa", rawArgs)
   const firstArg = rawArgs[0];
   const args = rawArgs.slice(1);
   if (firstArg === 'run') {

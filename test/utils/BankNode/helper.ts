@@ -44,6 +44,8 @@ interface IBankNodeStakingPoolFinancialState {
   poolTotalAssetsValue: BigNumberish;
   poolDepositConversion: BigNumberish;
   poolWithdrawConversion: BigNumberish;
+  nodeOwnerBNPLRewards: BigNumberish;
+  nodeOwnerPoolTokenRewards: BigNumberish;
 }
 type TDeltaBASupported = ILoanRequest | IKeyNodeBalancesForUser | IBankNodeFinancialState | IBankNodeStakingPoolFinancialState;// | { [key: string]: BigNumberish };
 
@@ -213,6 +215,8 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
       poolDepositConversion: await stakingPool.getPoolDepositConversion(ms`10^18`),
       poolWithdrawConversion: await stakingPool.getPoolWithdrawConversion(ms`10^18`),
       tokensBondedAllTime: await stakingPool.tokensBondedAllTime(),
+      nodeOwnerBNPLRewards: await stakingPool.getNodeOwnerBNPLRewards(),
+      nodeOwnerPoolTokenRewards: await stakingPool.getNodeOwnerPoolTokenRewards(),
     };
     return financialState;
   }
@@ -328,6 +332,16 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
 
     return { b, };
   }
+
+  async function claimNodeOwnerPoolTokenRewards(_from: string | { address: string }, _bankNode: string | { address: string }, _to: string | { address: string },) {
+    //const bankNodeAddress = typeof _bankNode === 'string' ? (await getAddress(_bankNode)) : _bankNode.address;
+    //const from = typeof _from === 'string' ? (await getAddress(_from)) : _from.address;
+    const to = typeof _to === 'string' ? (await getAddress(_to)) : _to.address;
+    const b = await getSubContractsForBankNodeWithSigner(_bankNode, _from);
+    await b.StakingPool.claimNodeOwnerPoolTokenRewards(to);
+
+    return { b, };
+  }
   async function stakeBNPLToBankNode(_from: string | { address: string }, _bankNode: string | { address: string }, amount: string) {
     //const bankNodeAddress = typeof _bankNode === 'string' ? (await getAddress(_bankNode)) : _bankNode.address;
     //const from = typeof _from === 'string' ? (await getAddress(_from)) : _from.address;
@@ -427,7 +441,8 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
 
     const user = typeof _user === 'string' ? await getUserWithAddress(_user) : _user;
     const b = await getSubContractsForBankNodeWithSigner(bankNode, user);
-    return b.BankNode.withdrawNodeOperatorBalance(amount, user.address);
+    b.BankNode.withdrawNodeOperatorBalance(amount, user.address);
+    return { b, }
 
   }
   async function makeLoanPaymentBankNode(_user: string | TUserWithContractDefs, bankNode: string | { address: string }, loanId: BigNumberish) {
@@ -568,6 +583,7 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     unstakeBankNodePoolTokensFromRewards,
     unstakeAllBankNodePoolTokensFromRewards,
     withdrawOperatorRewardsToSelf,
+    claimNodeOwnerPoolTokenRewards,
 
 
   }

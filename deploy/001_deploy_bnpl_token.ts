@@ -5,7 +5,6 @@ import { MintableDebugToken } from '../typechain/MintableDebugToken';
 import { mstr } from '../utils/math';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log("hiiiii")
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
   const shouldDeployFakeBNPLToken = true;//!hre.network.live;

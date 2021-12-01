@@ -322,8 +322,8 @@ contract BNPLStakingPool is
     function getNodeOwnerPoolTokenRewards() public view returns (uint256) {
         uint256 equivalentPoolTokens = getPoolDepositConversion(tokensBondedAllTime);
         uint256 ownerPoolTokens = POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
-        if (equivalentPoolTokens > ownerPoolTokens) {
-            return equivalentPoolTokens - ownerPoolTokens;
+        if (ownerPoolTokens > equivalentPoolTokens) {
+            return ownerPoolTokens - equivalentPoolTokens;
         }
         return 0;
     }

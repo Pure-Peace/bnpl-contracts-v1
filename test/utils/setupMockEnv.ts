@@ -51,9 +51,9 @@ async function setupFakeUniswap(hre: HardhatRuntimeEnvironment, signer?: string 
   const USDC = await getContract<IERC20>("USDC", realSigner);
 
 
-  await bnplSwapMarketExample.setBNPLPrice(DAI.address, ms`1`, { gasLimit: 5500000 }); // 1 DAI = 1 BNPL
-  await bnplSwapMarketExample.setBNPLPrice(USDT.address, "1", { gasLimit: 5500000 }); // 1 USDT = 1 BNPL
-  await bnplSwapMarketExample.setBNPLPrice(USDC.address, "1", { gasLimit: 5500000 }); // 1 USDC = 1 BNPL
+  await bnplSwapMarketExample.setBNPLPrice(DAI.address, ms`100000000`, { gasLimit: 5500000 }); // 1 DAI = 1 BNPL
+  await bnplSwapMarketExample.setBNPLPrice(USDT.address, "1000000", { gasLimit: 5500000 }); // 1 USDT = 1 BNPL
+  await bnplSwapMarketExample.setBNPLPrice(USDC.address, "1000000", { gasLimit: 5500000 }); // 1 USDC = 1 BNPL
 
   await DAI.approve(bnplSwapMarketExample.address, "50000000000000000000000000", { gasLimit: 5500000 });
   await bnplSwapMarketExample.depositToken(DAI.address, "50000000000000000000000000", { gasLimit: 5500000 }); // 50,000,000 DAI
