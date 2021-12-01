@@ -421,6 +421,15 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     const outLoanRequest = await b.BankNode.loanRequests(loanRequestId);
     return { loanRequest: outLoanRequest };
   }
+  async function withdrawOperatorRewardsToSelf(_user: string | TUserWithContractDefs, bankNode: string | { address: string }, amount: BigNumberish) {
+
+
+
+    const user = typeof _user === 'string' ? await getUserWithAddress(_user) : _user;
+    const b = await getSubContractsForBankNodeWithSigner(bankNode, user);
+    return b.BankNode.withdrawNodeOperatorBalance(amount, user.address);
+
+  }
   async function makeLoanPaymentBankNode(_user: string | TUserWithContractDefs, bankNode: string | { address: string }, loanId: BigNumberish) {
     const user = typeof _user === 'string' ? await getUserWithAddress(_user) : _user;
 
@@ -558,6 +567,7 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     stakeBankNodePoolTokensToRewards,
     unstakeBankNodePoolTokensFromRewards,
     unstakeAllBankNodePoolTokensFromRewards,
+    withdrawOperatorRewardsToSelf,
 
 
   }

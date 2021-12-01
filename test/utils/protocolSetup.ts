@@ -12,12 +12,13 @@ async function setupProtocol(hre: HardhatRuntimeEnvironment, minBondingAmount = 
   const BankNodeManager = await getContractForEnvironment<BankNodeManager>(hre, "BankNodeManager", protocolDeployer);
   const BNPLProtocolConfig = await getContractForEnvironment<BNPLProtocolConfig>(hre, "BNPLProtocolConfig", protocolDeployer);
   const BankNodeLendingRewards = await getContractForEnvironment<BankNodeLendingRewards>(hre, "BankNodeLendingRewards", protocolDeployer);
-
+  console.log("hiiii",
+    BNPLProtocolConfig.address);
   await BankNodeManager.initialize(
     BNPLProtocolConfig.address,
     protocolAdmin,
     minBondingAmount,
-    BankNodeLendingRewards.address
+    BankNodeLendingRewards.address, { gasLimit: 5500000 }
   );
 
   await BankNodeLendingRewards.initialize(
@@ -25,7 +26,7 @@ async function setupProtocol(hre: HardhatRuntimeEnvironment, minBondingAmount = 
     (await BNPLProtocolConfig.bnplToken()),
     BankNodeManager.address,
     protocolAdmin,
-    protocolAdmin,
+    protocolAdmin, { gasLimit: 5500000 }
   );
 
 

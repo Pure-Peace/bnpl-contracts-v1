@@ -27,6 +27,7 @@ function generateEnvNameContractDefHelper(networkToContract: { [networkName: str
 const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
   "BNPLToken": generateEnvNameContractDefHelper({
     "mainnet": "0x84d821f7fbdd595c4c4a50842913e6b1e07d7a53",
+    "ropsten": "BNPLToken",
     "hardhat": "BNPLToken",
   }),
 
@@ -64,7 +65,7 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       "hardhat": "DAI",
       "mainnet": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
       "kovan": "0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD",
-      "ropsten": "0xf80A32A835F79D7787E8a8ee5721D0fEaFd78108",
+      //"ropsten": "0xf80A32A835F79D7787E8a8ee5721D0fEaFd78108",
     }
   ),
   "USDT": generateEnvNameContractDefHelper(
@@ -72,7 +73,7 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       "hardhat": "USDT",
       "mainnet": "0xdac17f958d2ee523a2206206994597c13d831ec7",
       "kovan": "0x13512979ADE267AB5100878E2e0f485B568328a4",
-      "ropsten": "0xB404c51BBC10dcBE948077F18a4B8E553D160084",
+      //"ropsten": "0xB404c51BBC10dcBE948077F18a4B8E553D160084",
     }
   ),
   "USDC": generateEnvNameContractDefHelper(
@@ -80,7 +81,7 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       "hardhat": "USDC",
       "mainnet": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       "kovan": "0xe22da380ee6B445bb8273C81944ADEB6E8450422",
-      "ropsten": "0x851dEf71f0e6A903375C1e536Bd9ff1684BAD802",
+      //"ropsten": "0x851dEf71f0e6A903375C1e536Bd9ff1684BAD802",
     }
   ),
   "aDAI": generateEnvNameContractDefHelper(
@@ -88,7 +89,7 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       "hardhat": "aDAI",
       "mainnet": "0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d",
       "kovan": "0x58AD4cB396411B691A9AAb6F74545b2C5217FE6a",
-      "ropsten": "0xcB1Fe6F440c49E9290c3eb7f158534c2dC374201",
+      //"ropsten": "0xcB1Fe6F440c49E9290c3eb7f158534c2dC374201",
     }
   ),
   "aUSDT": generateEnvNameContractDefHelper(
@@ -96,7 +97,7 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       "hardhat": "aUSDT",
       "mainnet": "0x71fc860F7D3A592A4a98740e39dB31d25db65ae8",
       "kovan": "0xA01bA9fB493b851F4Ac5093A324CB081A909C34B",
-      "ropsten": "0x790744bC4257B4a0519a3C5649Ac1d16DDaFAE0D",
+      //"ropsten": "0x790744bC4257B4a0519a3C5649Ac1d16DDaFAE0D",
     }
   ),
   "aUSDC": generateEnvNameContractDefHelper(
@@ -104,7 +105,7 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       "hardhat": "aUSDC",
       "mainnet": "0x9bA00D6856a4eDF4665BcA2C2309936572473B7E",
       "kovan": "0x02F626c6ccb6D2ebC071c068DC1f02Bf5693416a",
-      "ropsten": "0x2dB6a31f973Ec26F5e17895f0741BB5965d5Ae15",
+      //"ropsten": "0x2dB6a31f973Ec26F5e17895f0741BB5965d5Ae15",
     }
   ),
 

@@ -67,7 +67,7 @@
     "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
     "compile": "hardhat compile --show-stack-traces --verbose",
     "void:deploy": "HARDHAT_NETWORK=\"ropsten\" hardhat deploy",
-    "test": "cross-env HARDHAT_NETWORK=\"ropsten\" HARDHAT_DEPLOY_FIXTURE=true HARDHAT_COMPILE=true mocha --bail --recursive test --timeout 90000",
+    "test": "cross-env HARDHAT_DEPLOY_FIXTURE=true HARDHAT_COMPILE=true mocha --bail --recursive test --timeout 90000",
     "gas": "cross-env REPORT_GAS=true hardhat test",
     "coverage": "cross-env HARDHAT_DEPLOY_FIXTURE=true hardhat coverage",
     "dev": "hardhat node --watch --export contractsInfo.json",

@@ -19,6 +19,7 @@ const TEN_6 = BigNumber.from("10").pow(6);
 
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('BNPLProtocolDeploy');
+  await deployments.fixture('BNPLProtocolDeployEco');
   const { protocolAdmin, protocolDeployer } = await getNamedAccounts();
   await setupMockEnvIfNeeded(hre);
 
@@ -212,6 +213,15 @@ describe('BankNodeCombos', function () {
     expect(loanAAfterPayment3.totalAmountPaid.eq(loanAStart.amountPerPayment.mul(3)), "should equal three payments");
     expect(loanAAfterPayment3.numberOfPaymentsMade === 3, "numberOfPayment should be 3");
     expect(loanAAfterPayment3.status === 1, "loanAAfterPayment3.status should be 1 (loan completed)");
+    console.log(finStatesAfterLoanAPayment3.bankNodeFinancialState.nodeOperatorBalance)
+    console.log(loanAAfterPayment3.totalAmountPaid, loanAAfterPayment3.loanAmount, loanAAfterPayment3.totalAmountPaid.sub(loanAAfterPayment3.loanAmount), loanAAfterPayment3.totalAmountPaid.sub(loanAAfterPayment3.loanAmount))
+
+    console.log(loanAAfterPayment3.totalAmountPaid.sub(loanAAfterPayment3.loanAmount).div(10), loanAAfterPayment3.totalAmountPaid.sub(loanAAfterPayment3.loanAmount).div(10) + "", finStatesAfterLoanAPayment3.bankNodeFinancialState.nodeOperatorBalance);
+    expect(loanAAfterPayment3.totalAmountPaid.sub(loanAAfterPayment3.loanAmount).div(10).eq(finStatesAfterLoanAPayment3.bankNodeFinancialState.nodeOperatorBalance))
+    await h.withdrawOperatorRewardsToSelf(u.bankNodeMakerA, bankNodeIdA, finStatesAfterLoanAPayment3.bankNodeFinancialState.nodeOperatorBalance);
+    expect(((await h.getBankNodeAllFinancialStates(bankNodeIdA)).bankNodeFinancialState.nodeOperatorBalance + "") === "0", "should be 0 operator balance after full cash out");
+
+
   });
 
   it('3 month loan for 25000 at 10% APR (Misses final payment)', async function () {

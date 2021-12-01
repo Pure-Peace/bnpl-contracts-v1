@@ -11,6 +11,7 @@ import { addLendableTokens } from './utils/addLendableTokens';
 
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('BNPLProtocolDeploy');
+  await deployments.fixture('BNPLProtocolDeployEco');
   const { protocolAdmin, protocolDeployer } = await getNamedAccounts();
   await setupMockEnvIfNeeded(hre);
 

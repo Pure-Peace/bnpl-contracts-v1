@@ -18,6 +18,7 @@ const TEN_6 = BigNumber.from("10").pow(6);
 
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('BNPLProtocolDeploy');
+  await deployments.fixture('BNPLProtocolDeployEco');
   const { protocolAdmin, protocolDeployer } = await getNamedAccounts();
   await setupMockEnvIfNeeded(hre);
 

@@ -6,10 +6,10 @@ import { getContractForEnvironment } from "./getContractForEnvironment";
 import { ms } from '../../utils/math';
 
 function shouldSetupFakeAave(hre: HardhatRuntimeEnvironment) {
-  return true;
+  return hre.network.name !== "mainnet" && hre.network.name !== "production";
 }
 function shouldSetupFakeUniswap(hre: HardhatRuntimeEnvironment) {
-  return true;
+  return hre.network.name !== "mainnet" && hre.network.name !== "production";
 }
 
 async function setupFakeAave(hre: HardhatRuntimeEnvironment, signer?: string | Signer | undefined) {
@@ -30,9 +30,9 @@ async function setupFakeAave(hre: HardhatRuntimeEnvironment, signer?: string | S
   //await fakeAaveLendingPool.deployed();
 
 
-  const r = await fakeAaveLendingPool.addAssetPair(DAI.address, aDAI.address);
-  await fakeAaveLendingPool.addAssetPair(USDT.address, aUSDT.address);
-  await fakeAaveLendingPool.addAssetPair(USDC.address, aUSDC.address);
+  const r = await fakeAaveLendingPool.addAssetPair(DAI.address, aDAI.address, { gasLimit: 5500000 });
+  await fakeAaveLendingPool.addAssetPair(USDT.address, aUSDT.address, { gasLimit: 5500000 });
+  await fakeAaveLendingPool.addAssetPair(USDC.address, aUSDC.address, { gasLimit: 5500000 });
 
 }
 async function setupFakeUniswap(hre: HardhatRuntimeEnvironment, signer?: string | Signer | undefined) {
@@ -51,23 +51,23 @@ async function setupFakeUniswap(hre: HardhatRuntimeEnvironment, signer?: string 
   const USDC = await getContract<IERC20>("USDC", realSigner);
 
 
-  await bnplSwapMarketExample.setBNPLPrice(DAI.address, ms`1`); // 1 DAI = 1 BNPL
-  await bnplSwapMarketExample.setBNPLPrice(USDT.address, "1"); // 1 USDT = 1 BNPL
-  await bnplSwapMarketExample.setBNPLPrice(USDC.address, "1"); // 1 USDC = 1 BNPL
+  await bnplSwapMarketExample.setBNPLPrice(DAI.address, ms`1`, { gasLimit: 5500000 }); // 1 DAI = 1 BNPL
+  await bnplSwapMarketExample.setBNPLPrice(USDT.address, "1", { gasLimit: 5500000 }); // 1 USDT = 1 BNPL
+  await bnplSwapMarketExample.setBNPLPrice(USDC.address, "1", { gasLimit: 5500000 }); // 1 USDC = 1 BNPL
 
-  await DAI.approve(bnplSwapMarketExample.address, "50000000000000000000000000");
-  await bnplSwapMarketExample.depositToken(DAI.address, "50000000000000000000000000"); // 50,000,000 DAI
+  await DAI.approve(bnplSwapMarketExample.address, "50000000000000000000000000", { gasLimit: 5500000 });
+  await bnplSwapMarketExample.depositToken(DAI.address, "50000000000000000000000000", { gasLimit: 5500000 }); // 50,000,000 DAI
 
-  await USDT.approve(bnplSwapMarketExample.address, "50000000000000");
-  await bnplSwapMarketExample.depositToken(USDT.address, "50000000000000"); // 50,000,000 USDT
+  await USDT.approve(bnplSwapMarketExample.address, "50000000000000", { gasLimit: 5500000 });
+  await bnplSwapMarketExample.depositToken(USDT.address, "50000000000000", { gasLimit: 5500000 }); // 50,000,000 USDT
 
-  await USDC.approve(bnplSwapMarketExample.address, "50000000000000");
-  await bnplSwapMarketExample.depositToken(USDC.address, "50000000000000"); // 50,000,000 USDC
+  await USDC.approve(bnplSwapMarketExample.address, "50000000000000", { gasLimit: 5500000 });
+  await bnplSwapMarketExample.depositToken(USDC.address, "50000000000000", { gasLimit: 5500000 }); // 50,000,000 USDC
   const bnplToken = await getContractForEnvironment<BNPLToken>(hre, "BNPLToken", bnplTokenDeployer);
 
-  await bnplToken.approve(bnplSwapMarketExample.address, "50000000000000000000000000");
+  await bnplToken.approve(bnplSwapMarketExample.address, "50000000000000000000000000", { gasLimit: 5500000 });
   const bnplSwapMarketExampleBNPLTokenDeployer = await getContract<BNPLSwapMarketExample>("BNPLSwapMarketExample", bnplTokenDeployer);
-  await bnplSwapMarketExampleBNPLTokenDeployer.depositBNPL("50000000000000000000000000");// 50,000,000 BNPL
+  await bnplSwapMarketExampleBNPLTokenDeployer.depositBNPL("50000000000000000000000000", { gasLimit: 5500000 });// 50,000,000 BNPL
 }
 
 async function setupMockEnvIfNeeded(hre: HardhatRuntimeEnvironment) {

@@ -60,9 +60,9 @@ async function addLendableTokens(hre: HardhatRuntimeEnvironment) {
     );
   */
   const BankNodeManager = await getContractForEnvironment<BankNodeManager>(hre, "BankNodeManager", protocolAdmin);
-  await BankNodeManager.addLendableToken(lendableTokenDAI, 1);
-  await BankNodeManager.addLendableToken(lendableTokenUSDT, 1);
-  await BankNodeManager.addLendableToken(lendableTokenUSDC, 1);
+  await BankNodeManager.addLendableToken(lendableTokenDAI, 1, { gasLimit: 5500000 });
+  await BankNodeManager.addLendableToken(lendableTokenUSDT, 1, { gasLimit: 5500000 });
+  await BankNodeManager.addLendableToken(lendableTokenUSDC, 1, { gasLimit: 5500000 });
 
 
 
