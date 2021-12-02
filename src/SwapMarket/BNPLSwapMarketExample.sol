@@ -18,7 +18,7 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
     uint256 public bnplBalance;
 
     address public BNPL_TOKEN_ADDRESS;
-    uint256 constant DECIMAL_PRECISION = 10**6;
+    uint256 constant BNPL_DECIMAL_PRECISION = 10**18;
 
     constructor(address bnplTokenAddress) {
         BNPL_TOKEN_ADDRESS = bnplTokenAddress;
@@ -70,10 +70,8 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
         require(bnplPrice != 0, "token not supported");
         require(inputTokenAmount != 0, "inputTokenAmount cannot be 0");
 
-        uint256 outTokens = (inputTokenAmount * DECIMAL_PRECISION) / bnplPrice;
-        require(outTokens != 0, "outTokens cannot be 0");
-
-        uint256 actualAmountOut = outTokens;
+        uint256 actualAmountOut = (inputTokenAmount * BNPL_DECIMAL_PRECISION) / bnplPrice;
+        require(actualAmountOut != 0, "actualAmountOut cannot be 0");
 
         require(bnplBalance >= actualAmountOut, "not enough bnpl");
         bnplBalance -= actualAmountOut;
@@ -93,7 +91,7 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
         require(outputTokenAddress != BNPL_TOKEN_ADDRESS);
         require(bnplPrices[outputTokenAddress] != 0, "token not supported");
         require(bnplAmount != 0, "bnplAmount cannot be 0");
-        uint256 actualAmountOut = (bnplPrices[outputTokenAddress] * bnplAmount) / DECIMAL_PRECISION;
+        uint256 actualAmountOut = (bnplPrices[outputTokenAddress] * bnplAmount) / BNPL_DECIMAL_PRECISION;
         require(actualAmountOut != 0, "actualAmountOut cannot be 0");
         require(tokenBalances[outputTokenAddress] >= actualAmountOut, "not enough output token");
         tokenBalances[outputTokenAddress] -= actualAmountOut;
