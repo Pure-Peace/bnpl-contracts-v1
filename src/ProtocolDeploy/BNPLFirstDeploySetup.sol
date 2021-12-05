@@ -41,6 +41,7 @@ contract BNPLFirstDeploySetup is Initializable {
             new UpgradeableBeacon(params.implBankNodeStakingPool),
             new UpgradeableBeacon(params.implBankNodeStakingPoolToken),
             upBeaconBankNodeLendingRewards,
+            UpgradeableBeacon(address(0)),
             bankNodeManager
         );
 
@@ -51,7 +52,8 @@ contract BNPLFirstDeploySetup is Initializable {
             protocolConfig,
             params.configurator,
             params.minimumBankNodeBondedAmount,
-            bankNodeLendingRewards
+            bankNodeLendingRewards,
+            BNPLKYCStore(address(0))
         );
 
         return protocolConfig;

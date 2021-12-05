@@ -6,7 +6,7 @@ import { BankNodeManager, BNPLToken } from '../typechain';
 import { setupMockEnvIfNeeded } from '../test/utils/setupMockEnv';
 import { setupProtocol } from '../test/utils/protocolSetup';
 import { addLendableTokens } from '../test/utils/addLendableTokens';
-import { setupTestEnv } from '../test/utils/testnetEnvSeup';
+import { setupTestEnv } from '../test/utils/testnetEnvSetup';
 import { ms } from '../utils/math';
 import { BigNumber } from 'ethers';
 
@@ -30,7 +30,10 @@ const func = async function (hre: HardhatRuntimeEnvironment) {
       "USDT",
       startBondedBNPLAmount,
       "Test Node A",
-      "https://test-node-a.example.com"
+      "https://test-node-a.example.com",
+      "https://test-node-a.example.com/config.json",
+      "0",
+      "0"
     );
     const makerASC = await h.getSubContractsForBankNodeWithSigner(bankNodeIdA, u.bankNodeMakerA)
     const makerFinStatesStart = await h.getKeyUserBalancesForBankNode(u.bankNodeMakerA, bankNodeIdA);

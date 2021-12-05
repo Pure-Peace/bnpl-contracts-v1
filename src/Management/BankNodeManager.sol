@@ -34,6 +34,8 @@ contract BankNodeManager is
         address operator;
         uint256 tokensToBond;
         address lendableTokenAddress;
+        address nodePublicKey;
+        uint32 kycMode;
     }
     bytes32 public constant CONFIGURE_NODE_MANAGER_ROLE = keccak256("CONFIGURE_NODE_MANAGER_ROLE");
 
@@ -51,6 +53,7 @@ contract BankNodeManager is
     BankNodeLendingRewards public override bankNodeLendingRewards;
 
     IBNPLProtocolConfig public override protocolConfig;
+    BNPLKYCStore public override bnplKYCStore;
 
     function bankNodeIdExists(uint32 bankNodeId) public view override returns (uint256) {
         return (bankNodeId >= 1 && bankNodeId <= bankNodeCount) ? 1 : 0;
@@ -85,9 +88,11 @@ contract BankNodeManager is
         IBNPLProtocolConfig _protocolConfig,
         address _configurator,
         uint256 _minimumBankNodeBondedAmount,
-        BankNodeLendingRewards _bankNodeLendingRewards
+        BankNodeLendingRewards _bankNodeLendingRewards,
+        BNPLKYCStore _bnplKYCStore
     ) public override initializer nonReentrant {
         require(address(_protocolConfig) != address(0), "_protocolConfig cannot be 0");
+        require(address(_bnplKYCStore) != address(0), "kyc store cannot be 0");
         require(_configurator != address(0), "_configurator cannot be 0");
         require(_minimumBankNodeBondedAmount > 0, "_minimumBankNodeBondedAmount cannot be 0");
 
@@ -101,6 +106,7 @@ contract BankNodeManager is
 
         minimumBankNodeBondedAmount = _minimumBankNodeBondedAmount;
         bankNodeCount = 0;
+        bnplKYCStore = _bnplKYCStore;
         bnplToken = IERC20(_protocolConfig.bnplToken());
         require(address(bnplToken) != address(0), "_bnplToken cannot be 0");
         bankNodeLendingRewards = _bankNodeLendingRewards;
@@ -224,22 +230,6 @@ contract BankNodeManager is
             address(0),
             output.bnplStakingPoolContract
         );
-
-        TransferHelper.safeTransferFrom(
-            address(bnplToken),
-            msg.sender,
-            output.bnplStakingPoolContract,
-            input.tokensToBond
-        );
-
-        IBNPLNodeStakingPool(output.bnplStakingPoolContract).initialize(
-            address(bnplToken),
-            output.bnplStakingPoolToken,
-            output.bankNodeContract,
-            msg.sender,
-            input.tokensToBond
-        );
-
         output.bankNodeToken = _createBankNodeLendingPoolTokenClone(
             lendableToken.poolSymbol,
             lendableToken.poolSymbol,
@@ -262,8 +252,27 @@ contract BankNodeManager is
                 unusedFundsLendingToken: lendableToken.unusedFundsLendingToken,
                 nodeStakingPool: output.bnplStakingPoolContract,
                 baseLiquidityToken: lendableToken.tokenContract,
-                poolLiquidityToken: output.bankNodeToken
+                poolLiquidityToken: output.bankNodeToken,
+                nodePublicKey: input.nodePublicKey,
+                kycMode: input.kycMode
             })
+        );
+
+        TransferHelper.safeTransferFrom(
+            address(bnplToken),
+            msg.sender,
+            output.bnplStakingPoolContract,
+            input.tokensToBond
+        );
+
+        IBNPLNodeStakingPool(output.bnplStakingPoolContract).initialize(
+            address(bnplToken),
+            output.bnplStakingPoolToken,
+            output.bankNodeContract,
+            msg.sender,
+            input.tokensToBond,
+            bnplKYCStore,
+            IBNPLBankNode(output.bankNodeContract).kycDomainId()
         );
     }
 
@@ -279,16 +288,16 @@ contract BankNodeManager is
         address lendableTokenAddress,
         string calldata nodeName,
         string calldata website,
-        string calldata configUrl
-    ) public override nonReentrant returns (uint256) {
+        string calldata configUrl,
+        address nodePublicKey,
+        uint32 kycMode
+    ) public override nonReentrant returns (uint32 id) {
         require(tokensToBond >= minimumBankNodeBondedAmount && tokensToBond > 0, "Not enough tokens bonded");
         require(operator != address(0), "operator cannot be 0");
         require(lendableTokenAddress != address(0), "lendableTokenAddress cannot be 0");
 
         bankNodeCount = bankNodeCount + 1;
-        //uint32 bankNodeId = bankNodeCount;
-        BankNode storage bankNode = bankNodes[bankNodeCount];
-        bankNode.id = bankNodeCount;
+        id = bankNodeCount;
 
         BankNodeContracts memory createResult = _createBankNodeContracts(
             CreateBankNodeContractsFncInput({
@@ -296,9 +305,14 @@ contract BankNodeManager is
                 operatorAdmin: operator,
                 operator: operator,
                 tokensToBond: tokensToBond,
-                lendableTokenAddress: lendableTokenAddress
+                lendableTokenAddress: lendableTokenAddress,
+                nodePublicKey: nodePublicKey,
+                kycMode: kycMode
             })
         );
+        //uint32 bankNodeId = bankNodeCount;
+        BankNode storage bankNode = bankNodes[id];
+        bankNode.id = id;
 
         bankNodeAddressToId[createResult.bankNodeContract] = bankNode.id;
 
@@ -317,6 +331,6 @@ contract BankNodeManager is
         bankNode.website = website;
         bankNode.configUrl = configUrl;
 
-        return bankNode.id;
+        return id;
     }
 }

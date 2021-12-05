@@ -19,6 +19,7 @@ contract BNPLProtocolConfig is IBNPLProtocolConfig {
     UpgradeableBeacon public override upBeaconBankNodeStakingPoolToken;
 
     UpgradeableBeacon public override upBeaconBankNodeLendingRewards;
+    UpgradeableBeacon public override upBeaconBNPLKYCStore;
 
     IBankNodeManager public override bankNodeManager;
 
@@ -32,6 +33,7 @@ contract BNPLProtocolConfig is IBNPLProtocolConfig {
         UpgradeableBeacon _upBeaconBankNodeStakingPool,
         UpgradeableBeacon _upBeaconBankNodeStakingPoolToken,
         UpgradeableBeacon _upBeaconBankNodeLendingRewards,
+        UpgradeableBeacon _upBeaconBNPLKYCStore,
         IBankNodeManager _bankNodeManager
     ) {
         networkId = _networkId;
@@ -48,6 +50,7 @@ contract BNPLProtocolConfig is IBNPLProtocolConfig {
         upBeaconBankNodeStakingPoolToken = _upBeaconBankNodeStakingPoolToken;
 
         upBeaconBankNodeLendingRewards = _upBeaconBankNodeLendingRewards;
+        upBeaconBNPLKYCStore = _upBeaconBNPLKYCStore;
 
         bankNodeManager = _bankNodeManager;
     }

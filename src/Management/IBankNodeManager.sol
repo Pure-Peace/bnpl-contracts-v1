@@ -56,11 +56,14 @@ interface IBankNodeManager {
 
     function getBankNodeLendableToken(uint32 bankNodeId) external view returns (address);
 
+    function bnplKYCStore() external view returns (BNPLKYCStore);
+
     function initialize(
         IBNPLProtocolConfig _protocolConfig,
         address _configurator,
         uint256 _minimumBankNodeBondedAmount,
-        BankNodeLendingRewards _bankNodeLendingRewards
+        BankNodeLendingRewards _bankNodeLendingRewards,
+        BNPLKYCStore _bnplKYCStore
     ) external;
 
     function enabledLendableTokens(address lendableTokenAddress) external view returns (uint8);
@@ -122,6 +125,8 @@ interface IBankNodeManager {
         address lendableTokenAddress,
         string calldata nodeName,
         string calldata website,
-        string calldata configUrl
-    ) external returns (uint256);
+        string calldata configUrl,
+        address nodePublicKey,
+        uint32 kycMode
+    ) external returns (uint32);
 }

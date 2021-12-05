@@ -357,7 +357,7 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     await b.StakingPool.unstakeTokens(amount);
     return { b, };
   }
-  async function setupBankNode(_user: string | TUserWithContractDefs, tokenType: "DAI" | "USDT" | "USDC", tokensToBond: string, nodeName: string, website: string) {
+  async function setupBankNode(_user: string | TUserWithContractDefs, tokenType: "DAI" | "USDT" | "USDC", tokensToBond: string, nodeName: string, website: string, config: string, nodePublicKey: any, kycMode: any) {
     const user = typeof _user === 'string' ? await getUserWithAddress(_user) : _user;
 
     await approveToken(user, user.BankNodeManager.address, "BNPLToken", tokensToBond);
@@ -367,7 +367,10 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
       tokensToBond,
       contracts[tokenType].address,
       nodeName,
-      website
+      website,
+      config,
+      nodePublicKey,
+      kycMode,
     );
 
     const bankNodeId = result + "";
@@ -377,6 +380,9 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
       contracts[tokenType].address,
       nodeName,
       website,
+      config,
+      nodePublicKey,
+      kycMode,
       { gasLimit: 5000000 }
     );
     const newCount = await user.BankNodeManager.bankNodeCount();

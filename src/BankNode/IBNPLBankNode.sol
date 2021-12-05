@@ -27,6 +27,8 @@ interface IBankNodeInitializableV1 {
         address nodeStakingPool;
         address baseLiquidityToken;
         address poolLiquidityToken;
+        address nodePublicKey;
+        uint32 kycMode;
     }
 
     function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig) external;
@@ -84,6 +86,10 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
     function nodePublicKey() external view returns (address);
 
     function kycMode() external view returns (uint256);
+
+    function kycDomainId() external view returns (uint32);
+
+    function bnplKYCStore() external view returns (BNPLKYCStore);
 
     function loanRequests(uint256 _loanRequestId)
         external

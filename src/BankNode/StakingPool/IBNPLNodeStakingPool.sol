@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
+import "../../Management/BNPLKYCStore.sol";
 
 /**
  * @dev Interface of the IBankNodeStakingPoolInitializableV1 standard
@@ -11,7 +12,9 @@ interface IBankNodeStakingPoolInitializableV1 {
         address poolBNPLToken,
         address slasherAdmin,
         address tokenBonder,
-        uint256 tokensToBond
+        uint256 tokensToBond,
+        BNPLKYCStore bnplKYCStore_,
+        uint32 kycDomainId_
     ) external;
 }
 

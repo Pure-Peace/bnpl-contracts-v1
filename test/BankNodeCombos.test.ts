@@ -115,7 +115,10 @@ describe('BankNodeCombos', function () {
       "DAI",
       startBondedBNPLAmount,
       "Test Node A",
-      "https://test-node-a.example.com"
+      "https://test-node-a.example.com",
+      "https://test-node-b.example.com/configc.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     const makerASC = await h.getSubContractsForBankNodeWithSigner(bankNodeIdA, u.bankNodeMakerA)
     const makerFinStatesStart = await h.getKeyUserBalancesForBankNode(u.bankNodeMakerA, bankNodeIdA);
@@ -289,7 +292,10 @@ describe('BankNodeCombos', function () {
       "DAI",
       startBondedBNPLAmount,
       "Test Node A",
-      "https://test-node-a.example.com"
+      "https://test-node-a.example.com",
+      "https://test-node-b.example.com/configa.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     //console.log("default occurred!")
     /*function toNiceObj(o: any) {
@@ -450,7 +456,10 @@ describe('BankNodeCombos', function () {
       "DAI",
       startBondedBNPLAmount,
       "Test Node A",
-      "https://test-node-a.example.com"
+      "https://test-node-a.example.com",
+      "https://test-node-b.example.com/configa.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
 
     //console.log("default occurred!")

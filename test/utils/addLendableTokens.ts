@@ -72,20 +72,35 @@ async function addLendableTokensTestNet(hre: HardhatRuntimeEnvironment) {
   const AaveLendingPool = await getContractForEnvironment<FakeAaveLendingPool>(hre, "AaveLendingPool");
   const UniswapV3Router = await getContractForEnvironment<IBNPLSwapMarket>(hre, "UniswapV3Router");
 
+  /*
+    const lendableTokenUSDT = {
+      tokenContract: (await getContractForEnvironment<IERC20>(hre, "USDT")).address,
+      swapMarket: UniswapV3Router.address,
+      swapMarketPoolFee: 3000,
+      decimals: 6,
+      valueMultiplier: "1000000000000000000",
+      unusedFundsLendingMode: 1,
+      unusedFundsLendingContract: AaveLendingPool.address,
+      unusedFundsLendingToken: (await getContractForEnvironment<IERC20>(hre, "aUSDT")).address,
+      symbol: "USDT",
+      poolSymbol: "pUSDT",
+    };
+    console.log("lendableTokenUSDT", lendableTokenUSDT)*/
 
-  const lendableTokenUSDT = {
-    tokenContract: (await getContractForEnvironment<IERC20>(hre, "USDT")).address,
+
+  const lendableTokenTUSD = {
+    tokenContract: (await getContractForEnvironment<IERC20>(hre, "TUSD")).address,
     swapMarket: UniswapV3Router.address,
     swapMarketPoolFee: 3000,
-    decimals: 6,
+    decimals: 18,
     valueMultiplier: "1000000000000000000",
     unusedFundsLendingMode: 1,
     unusedFundsLendingContract: AaveLendingPool.address,
-    unusedFundsLendingToken: (await getContractForEnvironment<IERC20>(hre, "aUSDT")).address,
-    symbol: "USDT",
-    poolSymbol: "pUSDT",
+    unusedFundsLendingToken: (await getContractForEnvironment<IERC20>(hre, "aTUSD")).address,
+    symbol: "TUSD",
+    poolSymbol: "pTUSD",
   };
-  console.log("lendableTokenUSDT", lendableTokenUSDT)
+
 
   const { protocolAdmin } = await hre.getNamedAccounts();
   /*
@@ -103,7 +118,7 @@ async function addLendableTokensTestNet(hre: HardhatRuntimeEnvironment) {
     );
   */
   const BankNodeManager = await getContractForEnvironment<BankNodeManager>(hre, "BankNodeManager", protocolAdmin);
-  await BankNodeManager.addLendableToken(lendableTokenUSDT, 1, { gasLimit: 5500000 });
+  await BankNodeManager.addLendableToken(lendableTokenTUSD, 1, { gasLimit: 5500000 });
 
 
 

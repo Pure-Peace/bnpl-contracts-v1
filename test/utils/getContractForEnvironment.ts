@@ -32,6 +32,8 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
   }),
 
   "BNPLProtocolConfig": generateEnvNameContractDefHelper({}),
+  "BNPLKYCStore": generateEnvNameContractDefHelper({},
+    { lookupName: "BNPLKYCStoreProxy", abiName: "BNPLKYCStore" }),
 
   "BankNodeManager": generateEnvNameContractDefHelper(
     {},
@@ -76,6 +78,14 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       //"ropsten": "0xB404c51BBC10dcBE948077F18a4B8E553D160084",
     }
   ),
+  "TUSD": generateEnvNameContractDefHelper(
+    {
+      "hardhat": "TUSD",
+      "mainnet": "0x0000000000085d4780B73119b644AE5ecd22b376",
+      "kovan": "0x016750AC630F711882812f24Dba6c95b9D35856d",
+      //"ropsten": "0xB404c51BBC10dcBE948077F18a4B8E553D160084",
+    }
+  ),
   "USDC": generateEnvNameContractDefHelper(
     {
       "hardhat": "USDC",
@@ -96,7 +106,15 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
     {
       "hardhat": "aUSDT",
       "mainnet": "0x71fc860F7D3A592A4a98740e39dB31d25db65ae8",
-      "kovan": "0xA01bA9fB493b851F4Ac5093A324CB081A909C34B",
+      "kovan": "0xff3c8bc103682fa918c954e84f5056ab4dd5189d",
+      //"ropsten": "0x790744bC4257B4a0519a3C5649Ac1d16DDaFAE0D",
+    }
+  ),
+  "aTUSD": generateEnvNameContractDefHelper(
+    {
+      "hardhat": "aTUSD",
+      "mainnet": "0x71fc860F7D3A592A4a98740e39dB31d25db65ae8",
+      "kovan": "0x39914AdBe5fDbC2b9ADeedE8Bcd444b20B039204",
       //"ropsten": "0x790744bC4257B4a0519a3C5649Ac1d16DDaFAE0D",
     }
   ),

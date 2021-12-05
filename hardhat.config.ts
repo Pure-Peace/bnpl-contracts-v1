@@ -146,7 +146,7 @@ const config = {
     path: './abibuild',
     clear: true,
     flat: true,
-    only: [':BNPLStakingPool$', ':BNPLBankNode$', ':PoolTokenUpgradeable$', ':BankNodeManager$', ':BankNodeLendingRewards$', ':BNPLSwapMarketExample$', ':BankNodeManager$'],
+    only: [':BNPLKYCStore$', ':BNPLStakingPool$', ':BNPLBankNode$', ':PoolTokenUpgradeable$', ':BankNodeManager$', ':BankNodeLendingRewards$', ':BNPLSwapMarketExample$', ':BankNodeManager$'],
     spacing: 2,
     pretty: true,
   }

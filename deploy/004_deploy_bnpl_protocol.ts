@@ -15,6 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const UpBeaconBankNodeLendingPoolToken = await deployments.get("UpBeaconBankNodeLendingPoolToken");
   const UpBeaconBankNodeStakingPoolToken = await deployments.get("UpBeaconBankNodeStakingPoolToken");
   const UpBeaconBankNodeLendingRewards = await deployments.get("UpBeaconBankNodeLendingRewards");
+  const UpBeaconBNPLKYCStore = await deployments.get("UpBeaconBNPLKYCStore");
 
 
 
@@ -31,6 +32,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     contract: "BeaconProxy",
     from: protocolDeployer,
     args: [UpBeaconBankNodeLendingRewards.address, []],
+    log: true,
+    skipIfAlreadyDeployed: false,
+    gasLimit: 5500000,
+  });
+  const BNPLKYCStoreProxy = await deploy("BNPLKYCStoreProxy", {
+    contract: "BeaconProxy",
+    from: protocolDeployer,
+    args: [UpBeaconBNPLKYCStore.address, []],
     log: true,
     skipIfAlreadyDeployed: false,
     gasLimit: 5500000,
@@ -53,6 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       UpBeaconBNPLStakingPool.address,
       UpBeaconBankNodeStakingPoolToken.address,
       UpBeaconBankNodeLendingRewards.address,
+      UpBeaconBNPLKYCStore.address,
 
       BankNodeManagerProxy.address
     ],

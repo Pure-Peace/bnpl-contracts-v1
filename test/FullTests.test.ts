@@ -86,6 +86,9 @@ describe('FullTests', function () {
       DAI.address,
       "My First Node!",
       "https://node1.isthebest",
+      "https://node1.com/config.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     expect((bankNodeAId + ""), "bank node id should be 1").to.equal("1");
 
@@ -95,6 +98,9 @@ describe('FullTests', function () {
       DAI.address,
       "My First Node!",
       "https://nodeA.isthebest",
+      "https://node1.com/config.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     const bankNodeADef = BankNodeManager.bankNodes(bankNodeAId);
 

@@ -86,6 +86,7 @@ describe('BankNodeManager', function () {
       tokensToBond: "100000000000000000000000",
       nodeName: "My First Node",
       website: "https://nodeA.isthebest.com",
+      config: "https://nodeA.isthebest.com/config.json",
     };
 
     await users.bankNodeMakerA.BNPLToken.approve(
@@ -98,6 +99,10 @@ describe('BankNodeManager', function () {
       DAI.address,
       nodeConfig.nodeName,
       nodeConfig.website,
+      nodeConfig.config,
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
+
     );
 
     const bnc = await getBankNodeContractsForUsers(hre, 1);

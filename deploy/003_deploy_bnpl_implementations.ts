@@ -19,6 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       log: true,
       skipIfAlreadyDeployed: false,
       gasLimit: 5500000,
+
     });
     return result;
 
@@ -45,6 +46,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const ImplPoolTokenUpgradeable = await easyDeployProtoDep("ImplPoolTokenUpgradeable", "PoolTokenUpgradeable");
   const UpBeaconBankNodeLendingPoolToken = await easyDeployProtoDep("UpBeaconBankNodeLendingPoolToken", "UpgradeableBeacon", [ImplPoolTokenUpgradeable.address]);
   const UpBeaconBankNodeStakingPoolToken = await easyDeployProtoDep("UpBeaconBankNodeStakingPoolToken", "UpgradeableBeacon", [ImplPoolTokenUpgradeable.address]);
+
+
+
+
+  const ImplBNPLKYCStore = await easyDeployProtoDep("ImplBNPLKYCStore", "BNPLKYCStore");
+  console.log("got impl", ImplBNPLKYCStore.address);
+  const UpBeaconBNPLKYCStore = await easyDeployProtoDep("UpBeaconBNPLKYCStore", "UpgradeableBeacon", [ImplBNPLKYCStore.address]);
 
 
 

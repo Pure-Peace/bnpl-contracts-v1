@@ -13,7 +13,6 @@ import "../../Utils/TransferHelper.sol";
 import "../../SwapMarket/IBNPLSwapMarket.sol";
 import "../../Aave/IAaveLendingPool.sol";
 import "../../Utils/Math/PRBMathUD60x18.sol";
-import "./IBNPLNodeStakingPool.sol";
 import "./UserTokenLockup.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
@@ -49,6 +48,8 @@ contract BNPLStakingPool is
      */
     event Slash(address indexed recipient, uint256 slashAmount);
 
+    uint32 public constant BNPL_STAKER_NEEDS_KYC = 1 << 3;
+
     bytes32 public constant SLASHER_ROLE = keccak256("SLASHER_ROLE");
     bytes32 public constant NODE_REWARDS_MANAGER_ROLE = keccak256("NODE_REWARDS_MANAGER_ROLE");
     //bytes32 public constant SLASHER_ADMIN_ROLE = keccak256("SLASHER_ADMIN_ROLE");
@@ -62,13 +63,17 @@ contract BNPLStakingPool is
     uint256 public virtualPoolTokensCount;
     uint256 public totalDonatedAllTime;
     uint256 public totalSlashedAllTime;
+    BNPLKYCStore public bnplKYCStore;
+    uint32 public kycDomainId;
 
     function initialize(
         address bnplToken,
         address poolBNPLToken,
         address slasherAdmin,
         address tokenBonder,
-        uint256 tokensToBond
+        uint256 tokensToBond,
+        BNPLKYCStore bnplKYCStore_,
+        uint32 kycDomainId_
     ) public override initializer nonReentrant {
         require(bnplToken != address(0), "bnplToken cannot be 0");
         require(poolBNPLToken != address(0), "poolBNPLToken cannot be 0");
@@ -96,6 +101,8 @@ contract BNPLStakingPool is
         tokensBondedAllTime = tokensToBond;
         poolTokenEffectiveSupply = tokensToBond;
         virtualPoolTokensCount = tokensToBond;
+        bnplKYCStore = bnplKYCStore_;
+        kycDomainId = kycDomainId_;
         POOL_LIQUIDITY_TOKEN.mint(address(this), tokensToBond);
         emit Bond(tokenBonder, tokensToBond);
     }
@@ -300,6 +307,10 @@ contract BNPLStakingPool is
 
     /// @notice Allows a user to stake `unstakeAmount` of BNPL to the pool (user must first approve)
     function stakeTokens(uint256 stakeAmount) external override nonReentrant {
+        require(
+            bnplKYCStore.checkUserBasicBitwiseMode(kycDomainId, msg.sender, BNPL_STAKER_NEEDS_KYC) == 1,
+            "borrower needs kyc"
+        );
         require(stakeAmount != 0, "stakeAmount cannot be 0");
         _addLiquidity(msg.sender, stakeAmount);
     }

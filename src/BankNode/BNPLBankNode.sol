@@ -100,6 +100,9 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
     //TODO: Add max duration and max payment interval
 
+    uint32 public constant LENDER_NEEDS_KYC = 1 << 1;
+    uint32 public constant BORROWER_NEEDS_KYC = 1 << 2;
+
     uint256 public constant MAX_LOAN_AMOUNT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFF00;
     uint256 public constant MIN_LOAN_AMOUNT = 100;
 
@@ -138,8 +141,16 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint256 public override totalLoansDefaulted;
 
     uint256 public override totalDonatedAllTime;
-    address public override nodePublicKey;
-    uint256 public override kycMode;
+    uint32 public override kycDomainId;
+    BNPLKYCStore public override bnplKYCStore;
+
+    function kycMode() external view override returns (uint256) {
+        return bnplKYCStore.domainKycMode(kycDomainId);
+    }
+
+    function nodePublicKey() external view override returns (address) {
+        return bnplKYCStore.publicKeys(kycDomainId);
+    }
 
     function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig) public override nonReentrant initializer {
         require(
@@ -175,6 +186,12 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             _setupRole(OPERATOR_ADMIN_ROLE, bankNodeInitConfig.operatorAdmin);
             _setRoleAdmin(OPERATOR_ROLE, OPERATOR_ADMIN_ROLE);
         }
+        bnplKYCStore = bankNodeManager.bnplKYCStore();
+        kycDomainId = bnplKYCStore.createNewKYCDomain(
+            address(this),
+            bankNodeInitConfig.nodePublicKey,
+            bankNodeInitConfig.kycMode
+        );
     }
 
     function getValueOfUnusedFundsLendingDeposits() public view returns (uint256) {
@@ -408,6 +425,11 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     /// @notice Allows users to lend tokens to the bank node
     function addLiquidity(uint256 depositAmount) public override nonReentrant {
         require(depositAmount != 0, "depositAmount cannot be 0");
+        require(
+            bnplKYCStore.checkUserBasicBitwiseMode(kycDomainId, msg.sender, LENDER_NEEDS_KYC) == 1,
+            "lender needs kyc"
+        );
+
         _addLiquidity(msg.sender, depositAmount);
     }
 
@@ -467,6 +489,10 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         uint8 messageType,
         string memory message
     ) public override nonReentrant {
+        require(
+            bnplKYCStore.checkUserBasicBitwiseMode(kycDomainId, msg.sender, BORROWER_NEEDS_KYC) == 1,
+            "borrower needs kyc"
+        );
         _requestLoan(
             msg.sender,
             loanAmount,
@@ -559,8 +585,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         nonReentrant
         onlyRole(OPERATOR_ROLE)
     {
-        kycMode = kycMode_;
-        nodePublicKey = nodePublicKey_;
+        bnplKYCStore.setKYCDomainMode(kycDomainId, kycMode_);
+        bnplKYCStore.setKYCDomainPublicKey(kycDomainId, nodePublicKey_);
     }
 
     function withdrawNodeOperatorBalance(uint256 amount, address to)

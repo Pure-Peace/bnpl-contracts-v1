@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { BankNodeLendingRewards, BankNodeManager, BNPLProtocolConfig } from "../../typechain";
+import { BankNodeLendingRewards, BankNodeManager, BNPLKYCStore, BNPLProtocolConfig } from "../../typechain";
 import { getContractForEnvironment } from "./getContractForEnvironment";
 
 
@@ -12,12 +12,17 @@ async function setupProtocol(hre: HardhatRuntimeEnvironment, minBondingAmount = 
   const BankNodeManager = await getContractForEnvironment<BankNodeManager>(hre, "BankNodeManager", protocolDeployer);
   const BNPLProtocolConfig = await getContractForEnvironment<BNPLProtocolConfig>(hre, "BNPLProtocolConfig", protocolDeployer);
   const BankNodeLendingRewards = await getContractForEnvironment<BankNodeLendingRewards>(hre, "BankNodeLendingRewards", protocolDeployer);
+  console.log("isetup: ")
+  const BNPLKYCStore = await getContractForEnvironment<BNPLKYCStore>(hre, "BNPLKYCStore", protocolDeployer);
 
   await BankNodeManager.initialize(
     BNPLProtocolConfig.address,
     protocolAdmin,
     minBondingAmount,
-    BankNodeLendingRewards.address, { gasLimit: 5500000 }
+
+    BankNodeLendingRewards.address,
+    BNPLKYCStore.address,
+    { gasLimit: 5500000 }
   );
 
   await BankNodeLendingRewards.initialize(
@@ -25,7 +30,10 @@ async function setupProtocol(hre: HardhatRuntimeEnvironment, minBondingAmount = 
     (await BNPLProtocolConfig.bnplToken()),
     BankNodeManager.address,
     protocolAdmin,
-    protocolAdmin, { gasLimit: 5500000 }
+    protocolAdmin,
+
+
+    { gasLimit: 5500000 }
   );
 
 
@@ -40,11 +48,17 @@ async function setupProtocolTestNet(hre: HardhatRuntimeEnvironment, minBondingAm
   const BNPLProtocolConfig = await getContractForEnvironment<BNPLProtocolConfig>(hre, "BNPLProtocolConfig", protocolDeployer);
   const BankNodeLendingRewards = await getContractForEnvironment<BankNodeLendingRewards>(hre, "BankNodeLendingRewards", protocolDeployer);
 
+  const BNPLKYCStore = await getContractForEnvironment<BNPLKYCStore>(hre, "BNPLKYCStore", protocolDeployer);
+
+
   await BankNodeManager.initialize(
     BNPLProtocolConfig.address,
     protocolAdmin,
     minBondingAmount,
-    BankNodeLendingRewards.address, { gasLimit: 5500000 }
+    BankNodeLendingRewards.address,
+    BNPLKYCStore.address,
+
+    { gasLimit: 5500000 }
   );
 
   await BankNodeLendingRewards.initialize(

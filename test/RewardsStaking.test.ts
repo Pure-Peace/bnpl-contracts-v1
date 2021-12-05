@@ -92,7 +92,10 @@ describe('RewardsStaking', function () {
       "DAI",
       ms`100000*10^18`,
       "Test Node A",
-      "https://test-node-a.example.com"
+      "https://test-node-a.example.com",
+      "https://test-node-b.example.com/configa.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     const bA = await h.stakeBNPLToBankNode(u.stakerA1, bankNodeIdA, ms`50000*10^18`);
     await h.stakeBNPLToBankNode(u.stakerA2, bankNodeIdA, ms`100000*10^18`);
@@ -112,7 +115,10 @@ describe('RewardsStaking', function () {
       "DAI",
       ms`300000*10^18`,
       "Test Node B",
-      "https://test-node-b.example.com"
+      "https://test-node-b.example.com",
+      "https://test-node-b.example.com/configb.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     const bB = await h.stakeBNPLToBankNode(u.stakerB1, bankNodeIdB, ms`10000*10^18`);
     await h.stakeBNPLToBankNode(u.stakerB2, bankNodeIdB, ms`50000*10^18`);
@@ -126,7 +132,10 @@ describe('RewardsStaking', function () {
       "USDT",
       ms`220000*10^18`,
       "Test Node C",
-      "https://test-node-c.example.com"
+      "https://test-node-c.example.com",
+      "https://test-node-b.example.com/configc.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     const bC = await h.stakeBNPLToBankNode(u.stakerC1, bankNodeIdC, ms`10000*10^18`);
     await h.stakeBNPLToBankNode(u.stakerC2, bankNodeIdC, ms`50000*10^18`);
@@ -175,7 +184,10 @@ describe('RewardsStaking', function () {
       "DAI",
       ms`100000*10^18`,
       "Test Node A",
-      "https://test-node-a.example.com"
+      "https://test-node-a.example.com",
+      "https://test-node-b.example.com/configa.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     const bA = await h.stakeBNPLToBankNode(u.stakerA1, bankNodeIdA, ms`50000*10^18`);
     await h.stakeBNPLToBankNode(u.stakerA2, bankNodeIdA, ms`100000*10^18`);
@@ -216,7 +228,10 @@ describe('RewardsStaking', function () {
       "DAI",
       ms`300000*10^18`,
       "Test Node B",
-      "https://test-node-b.example.com"
+      "https://test-node-b.example.com",
+      "https://test-node-b.example.com/configb.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     const bB = await h.stakeBNPLToBankNode(u.stakerB1, bankNodeIdB, ms`10000*10^18`);
     await h.stakeBNPLToBankNode(u.stakerB2, bankNodeIdB, ms`50000*10^18`);
@@ -254,7 +269,10 @@ describe('RewardsStaking', function () {
       "USDT",
       ms`220000*10^18`,
       "Test Node C",
-      "https://test-node-c.example.com"
+      "https://test-node-c.example.com",
+      "https://test-node-c.example.com/configc.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     const bC = await h.stakeBNPLToBankNode(u.stakerC1, bankNodeIdC, ms`10000*10^18`);
     await h.stakeBNPLToBankNode(u.stakerC2, bankNodeIdC, ms`50000*10^18`);
@@ -320,7 +338,10 @@ describe('RewardsStaking', function () {
       "DAI",
       ms`100000*10^18`,
       "Test Node DD",
-      "https://test-node-a.example.com"
+      "https://test-node-a.example.com",
+      "https://test-node-a.example.com/configdd.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
     );
     await u.protocolAdmin.BankNodeLendingRewards.distributeBNPLTokensToBankNodes(totalAmountToDistribute);
 
