@@ -315,6 +315,13 @@ describe('RewardsStaking', function () {
 
     await u.protocolAdmin.BNPLToken.approve(u.protocolAdmin.BankNodeLendingRewards.address, totalAmountToDistribute);
 
+    await h.setupBankNode(
+      u.bankNodeMakerA,
+      "DAI",
+      ms`100000*10^18`,
+      "Test Node DD",
+      "https://test-node-a.example.com"
+    );
     await u.protocolAdmin.BankNodeLendingRewards.distributeBNPLTokensToBankNodes(totalAmountToDistribute);
 
 
@@ -345,6 +352,7 @@ describe('RewardsStaking', function () {
       await h.getKeyUserBalancesForBankNode(u.lenderC1, bankNodeIdC),
       await h.getKeyUserBalancesForBankNode(u.lenderC2, bankNodeIdC),
     ];
+
     /*
         const totalActuallyRewardedToNodeALenders = endBalancesNodeA.map(x => x.bnplTokenBalance).reduce((a, b) => a.add(b));
         const totalActuallyRewardedToNodeBLenders = endBalancesNodeB.map(x => x.bnplTokenBalance).reduce((a, b) => a.add(b));

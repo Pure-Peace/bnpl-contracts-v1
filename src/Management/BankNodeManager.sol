@@ -22,6 +22,19 @@ contract BankNodeManager is
     ReentrancyGuardUpgradeable,
     IBankNodeManager
 {
+    struct BankNodeContracts {
+        address bankNodeContract;
+        address bankNodeToken;
+        address bnplStakingPoolContract;
+        address bnplStakingPoolToken;
+    }
+    struct CreateBankNodeContractsFncInput {
+        uint32 bankNodeId;
+        address operatorAdmin;
+        address operator;
+        uint256 tokensToBond;
+        address lendableTokenAddress;
+    }
     bytes32 public constant CONFIGURE_NODE_MANAGER_ROLE = keccak256("CONFIGURE_NODE_MANAGER_ROLE");
 
     mapping(address => uint8) public override enabledLendableTokens;
@@ -188,72 +201,68 @@ contract BankNodeManager is
         return address(p);
     }
 
-    function _createBankNodeContracts(
-        uint32 bankNodeId,
-        address operatorAdmin,
-        address operator,
-        uint256 tokensToBond,
-        address lendableTokenAddress
-    )
+    function _createBankNodeContracts(CreateBankNodeContractsFncInput memory input)
         private
-        returns (
-            address bankNodeContract,
-            address bankNodeToken,
-            address bnplStakingPoolContract,
-            address bnplStakingPoolToken
-        )
+        returns (BankNodeContracts memory output)
     {
-        require(lendableTokenAddress != address(0), "lendableTokenAddress cannot be 0");
-        LendableToken memory lendableToken = lendableTokens[lendableTokenAddress];
+        require(input.lendableTokenAddress != address(0), "lendableTokenAddress cannot be 0");
+        LendableToken memory lendableToken = lendableTokens[input.lendableTokenAddress];
         require(
-            lendableToken.tokenContract == lendableTokenAddress && lendableToken.valueMultiplier > 0,
+            lendableToken.tokenContract == input.lendableTokenAddress && lendableToken.valueMultiplier > 0,
             "invalid lendable token"
         );
-        require(enabledLendableTokens[lendableTokenAddress] == 1, "lendable token not enabled");
-        bankNodeContract = address(new BeaconProxy(address(protocolConfig.upBeaconBankNode()), ""));
-        bnplStakingPoolContract = address(new BeaconProxy(address(protocolConfig.upBeaconBankNodeStakingPool()), ""));
+        require(enabledLendableTokens[input.lendableTokenAddress] == 1, "lendable token not enabled");
+        output.bankNodeContract = address(new BeaconProxy(address(protocolConfig.upBeaconBankNode()), ""));
+        output.bnplStakingPoolContract = address(
+            new BeaconProxy(address(protocolConfig.upBeaconBankNodeStakingPool()), "")
+        );
 
-        bnplStakingPoolToken = _createBankNodeLendingPoolTokenClone(
+        output.bnplStakingPoolToken = _createBankNodeLendingPoolTokenClone(
             "Banking Node Pool BNPL",
             "pBNPL",
             18,
             address(0),
-            bnplStakingPoolContract
+            output.bnplStakingPoolContract
         );
 
-        TransferHelper.safeTransferFrom(address(bnplToken), msg.sender, bnplStakingPoolContract, tokensToBond);
-
-        IBNPLNodeStakingPool(bnplStakingPoolContract).initialize(
+        TransferHelper.safeTransferFrom(
             address(bnplToken),
-            bnplStakingPoolToken,
-            bankNodeContract,
             msg.sender,
-            tokensToBond
+            output.bnplStakingPoolContract,
+            input.tokensToBond
         );
 
-        bankNodeToken = _createBankNodeLendingPoolTokenClone(
+        IBNPLNodeStakingPool(output.bnplStakingPoolContract).initialize(
+            address(bnplToken),
+            output.bnplStakingPoolToken,
+            output.bankNodeContract,
+            msg.sender,
+            input.tokensToBond
+        );
+
+        output.bankNodeToken = _createBankNodeLendingPoolTokenClone(
             lendableToken.poolSymbol,
             lendableToken.poolSymbol,
             lendableToken.decimals,
             address(0),
-            bankNodeContract
+            output.bankNodeContract
         );
 
-        IBankNodeInitializableV1(bankNodeContract).initialize(
+        IBankNodeInitializableV1(output.bankNodeContract).initialize(
             IBankNodeInitializableV1.BankNodeInitializeArgsV1({
-                bankNodeId: bankNodeId,
+                bankNodeId: input.bankNodeId,
                 bnplSwapMarketPoolFee: lendableToken.swapMarketPoolFee,
                 bankNodeManager: address(this),
-                operatorAdmin: operatorAdmin,
-                operator: operator,
+                operatorAdmin: input.operatorAdmin,
+                operator: input.operator,
                 bnplToken: address(bnplToken),
                 bnplSwapMarket: lendableToken.swapMarket,
                 unusedFundsLendingMode: lendableToken.unusedFundsLendingMode,
                 unusedFundsLendingContract: lendableToken.unusedFundsLendingContract,
                 unusedFundsLendingToken: lendableToken.unusedFundsLendingToken,
-                nodeStakingPool: bnplStakingPoolContract,
+                nodeStakingPool: output.bnplStakingPoolContract,
                 baseLiquidityToken: lendableToken.tokenContract,
-                poolLiquidityToken: bankNodeToken
+                poolLiquidityToken: output.bankNodeToken
             })
         );
     }
@@ -269,40 +278,45 @@ contract BankNodeManager is
         uint256 tokensToBond,
         address lendableTokenAddress,
         string calldata nodeName,
-        string calldata website
+        string calldata website,
+        string calldata configUrl
     ) public override nonReentrant returns (uint256) {
         require(tokensToBond >= minimumBankNodeBondedAmount && tokensToBond > 0, "Not enough tokens bonded");
         require(operator != address(0), "operator cannot be 0");
         require(lendableTokenAddress != address(0), "lendableTokenAddress cannot be 0");
 
         bankNodeCount = bankNodeCount + 1;
-        uint32 bankNodeId = bankNodeCount;
+        //uint32 bankNodeId = bankNodeCount;
+        BankNode storage bankNode = bankNodes[bankNodeCount];
+        bankNode.id = bankNodeCount;
 
-        (
-            address bankNodeContract,
-            address bankNodeToken,
-            address bnplStakingPoolContract,
-            address bnplStakingPoolToken
-        ) = _createBankNodeContracts(bankNodeId, operator, operator, tokensToBond, lendableTokenAddress);
+        BankNodeContracts memory createResult = _createBankNodeContracts(
+            CreateBankNodeContractsFncInput({
+                bankNodeId: bankNodeCount,
+                operatorAdmin: operator,
+                operator: operator,
+                tokensToBond: tokensToBond,
+                lendableTokenAddress: lendableTokenAddress
+            })
+        );
 
-        BankNode storage bankNode = bankNodes[bankNodeId];
-        bankNodeAddressToId[bankNodeContract] = bankNodeId;
+        bankNodeAddressToId[createResult.bankNodeContract] = bankNode.id;
 
-        bankNode.bankNodeContract = bankNodeContract;
-        bankNode.bankNodeToken = bankNodeToken;
+        bankNode.bankNodeContract = createResult.bankNodeContract;
+        bankNode.bankNodeToken = createResult.bankNodeToken;
 
-        bankNode.bnplStakingPoolContract = bnplStakingPoolContract;
-        bankNode.bnplStakingPoolToken = bnplStakingPoolToken;
+        bankNode.bnplStakingPoolContract = createResult.bnplStakingPoolContract;
+        bankNode.bnplStakingPoolToken = createResult.bnplStakingPoolToken;
 
         bankNode.lendableToken = lendableTokenAddress;
         bankNode.creator = msg.sender;
 
-        bankNode.id = bankNodeId;
         bankNode.createdAt = uint64(block.timestamp);
 
         bankNode.nodeName = nodeName;
         bankNode.website = website;
+        bankNode.configUrl = configUrl;
 
-        return bankNodeId;
+        return bankNode.id;
     }
 }

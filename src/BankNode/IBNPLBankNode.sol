@@ -81,6 +81,10 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
 
     function totalLoansDefaulted() external view returns (uint256);
 
+    function nodePublicKey() external view returns (address);
+
+    function kycMode() external view returns (uint256);
+
     function loanRequests(uint256 _loanRequestId)
         external
         view
@@ -150,4 +154,6 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
     function reportOverdueLoan(uint256 loanId) external;
 
     function withdrawNodeOperatorBalance(uint256 amount, address to) external;
+
+    function setKYCSettings(uint256 kycMode_, address nodePublicKey_) external;
 }

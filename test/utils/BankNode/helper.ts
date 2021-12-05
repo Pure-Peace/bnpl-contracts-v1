@@ -376,7 +376,8 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
       tokensToBond,
       contracts[tokenType].address,
       nodeName,
-      website
+      website,
+      { gasLimit: 5000000 }
     );
     const newCount = await user.BankNodeManager.bankNodeCount();
 

@@ -29,6 +29,7 @@ interface IBankNodeManager {
         uint64 createdAt;
         string nodeName;
         string website;
+        string configUrl;
     }
     struct CreateBankNodeContractsInput {
         uint32 bankNodeId;
@@ -93,7 +94,8 @@ interface IBankNodeManager {
             uint32 id,
             uint64 createdAt,
             string calldata nodeName,
-            string calldata website
+            string calldata website,
+            string calldata configUrl
         );
 
     function bankNodeAddressToId(address bankNodeAddressTo) external view returns (uint32);
@@ -119,6 +121,7 @@ interface IBankNodeManager {
         uint256 tokensToBond,
         address lendableTokenAddress,
         string calldata nodeName,
-        string calldata website
+        string calldata website,
+        string calldata configUrl
     ) external returns (uint256);
 }

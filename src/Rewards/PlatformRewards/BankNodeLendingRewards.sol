@@ -100,11 +100,13 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         uint256 amt = 0;
         uint256 total = 0;
         while (i < nodeCount) {
-            amt = rewardsToken.balanceOf(
-                _ensureContractAddressNot0(bankNodeManager.getBankNodeStakingPoolContract(i + 1))
-            );
-            bnplTokensPerNode[i] = amt;
-            total += amt;
+            if (getPoolLiquidityTokensStakedInRewards(i + 1) != 0) {
+                amt = rewardsToken.balanceOf(
+                    _ensureContractAddressNot0(bankNodeManager.getBankNodeStakingPoolContract(i + 1))
+                );
+                bnplTokensPerNode[i] = amt;
+                total += amt;
+            }
             i += 1;
         }
         i = 0;

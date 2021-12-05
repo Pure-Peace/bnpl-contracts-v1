@@ -138,6 +138,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint256 public override totalLoansDefaulted;
 
     uint256 public override totalDonatedAllTime;
+    address public override nodePublicKey;
+    uint256 public override kycMode;
 
     function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig) public override nonReentrant initializer {
         require(
@@ -548,6 +550,17 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     /// @notice Allows admins with role "OPERATOR_ROLE" to approve a loan request with id `loanRequestId` (this also sends the lending token requested to the borrower)
     function approveLoanRequest(uint256 loanRequestId) public override nonReentrant onlyRole(OPERATOR_ROLE) {
         _approveLoanRequest(msg.sender, loanRequestId);
+    }
+
+    /// @notice Allows admins with role "OPERATOR_ROLE" to approve a loan request with id `loanRequestId` (this also sends the lending token requested to the borrower)
+    function setKYCSettings(uint256 kycMode_, address nodePublicKey_)
+        external
+        override
+        nonReentrant
+        onlyRole(OPERATOR_ROLE)
+    {
+        kycMode = kycMode_;
+        nodePublicKey = nodePublicKey_;
     }
 
     function withdrawNodeOperatorBalance(uint256 amount, address to)

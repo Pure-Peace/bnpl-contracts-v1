@@ -68,7 +68,49 @@ async function addLendableTokens(hre: HardhatRuntimeEnvironment) {
 
 
 }
+async function addLendableTokensTestNet(hre: HardhatRuntimeEnvironment) {
+  const AaveLendingPool = await getContractForEnvironment<FakeAaveLendingPool>(hre, "AaveLendingPool");
+  const UniswapV3Router = await getContractForEnvironment<IBNPLSwapMarket>(hre, "UniswapV3Router");
+
+
+  const lendableTokenUSDT = {
+    tokenContract: (await getContractForEnvironment<IERC20>(hre, "USDT")).address,
+    swapMarket: UniswapV3Router.address,
+    swapMarketPoolFee: 3000,
+    decimals: 6,
+    valueMultiplier: "1000000000000000000",
+    unusedFundsLendingMode: 1,
+    unusedFundsLendingContract: AaveLendingPool.address,
+    unusedFundsLendingToken: (await getContractForEnvironment<IERC20>(hre, "aUSDT")).address,
+    symbol: "USDT",
+    poolSymbol: "pUSDT",
+  };
+  console.log("lendableTokenUSDT", lendableTokenUSDT)
+
+  const { protocolAdmin } = await hre.getNamedAccounts();
+  /*
+    await AaveLendingPool.addAssetPair(
+      lendableTokenDAI.tokenContract,
+      lendableTokenDAI.unusedFundsLendingToken,
+    );
+    await AaveLendingPool.addAssetPair(
+      lendableTokenUSDT.tokenContract,
+      lendableTokenUSDT.unusedFundsLendingToken,
+    );
+    await AaveLendingPool.addAssetPair(
+      lendableTokenUSDC.tokenContract,
+      lendableTokenUSDC.unusedFundsLendingToken,
+    );
+  */
+  const BankNodeManager = await getContractForEnvironment<BankNodeManager>(hre, "BankNodeManager", protocolAdmin);
+  await BankNodeManager.addLendableToken(lendableTokenUSDT, 1, { gasLimit: 5500000 });
+
+
+
+
+}
 
 export {
   addLendableTokens,
+  addLendableTokensTestNet,
 }

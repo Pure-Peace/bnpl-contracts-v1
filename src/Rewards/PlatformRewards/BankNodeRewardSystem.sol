@@ -134,6 +134,10 @@ contract BankNodeRewardSystem is
         return _ensureAddressIERC20Not0(bankNodeManager.getBankNodeToken(bankNodeId));
     }
 
+    function getPoolLiquidityTokensStakedInRewards(uint32 bankNodeId) public view returns (uint256) {
+        return getStakingTokenForBankNode(bankNodeId).balanceOf(address(this));
+    }
+
     function getInternalValueForStakedTokenAmount(uint256 amount) internal pure returns (uint256) {
         return amount;
     }

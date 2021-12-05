@@ -6,6 +6,7 @@ import { mstr } from '../utils/math';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
+  console.log(await getNamedAccounts())
   const { deploy } = deployments;
   const shouldDeployFakeBNPLToken = true;//!hre.network.live;
   if (shouldDeployFakeBNPLToken) {

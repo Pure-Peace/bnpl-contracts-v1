@@ -19,6 +19,7 @@ function genForTokenTransferBasic(contractName: TContractSlug, fromActor: string
 
 
     const token = await getContractForEnvironment<IERC20>(hre, contractName, namedAccounts[fromActor]);
+    console.log(fromActor, toActor);
     return token.transfer(namedAccounts[toActor], amount);
 
 

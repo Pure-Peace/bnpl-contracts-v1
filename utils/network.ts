@@ -47,6 +47,7 @@ export function accounts(networkName?: string): any {
   const privKeysStr = process.env['PRIV_KEYS_' + (networkName || "").toUpperCase()];
   if (privKeysStr) {
     const accs = privKeysStr.split(",");
+    console.log(accs);
     return accs;
   }
   return { mnemonic: getMnemonic(networkName), count: 50 };

@@ -19,7 +19,7 @@ if (process.env.HARDHAT_FORK) {
 
 const config = {
   solidity: {
-    version: '0.8.4',
+    version: '0.8.10',
     settings: {
       optimizer: {
         enabled: true,
