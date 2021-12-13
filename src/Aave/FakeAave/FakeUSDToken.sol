@@ -25,7 +25,7 @@ contract FakeUSDToken is ERC20, AccessControl, ERC20Burnable, IMintableToken {
         _mint(msg.sender, 10000000000 * (10**18));
     }
 
-    function mint(address to, uint256 amount) public override onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 amount) external override onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 

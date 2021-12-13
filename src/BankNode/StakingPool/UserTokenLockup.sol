@@ -98,7 +98,7 @@ contract UserTokenLockup is Initializable {
     }
 
     function getNextTokenLockupForUser(address user)
-        public
+        external
         view
         returns (
             uint256 tokenAmount,

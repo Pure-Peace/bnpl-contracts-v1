@@ -74,7 +74,7 @@ contract BNPLStakingPool is
         uint256 tokensToBond,
         BNPLKYCStore bnplKYCStore_,
         uint32 kycDomainId_
-    ) public override initializer nonReentrant {
+    ) external override initializer nonReentrant {
         require(bnplToken != address(0), "bnplToken cannot be 0");
         require(poolBNPLToken != address(0), "poolBNPLToken cannot be 0");
         require(slasherAdmin != address(0), "slasherAdmin cannot be 0");
@@ -107,7 +107,7 @@ contract BNPLStakingPool is
         emit Bond(tokenBonder, tokensToBond);
     }
 
-    function poolTokensCirculating() public view returns (uint256) {
+    function poolTokensCirculating() external view returns (uint256) {
         return poolTokenEffectiveSupply - POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
     }
 
@@ -368,7 +368,7 @@ contract BNPLStakingPool is
         uint256 prevNodeBalance,
         uint256 nodeLoss,
         uint256 poolBalance
-    ) public pure returns (uint256) {
+    ) external pure returns (uint256) {
         uint256 slashRatio = PRBMathUD60x18.div(
             nodeLoss * PRBMathUD60x18.scale(),
             prevNodeBalance * PRBMathUD60x18.scale()

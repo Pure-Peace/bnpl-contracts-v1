@@ -102,12 +102,12 @@ contract BankNodeRewardSystem is
         return (uint256(uint160(user)) << 32) | uint256(bankNodeId);
     }
 
-    function decodeUserBankNodeKey(uint256 stakingVaultKey) public pure returns (address user, uint32 bankNodeId) {
+    function decodeUserBankNodeKey(uint256 stakingVaultKey) external pure returns (address user, uint32 bankNodeId) {
         bankNodeId = uint32(stakingVaultKey & 0xffffffff);
         user = address(uint160(stakingVaultKey >> 32));
     }
 
-    function encodeVaultValue(uint256 amount, uint40 depositTime) public pure returns (uint256) {
+    function encodeVaultValue(uint256 amount, uint40 depositTime) external pure returns (uint256) {
         require(
             amount <= 0xffffffffffffffffffffffffffffffffffffffffffffffffffffff,
             "cannot encode amount larger than 2^216-1"
@@ -115,7 +115,7 @@ contract BankNodeRewardSystem is
         return (amount << 40) | uint256(depositTime);
     }
 
-    function decodeVaultValue(uint256 vaultValue) public pure returns (uint256 amount, uint40 depositTime) {
+    function decodeVaultValue(uint256 vaultValue) external pure returns (uint256 amount, uint40 depositTime) {
         depositTime = uint40(vaultValue & 0xffffffffff);
         amount = vaultValue >> 40;
     }

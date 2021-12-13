@@ -32,7 +32,7 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         _;
     }
 
-    function getDomainPermissions(uint32 domain, address user) public view returns (uint32) {
+    function getDomainPermissions(uint32 domain, address user) external view returns (uint32) {
         return domainPermissions[encodeKYCUserDomainKey(domain, user)];
     }
 
@@ -139,7 +139,7 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         uint32 status,
         uint256 nonce,
         bytes calldata signature
-    ) public {
+    ) external {
         require(domain != 0 && domain <= domainCount, "invalid domain");
         require(publicKeys[domain] != address(0), "this domain is disabled");
         bytes32 proofHash = getKYCSignatureHash(domain, user, status, nonce);
@@ -150,7 +150,7 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         _orKYCStatusUser(domain, user, status);
     }
 
-    function initialize() public initializer nonReentrant {
+    function initialize() external initializer nonReentrant {
         __ReentrancyGuard_init_unchained();
     }
 }

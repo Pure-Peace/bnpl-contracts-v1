@@ -28,7 +28,7 @@ contract MintableDebugToken is
         uint8 decimalsValue_,
         address minterAdmin_,
         address minter_
-    ) public override initializer {
+    ) external override initializer {
         __Context_init_unchained();
         __ERC165_init_unchained();
         __AccessControl_init_unchained();
@@ -48,7 +48,7 @@ contract MintableDebugToken is
         }
     }
 
-    function mint(address to, uint256 amount) public override onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 amount) external override onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 
