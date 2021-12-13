@@ -34,14 +34,14 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
     function withdrawToken(address token, uint256 amount) public onlyRole(WITHDRAWAL_ROLE) {
         require(amount != 0);
         require(token != BNPL_TOKEN_ADDRESS);
-        require(tokenBalances[token] != 0 && tokenBalances[token] >= amount);
+        require(tokenBalances[token] >= amount);
         tokenBalances[token] -= amount;
         TransferHelper.safeTransfer(token, msg.sender, amount);
     }
 
     function withdrawBNPL(uint256 amount) public onlyRole(WITHDRAWAL_ROLE) {
         require(amount != 0);
-        require(bnplBalance != 0 && bnplBalance >= amount);
+        require(bnplBalance >= amount);
         bnplBalance -= amount;
         TransferHelper.safeTransfer(BNPL_TOKEN_ADDRESS, msg.sender, amount);
     }
