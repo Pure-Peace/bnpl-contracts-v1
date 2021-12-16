@@ -194,11 +194,11 @@ contract BNPLStakingPool is
 
         require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
         TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), sender, address(this), depositAmount);
-        baseTokenBalance += depositAmount;
-        tokensBondedAllTime += depositAmount;
         uint256 selfMint = getPoolDepositConversion(depositAmount);
         _mintPoolTokensForUser(address(this), selfMint);
         virtualPoolTokensCount += selfMint;
+        baseTokenBalance += depositAmount;
+        tokensBondedAllTime += depositAmount;
         emit Bond(sender, depositAmount);
     }
 
