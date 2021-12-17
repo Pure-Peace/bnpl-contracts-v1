@@ -225,16 +225,13 @@ contract BNPLStakingPool is
         require(sender != address(0), "sender cannot be null");
         require(unbondAmount != 0, "unbondAmount cannot be 0");
 
+        require(bankNode.onGoingLoanCount() == 0, "Cannot unbond, there are ongoing loans");
         uint256 bondedAmount = getPoolDepositConversion(unbondAmount);
         require(unbondAmount <= bondedAmount, "The unbondAmount must be <= the bondedAmount");
         require(
             getPoolWithdrawConversion(POOL_LIQUIDITY_TOKEN.balanceOf(address(this))) >= unbondAmount,
             "Insufficient bonded amount"
         );
-
-        if ((bondedAmount - unbondAmount) <= bankNodeManager.minimumBankNodeBondedAmount()) {
-            require(bankNode.onGoingLoanCount() == 0, "Unbond too much, there are ongoing loans");
-        }
 
         TransferHelper.safeTransfer(address(BASE_LIQUIDITY_TOKEN), sender, unbondAmount);
         POOL_LIQUIDITY_TOKEN.burn(bondedAmount);
