@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
+import "../../Management/IBankNodeManager.sol";
 import "../IBNPLBankNode.sol";
 import "../../ERC20/IMintableBurnableTokenUpgradeable.sol";
 import "../../Utils/TransferHelper.sol";
@@ -44,6 +45,11 @@ contract BNPLStakingPool is
     event Bond(address indexed user, uint256 bondAmount);
 
     /**
+     * @dev Emitted when user `user` unbonds `unbondAmount` of base liquidity tokens to the pool
+     */
+    event Unbond(address indexed user, uint256 unbondAmount);
+
+    /**
      * @dev Emitted when user `user` donates `donationAmount` of base liquidity tokens to the pool
      */
     event Slash(address indexed recipient, uint256 slashAmount);
@@ -56,6 +62,8 @@ contract BNPLStakingPool is
 
     IERC20 public BASE_LIQUIDITY_TOKEN; // = IERC20(0x1d1781B0017CCBb3f0341420E5952aAfD9d8C083);
     IMintableBurnableTokenUpgradeable public POOL_LIQUIDITY_TOKEN; // = IMintableToken(0x517D01e738F8E1fB473f905BCC736aaa41226761);
+    IBNPLBankNode public bankNode;
+    IBankNodeManager public bankNodeManager;
 
     uint256 public baseTokenBalance;
     uint256 public tokensBondedAllTime;
@@ -69,7 +77,8 @@ contract BNPLStakingPool is
     function initialize(
         address bnplToken,
         address poolBNPLToken,
-        address slasherAdmin,
+        address bankNodeContract,
+        address bankNodeManagerContract,
         address tokenBonder,
         uint256 tokensToBond,
         BNPLKYCStore bnplKYCStore_,
@@ -77,7 +86,7 @@ contract BNPLStakingPool is
     ) external override initializer nonReentrant {
         require(bnplToken != address(0), "bnplToken cannot be 0");
         require(poolBNPLToken != address(0), "poolBNPLToken cannot be 0");
-        require(slasherAdmin != address(0), "slasherAdmin cannot be 0");
+        require(bankNodeContract != address(0), "slasherAdmin cannot be 0");
         require(tokenBonder != address(0), "tokenBonder cannot be 0");
         require(tokensToBond > 0, "tokensToBond cannot be 0");
 
@@ -91,8 +100,11 @@ contract BNPLStakingPool is
         BASE_LIQUIDITY_TOKEN = IERC20(bnplToken);
         POOL_LIQUIDITY_TOKEN = IMintableBurnableTokenUpgradeable(poolBNPLToken);
 
+        bankNode = IBNPLBankNode(bankNodeContract);
+        bankNodeManager = IBankNodeManager(bankNodeManagerContract);
+
         //_setupRole(SLASHER_ADMIN_ROLE, slasherAdmin);
-        _setupRole(SLASHER_ROLE, slasherAdmin);
+        _setupRole(SLASHER_ROLE, bankNodeContract);
         _setupRole(NODE_REWARDS_MANAGER_ROLE, tokenBonder);
         //_setRoleAdmin(SLASHER_ROLE, SLASHER_ADMIN_ROLE);
 
@@ -119,10 +131,10 @@ contract BNPLStakingPool is
         return baseTokenBalance;
     }
 
-    function isApproveLoanAvailable(uint256 minimumBankNodeBondedAmount) public view override returns (bool) {
+    function isApproveLoanAvailable() public view override returns (bool) {
         return
             getPoolWithdrawConversion(POOL_LIQUIDITY_TOKEN.balanceOf(address(this))) >=
-            ((minimumBankNodeBondedAmount * 75) / 100);
+            ((bankNodeManager.minimumBankNodeBondedAmount() * 75) / 100);
     }
 
     function getPoolDepositConversion(uint256 depositAmount) public view returns (uint256) {
@@ -206,6 +218,32 @@ contract BNPLStakingPool is
         baseTokenBalance += depositAmount;
         tokensBondedAllTime += depositAmount;
         emit Bond(sender, depositAmount);
+    }
+
+    function _processUnbondTokens(address sender, uint256 unbondAmount) private {
+        require(sender != address(this), "sender cannot be self");
+        require(sender != address(0), "sender cannot be null");
+        require(unbondAmount != 0, "unbondAmount cannot be 0");
+
+        uint256 bondedAmount = getPoolDepositConversion(unbondAmount);
+        require(unbondAmount <= bondedAmount, "The unbondAmount must be <= the bondedAmount");
+        require(
+            getPoolWithdrawConversion(POOL_LIQUIDITY_TOKEN.balanceOf(address(this))) >= unbondAmount,
+            "Insufficient bonded amount"
+        );
+
+        if ((bondedAmount - unbondAmount) <= bankNodeManager.minimumBankNodeBondedAmount()) {
+            require(bankNode.onGoingLoanCount() == 0, "Unbond too much, there are ongoing loans");
+        }
+
+        TransferHelper.safeTransfer(address(BASE_LIQUIDITY_TOKEN), sender, unbondAmount);
+        POOL_LIQUIDITY_TOKEN.burn(bondedAmount);
+
+        poolTokenEffectiveSupply -= bondedAmount;
+        virtualPoolTokensCount -= bondedAmount;
+        baseTokenBalance -= unbondAmount;
+
+        emit Unbond(sender, unbondAmount);
     }
 
     function _setupLiquidityFirst(address user, uint256 depositAmount) private returns (uint256) {
@@ -309,6 +347,12 @@ contract BNPLStakingPool is
     function bondTokens(uint256 bondAmount) external override nonReentrant {
         require(bondAmount != 0, "bondAmount cannot be 0");
         _processBondTokens(msg.sender, bondAmount);
+    }
+
+    /// @notice Allows a user to unbond `unbondAmount` of BNPL from the pool
+    function unbondTokens(uint256 unbondAmount) external override nonReentrant {
+        require(unbondAmount != 0, "unbondAmount cannot be 0");
+        _processUnbondTokens(msg.sender, unbondAmount);
     }
 
     /// @notice Allows a user to stake `unstakeAmount` of BNPL to the pool (user must first approve)

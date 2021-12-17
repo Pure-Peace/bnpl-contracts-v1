@@ -129,7 +129,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint256 public override poolTokensCirculating;
 
     uint256 public override loanRequestIndex;
-
+    uint256 public override onGoingLoanCount;
     uint256 public override loanIndex;
 
     mapping(uint256 => LoanRequest) public override loanRequests;
@@ -515,7 +515,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         require(loanRequest.borrower != address(0));
         require(loanRequest.status == 0, "loan must not already be approved/rejected");
         require(
-            nodeStakingPool.isApproveLoanAvailable(bankNodeManager.minimumBankNodeBondedAmount()),
+            nodeStakingPool.isApproveLoanAvailable(),
             "BankNode bonded amount is less than 75% of the minimum bonded"
         );
 
@@ -556,6 +556,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         loan.numberOfPaymentsMade = 0;
         loan.remainingBalance = uint256(loan.numberOfPayments) * uint256(loan.amountPerPayment);
         loan.status = 0;
+        onGoingLoanCount += 1;
         loan.loanRequestId = loanRequestId;
 
         _ensureBaseBalance(loanAmount);
@@ -572,6 +573,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         require(loanRequest.borrower != address(0));
         require(loanRequest.status == 0, "loan must not already be approved/rejected");
         loanRequest.status = 1;
+        onGoingLoanCount -= 1;
         loanRequest.statusUpdatedAt = uint64(block.timestamp);
         loanRequest.statusModifiedBy = operator;
         emit LoanDenied(loanRequest.borrower, loanRequestId, operator);
@@ -666,6 +668,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         require(loan.loanAmount > loan.totalAmountPaid);
         uint256 startPoolTotalAssetValue = getPoolTotalAssetsValue();
         loan.status = 2;
+        onGoingLoanCount -= 1;
 
         //loan.loanAmount-principalPaidForLoan[loanId]
         //uint256 total3rdPartyInterestPaid = loanBondedAmount[loanId]; // bnpl market buy is the same amount as the amount bonded, this must change if they are not equal
@@ -745,6 +748,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
         if (loan.remainingBalance == 0) {
             loan.status = 1;
+            onGoingLoanCount -= 1;
             loan.statusUpdatedAt = uint64(block.timestamp);
             nodeOperatorBalance += loanBondedAmount[loanId];
             loanBondedAmount[loanId] = 0;

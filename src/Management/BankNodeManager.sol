@@ -269,6 +269,7 @@ contract BankNodeManager is
             address(bnplToken),
             output.bnplStakingPoolToken,
             output.bankNodeContract,
+            address(this),
             msg.sender,
             input.tokensToBond,
             bnplKYCStore,
