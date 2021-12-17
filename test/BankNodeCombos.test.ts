@@ -657,9 +657,8 @@ describe('BankNodeCombos', function () {
     expect(finStatesStart.stakingPoolFinancialState.tokensBondedAllTime, "tokensBondedAllTime = total bnpl staked at the start")
       .equals(startBondedBNPLAmount);
 
-    const finStatesAfterLoanA = await h.getBankNodeAllFinancialStates(bankNodeIdA);
-    const b = finStatesAfterLoanA.b
-    await b.StakingPool.unbondTokens(await b.StakingPool.getPoolWithdrawConversion(await b.StakingPool.virtualPoolTokensCount()))
+    const o = await h.getSubContractsForBankNodeWithSigner(bankNodeIdA, u.bankNodeMakerA)
+    await o.StakingPool.unbondTokens(await o.StakingPool.getPoolWithdrawConversion(await o.StakingPool.virtualPoolTokensCount()))
 
 
     let result
@@ -680,12 +679,12 @@ describe('BankNodeCombos', function () {
       const loanAId = loanAApprovedResult.loanRequest.loanId;
       const loanAStart = loanAApprovedResult.loan;
       result = false
-    } catch (_err) {
+    } catch (err) {
       result = true
     }
 
     expect(result, "After unbond: BankNode bonded amount is less than 75% of the minimum bonded")
-      .equals(false);
+      .equals(true);
   });
 });
 export {
