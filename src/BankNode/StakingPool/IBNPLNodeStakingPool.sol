@@ -34,5 +34,7 @@ interface IBNPLNodeStakingPool is IBankNodeStakingPoolInitializableV1 {
 
     function getPoolTotalAssetsValue() external view returns (uint256);
 
+    function isApproveLoanAvailable(uint256 minimumBankNodeBondedAmount) external view returns (bool);
+
     function claimNodeOwnerPoolTokenRewards(address to) external;
 }

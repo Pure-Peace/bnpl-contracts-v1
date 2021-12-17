@@ -119,6 +119,12 @@ contract BNPLStakingPool is
         return baseTokenBalance;
     }
 
+    function isApproveLoanAvailable(uint256 minimumBankNodeBondedAmount) public view override returns (bool) {
+        return
+            getPoolWithdrawConversion(POOL_LIQUIDITY_TOKEN.balanceOf(address(this))) >=
+            ((minimumBankNodeBondedAmount * 75) / 100);
+    }
+
     function getPoolDepositConversion(uint256 depositAmount) public view returns (uint256) {
         return (depositAmount * poolTokenEffectiveSupply) / getPoolTotalAssetsValue();
     }

@@ -514,6 +514,10 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         LoanRequest storage loanRequest = loanRequests[loanRequestId];
         require(loanRequest.borrower != address(0));
         require(loanRequest.status == 0, "loan must not already be approved/rejected");
+        require(
+            nodeStakingPool.isApproveLoanAvailable(bankNodeManager.minimumBankNodeBondedAmount()),
+            "BankNode bonded amount is less than 75% of the minimum bonded"
+        );
 
         uint256 loanAmount = loanRequest.loanAmount;
         require(
