@@ -341,13 +341,13 @@ contract BNPLStakingPool is
     }
 
     /// @notice Allows a user to bond `bondAmount` of BNPL to the pool (user must first approve)
-    function bondTokens(uint256 bondAmount) external override nonReentrant {
+    function bondTokens(uint256 bondAmount) external override nonReentrant onlyRole(NODE_REWARDS_MANAGER_ROLE) {
         require(bondAmount != 0, "bondAmount cannot be 0");
         _processBondTokens(msg.sender, bondAmount);
     }
 
     /// @notice Allows a user to unbond `unbondAmount` of BNPL from the pool
-    function unbondTokens(uint256 unbondAmount) external override nonReentrant {
+    function unbondTokens(uint256 unbondAmount) external override nonReentrant onlyRole(NODE_REWARDS_MANAGER_ROLE) {
         require(unbondAmount != 0, "unbondAmount cannot be 0");
         _processUnbondTokens(msg.sender, unbondAmount);
     }
