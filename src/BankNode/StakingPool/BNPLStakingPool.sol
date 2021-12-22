@@ -107,7 +107,7 @@ contract BNPLStakingPool is
         emit Bond(tokenBonder, tokensToBond);
     }
 
-    function poolTokensCirculating() public view returns (uint256) {
+    function poolTokensCirculating() external view returns (uint256) {
         return poolTokenEffectiveSupply - POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
     }
 
@@ -368,7 +368,7 @@ contract BNPLStakingPool is
         uint256 prevNodeBalance,
         uint256 nodeLoss,
         uint256 poolBalance
-    ) public pure returns (uint256) {
+    ) external pure returns (uint256) {
         uint256 slashRatio = PRBMathUD60x18.div(
             nodeLoss * PRBMathUD60x18.scale(),
             prevNodeBalance * PRBMathUD60x18.scale()

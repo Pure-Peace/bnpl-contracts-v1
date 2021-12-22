@@ -332,6 +332,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         TransferHelper.safeTransferFrom(address(baseLiquidityToken), sender, address(this), depositAmount);
         baseTokenBalance += depositAmount;
         totalDonatedAllTime += depositAmount;
+        _processMigrateUnusedFundsToLendingPool();
+
         emit Donation(sender, depositAmount);
     }
 
@@ -417,13 +419,13 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     /// @notice Allows users to lend tokens to the bank node
-    function donate(uint256 depositAmount) public override nonReentrant {
+    function donate(uint256 depositAmount) external override nonReentrant {
         require(depositAmount != 0, "depositAmount cannot be 0");
         _processDonation(msg.sender, depositAmount);
     }
 
     /// @notice Allows users to lend tokens to the bank node
-    function addLiquidity(uint256 depositAmount) public override nonReentrant {
+    function addLiquidity(uint256 depositAmount) external override nonReentrant {
         require(depositAmount != 0, "depositAmount cannot be 0");
         require(
             bnplKYCStore.checkUserBasicBitwiseMode(kycDomainId, msg.sender, LENDER_NEEDS_KYC) == 1,
@@ -433,7 +435,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         _addLiquidity(msg.sender, depositAmount);
     }
 
-    function removeLiquidity(uint256 poolTokensToConsume) public override nonReentrant {
+    function removeLiquidity(uint256 poolTokensToConsume) external override nonReentrant {
         _removeLiquidity(msg.sender, poolTokensToConsume);
     }
 
@@ -488,7 +490,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         uint256 interestRatePerPayment,
         uint8 messageType,
         string memory message
-    ) public override nonReentrant {
+    ) external override nonReentrant {
         require(
             bnplKYCStore.checkUserBasicBitwiseMode(kycDomainId, msg.sender, BORROWER_NEEDS_KYC) == 1,
             "borrower needs kyc"
@@ -569,12 +571,12 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     /// @notice Allows admins with role "OPERATOR_ROLE" to deny a loan request with id `loanRequestId`
-    function denyLoanRequest(uint256 loanRequestId) public override nonReentrant onlyRole(OPERATOR_ROLE) {
+    function denyLoanRequest(uint256 loanRequestId) external override nonReentrant onlyRole(OPERATOR_ROLE) {
         _denyLoanRequest(msg.sender, loanRequestId);
     }
 
     /// @notice Allows admins with role "OPERATOR_ROLE" to approve a loan request with id `loanRequestId` (this also sends the lending token requested to the borrower)
-    function approveLoanRequest(uint256 loanRequestId) public override nonReentrant onlyRole(OPERATOR_ROLE) {
+    function approveLoanRequest(uint256 loanRequestId) external override nonReentrant onlyRole(OPERATOR_ROLE) {
         _approveLoanRequest(msg.sender, loanRequestId);
     }
 
@@ -590,7 +592,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     function withdrawNodeOperatorBalance(uint256 amount, address to)
-        public
+        external
         override
         nonReentrant
         onlyRole(OPERATOR_ROLE)
@@ -686,7 +688,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     /// @notice Report a loan with id `loanId` as being overdue
-    function reportOverdueLoan(uint256 loanId) public override nonReentrant {
+    function reportOverdueLoan(uint256 loanId) external override nonReentrant {
         _markLoanAsWriteOff(loanId);
     }
 
@@ -746,7 +748,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     /// @notice Make a loan payment for loan with id `loanId`
-    function makeLoanPayment(uint256 loanId) public override nonReentrant {
+    function makeLoanPayment(uint256 loanId) external override nonReentrant {
         _makeLoanPayment(msg.sender, loanId);
     }
 }

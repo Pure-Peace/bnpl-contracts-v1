@@ -22,7 +22,7 @@ contract BNPLFirstDeploySetup is Initializable {
     }
 
     function deployBNPLWithImplementations(IDeployWithImplementationsParams calldata params)
-        public
+        external
         returns (BNPLProtocolConfig)
     {
         UpgradeableBeacon upBeaconBankNodeManager = new UpgradeableBeacon(params.implBankNodeManager);

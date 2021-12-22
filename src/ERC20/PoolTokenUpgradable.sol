@@ -48,7 +48,7 @@ contract PoolTokenUpgradeable is
         }
     }
 
-    function mint(address to, uint256 amount) public override onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 amount) external override onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 

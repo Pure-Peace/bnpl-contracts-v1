@@ -21,7 +21,7 @@ contract FakeAaveLendingPool is IAaveLendingPool {
         aaveAssetToDepositAsset[aaveAsset] = IERC20(depositAsset);
     }
 
-    function addAssetPair(address depositAsset, address aaveAsset) public {
+    function addAssetPair(address depositAsset, address aaveAsset) external {
         _addAssetPair(depositAsset, aaveAsset);
     }
 
@@ -30,7 +30,7 @@ contract FakeAaveLendingPool is IAaveLendingPool {
         uint256 amount,
         address onBehalfOf,
         uint16 /*referralCode*/
-    ) public override {
+    ) external override {
         require(asset != address(0), "cannot be asset == 0");
         IFakeAaveToken aaveToken = depositAssetToAaveAsset[asset];
 
@@ -45,7 +45,7 @@ contract FakeAaveLendingPool is IAaveLendingPool {
         address asset,
         uint256 amount,
         address to
-    ) public override {
+    ) external override {
         require(asset != address(0), "cannot be asset == 0");
         IFakeAaveToken aaveAsset = depositAssetToAaveAsset[asset];
         require(address(aaveAsset) != address(0), "aave asset not supported");

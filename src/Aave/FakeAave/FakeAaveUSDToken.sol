@@ -26,15 +26,15 @@ contract FakeAaveUSDToken is ERC20, AccessControl, ERC20Burnable, IMintableToken
         // _mint(msg.sender, 100000000*(10**18));
     }
 
-    function internalAaveMintFor(address to, uint256 amount) public override {
+    function internalAaveMintFor(address to, uint256 amount) external override {
         _mint(to, amount);
     }
 
-    function internalAaveBurnFor(address to, uint256 amount) public override {
+    function internalAaveBurnFor(address to, uint256 amount) external override {
         _burn(to, amount);
     }
 
-    function mint(address to, uint256 amount) public override onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 amount) external override onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 

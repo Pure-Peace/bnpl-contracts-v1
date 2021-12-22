@@ -98,7 +98,7 @@ contract UserTokenLockup is Initializable {
     }
 
     function getNextTokenLockupForUser(address user)
-        public
+        external
         view
         returns (
             uint256 tokenAmount,
@@ -136,7 +136,7 @@ contract UserTokenLockup is Initializable {
             unlockDate
         ) {
             require(
-                allowAddToFutureVault == true || futureDate == unlockDate,
+                allowAddToFutureVault || futureDate == unlockDate,
                 "allowAddToFutureVault must be enabled to add to future vaults"
             );
             // if the current vault's date is later than our unlockDate, add the value to it

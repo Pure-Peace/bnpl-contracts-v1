@@ -55,21 +55,21 @@ contract BankNodeManager is
     IBNPLProtocolConfig public override protocolConfig;
     BNPLKYCStore public override bnplKYCStore;
 
-    function bankNodeIdExists(uint32 bankNodeId) public view override returns (uint256) {
+    function bankNodeIdExists(uint32 bankNodeId) external view override returns (uint256) {
         return (bankNodeId >= 1 && bankNodeId <= bankNodeCount) ? 1 : 0;
     }
 
-    function getBankNodeContract(uint32 bankNodeId) public view override returns (address) {
+    function getBankNodeContract(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bankNodeContract;
     }
 
-    function getBankNodeToken(uint32 bankNodeId) public view override returns (address) {
+    function getBankNodeToken(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bankNodeToken;
     }
 
-    function getBankNodeStakingPoolContract(uint32 bankNodeId) public view override returns (address) {
+    function getBankNodeStakingPoolContract(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bnplStakingPoolContract;
     }
@@ -79,7 +79,7 @@ contract BankNodeManager is
         return bankNodes[bankNodeId].bnplStakingPoolToken;
     }
 
-    function getBankNodeLendableToken(uint32 bankNodeId) public view override returns (address) {
+    function getBankNodeLendableToken(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].lendableToken;
     }
@@ -146,7 +146,7 @@ contract BankNodeManager is
 
     /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to enable/disable support for ERC20 tokens to be used as lendable tokens for new bank nodes (does not effect existing nodes)
     function setLendableTokenStatus(address tokenContract, uint8 enabled)
-        public
+        external
         override
         onlyRole(CONFIGURE_NODE_MANAGER_ROLE)
     {
@@ -156,7 +156,7 @@ contract BankNodeManager is
 
     /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to set the minimum BNPL to bond per node
     function setMinimumBankNodeBondedAmount(uint256 _minimumBankNodeBondedAmount)
-        public
+        external
         override
         onlyRole(CONFIGURE_NODE_MANAGER_ROLE)
     {
@@ -291,7 +291,7 @@ contract BankNodeManager is
         string calldata configUrl,
         address nodePublicKey,
         uint32 kycMode
-    ) public override nonReentrant returns (uint32 id) {
+    ) external override nonReentrant returns (uint32 id) {
         require(tokensToBond >= minimumBankNodeBondedAmount && tokensToBond > 0, "Not enough tokens bonded");
         require(operator != address(0), "operator cannot be 0");
         require(lendableTokenAddress != address(0), "lendableTokenAddress cannot be 0");

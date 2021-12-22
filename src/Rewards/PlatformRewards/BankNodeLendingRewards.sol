@@ -88,7 +88,7 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
     }
 
     function distributeBNPLTokensToBankNodes(uint256 amount)
-        public
+        external
         onlyRole(REWARDS_DISTRIBUTOR_ROLE)
         returns (uint256)
     {
@@ -121,7 +121,7 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
     }
 
     function distributeBNPLTokensToBankNodes2(uint256 amount)
-        public
+        external
         onlyRole(REWARDS_DISTRIBUTOR_ROLE)
         returns (uint256)
     {

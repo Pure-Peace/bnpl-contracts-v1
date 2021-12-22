@@ -26,34 +26,34 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
         _setupRole(WITHDRAWAL_ROLE, msg.sender);
     }
 
-    function setBNPLPrice(address token, uint256 bnplPrice) public onlyRole(PRICE_SETTER_ROLE) {
+    function setBNPLPrice(address token, uint256 bnplPrice) external onlyRole(PRICE_SETTER_ROLE) {
         require(token != BNPL_TOKEN_ADDRESS);
         bnplPrices[token] = bnplPrice;
     }
 
-    function withdrawToken(address token, uint256 amount) public onlyRole(WITHDRAWAL_ROLE) {
+    function withdrawToken(address token, uint256 amount) external onlyRole(WITHDRAWAL_ROLE) {
         require(amount != 0);
         require(token != BNPL_TOKEN_ADDRESS);
-        require(tokenBalances[token] != 0 && tokenBalances[token] >= amount);
+        require(tokenBalances[token] >= amount);
         tokenBalances[token] -= amount;
         TransferHelper.safeTransfer(token, msg.sender, amount);
     }
 
-    function withdrawBNPL(uint256 amount) public onlyRole(WITHDRAWAL_ROLE) {
+    function withdrawBNPL(uint256 amount) external onlyRole(WITHDRAWAL_ROLE) {
         require(amount != 0);
-        require(bnplBalance != 0 && bnplBalance >= amount);
+        require(bnplBalance >= amount);
         bnplBalance -= amount;
         TransferHelper.safeTransfer(BNPL_TOKEN_ADDRESS, msg.sender, amount);
     }
 
-    function depositToken(address token, uint256 amount) public {
+    function depositToken(address token, uint256 amount) external {
         require(amount != 0);
         require(token != BNPL_TOKEN_ADDRESS);
         TransferHelper.safeTransferFrom(token, msg.sender, address(this), amount);
         tokenBalances[token] += amount;
     }
 
-    function depositBNPL(uint256 amount) public {
+    function depositBNPL(uint256 amount) external {
         require(amount != 0);
         TransferHelper.safeTransferFrom(BNPL_TOKEN_ADDRESS, msg.sender, address(this), amount);
         bnplBalance += amount;
