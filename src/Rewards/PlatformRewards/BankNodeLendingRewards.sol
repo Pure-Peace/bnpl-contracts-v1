@@ -48,7 +48,7 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         address _bankNodeManager,
         address distributorAdmin,
         address managerAdmin
-    ) public initializer {
+    ) external initializer {
         _BankNodesRewardSystem_init_(
             _defaultRewardsDuration,
             _rewardsToken,
@@ -65,7 +65,7 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
             );
     }
 
-    function getBNPLTokenDistribution(uint256 amount) public view returns (uint256[] memory) {
+    function getBNPLTokenDistribution(uint256 amount) external view returns (uint256[] memory) {
         uint32 nodeCount = bankNodeManager.bankNodeCount();
         uint256[] memory bnplTokensPerNode = new uint256[](nodeCount);
         uint32 i = 0;

@@ -67,6 +67,8 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
 
     function loanRequestIndex() external view returns (uint256);
 
+    function onGoingLoanCount() external view returns (uint256);
+
     function loanIndex() external view returns (uint256);
 
     function baseLiquidityToken() external view returns (IERC20);

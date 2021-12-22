@@ -594,6 +594,98 @@ describe('BankNodeCombos', function () {
 
 
   });
+
+
+  it('Test BankNode unbond', async function () {
+    const { users, h } = await setup();
+    const u = users;
+
+    const startBondedBNPLAmount = ms`1000000*10^18`;
+    const startStakedBNPLAmount = ms`500000*10^18`;
+    const startTotalBNPL = BigNumber.from(startBondedBNPLAmount).add(startStakedBNPLAmount);
+    const startLiquidityAmount = ms`100000*10^18`;
+    const bankNodeIdA = await h.setupBankNode(
+      u.bankNodeMakerA,
+      "DAI",
+      startBondedBNPLAmount,
+      "Test Node A",
+      "https://test-node-a.example.com",
+      "https://test-node-b.example.com/configa.json",
+      "0x38a449a43d7af4acbb4446e2984009bae0646b6b",
+      "0"
+    );
+
+    //console.log("default occurred!")
+    /**/
+    await h.stakeBNPLToBankNode(u.stakerA1, bankNodeIdA, startStakedBNPLAmount);
+
+    await h.stakeLendingCoinToBankNode(u.lenderA1, bankNodeIdA, startLiquidityAmount, "DAI");
+    const finStatesStart = await h.getBankNodeAllFinancialStates(bankNodeIdA);
+    //printFinState("finStatesStart", finStatesStart);
+
+    expect(finStatesStart.bankNodeFinancialState.accountsReceivableFromLoans, "No Accounts Receivable before anyone loans have been made")
+      .equals(0);
+
+    expect(finStatesStart.bankNodeFinancialState.valueOfUnusedFundsLendingDeposits, "All of the money should have gone into aave (all in unused funds lending deposits)")
+      .equals(startLiquidityAmount);
+
+    expect(finStatesStart.bankNodeFinancialState.baseTokenBalance, "All of the money should have gone into aave (no base tokens held)")
+      .equals(0);
+
+    expect(finStatesStart.bankNodeFinancialState.nodeOperatorBalance, "No operator balance before the first loan has received a payment")
+      .equals(0);
+
+    expect(finStatesStart.bankNodeFinancialState.nodeOperatorBalance, "No operator balance before the first loan has received a payment")
+      .equals(0);
+
+    expect(finStatesStart.bankNodeFinancialState.poolTotalAssetsValue, "poolTotalAssetsValue should equal the total liquidity we injected in the pool before any loans are made")
+      .equals(startLiquidityAmount);
+
+    expect(finStatesStart.bankNodeFinancialState.poolTotalLiquidAssetsValue, "poolTotalLiquidAssetsValue should equal the total liquidity we injected in the pool before any loans are made")
+      .equals(startLiquidityAmount);
+
+
+    expect(finStatesStart.stakingPoolFinancialState.baseTokenBalance, "total bnpl should be staked + bonded at the start")
+      .equals(startTotalBNPL);
+
+    expect(finStatesStart.stakingPoolFinancialState.poolTokensCirculating, "poolTokensCirculating = total bnpl staked at the start")
+      .equals(startStakedBNPLAmount);
+
+    expect(finStatesStart.stakingPoolFinancialState.poolTotalAssetsValue, "poolTotalAssetsValue = total bnpl staked + bonded at the start")
+      .equals(startTotalBNPL);
+
+    expect(finStatesStart.stakingPoolFinancialState.tokensBondedAllTime, "tokensBondedAllTime = total bnpl staked at the start")
+      .equals(startBondedBNPLAmount);
+
+    const o = await h.getSubContractsForBankNodeWithSigner(bankNodeIdA, u.bankNodeMakerA)
+    await o.StakingPool.unbondTokens(await o.StakingPool.getPoolWithdrawConversion(await o.StakingPool.virtualPoolTokensCount()))
+
+
+    let result
+    try {
+      const loanARequest: ILoanRequest = {
+        loanAmount: ms`25000*10^18`, // 25000 USD
+        totalLoanDuration: 60 * 60 * 24 * 30 * 12, // 360 days
+        numberOfPayments: 3, // 4 payments
+        interestRatePerPayment: ms`10^18 * 0.1 / 12`, // 10% Real APR
+        messageType: 0,
+        message: "I need 25k to start a small business selling ice cream cones for dogs",
+      };
+
+      const loanARequestResult = await h.requestLoanBankNode(u.borrowerA1, bankNodeIdA, loanARequest);
+      const borrowerA1FinStatesStart = await h.getKeyUserBalancesForBankNode(u.borrowerA1, bankNodeIdA);
+
+      const loanAApprovedResult = await h.approveLoanRequestBankNode(u.bankNodeMakerA, bankNodeIdA, loanARequestResult.loanRequestId);
+      const loanAId = loanAApprovedResult.loanRequest.loanId;
+      const loanAStart = loanAApprovedResult.loan;
+      result = false
+    } catch (err) {
+      result = true
+    }
+
+    expect(result, "After unbond: BankNode bonded amount is less than 75% of the minimum bonded")
+      .equals(true);
+  });
 });
 export {
   setup,

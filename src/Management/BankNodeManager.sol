@@ -74,7 +74,7 @@ contract BankNodeManager is
         return bankNodes[bankNodeId].bnplStakingPoolContract;
     }
 
-    function getBankNodeStakingPoolToken(uint32 bankNodeId) public view override returns (address) {
+    function getBankNodeStakingPoolToken(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bnplStakingPoolToken;
     }
@@ -90,7 +90,7 @@ contract BankNodeManager is
         uint256 _minimumBankNodeBondedAmount,
         BankNodeLendingRewards _bankNodeLendingRewards,
         BNPLKYCStore _bnplKYCStore
-    ) public override initializer nonReentrant {
+    ) external override initializer nonReentrant {
         require(address(_protocolConfig) != address(0), "_protocolConfig cannot be 0");
         require(address(_bnplKYCStore) != address(0), "kyc store cannot be 0");
         require(_configurator != address(0), "_configurator cannot be 0");
@@ -117,7 +117,7 @@ contract BankNodeManager is
 
     /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to add support for a new ERC20 token to be used as lendable tokens for new bank nodes
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled)
-        public
+        external
         override
         nonReentrant
         onlyRole(CONFIGURE_NODE_MANAGER_ROLE)
@@ -269,6 +269,7 @@ contract BankNodeManager is
             address(bnplToken),
             output.bnplStakingPoolToken,
             output.bankNodeContract,
+            address(this),
             msg.sender,
             input.tokensToBond,
             bnplKYCStore,

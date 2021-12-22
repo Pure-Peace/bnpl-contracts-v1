@@ -10,7 +10,8 @@ interface IBankNodeStakingPoolInitializableV1 {
     function initialize(
         address bnplToken,
         address poolBNPLToken,
-        address slasherAdmin,
+        address bankNodeContract,
+        address bankNodeManagerContract,
         address tokenBonder,
         uint256 tokensToBond,
         BNPLKYCStore bnplKYCStore_,
@@ -26,6 +27,8 @@ interface IBNPLNodeStakingPool is IBankNodeStakingPoolInitializableV1 {
 
     function bondTokens(uint256 bondAmount) external;
 
+    function unbondTokens(uint256 unbondAmount) external;
+
     function stakeTokens(uint256 stakeAmount) external;
 
     function unstakeTokens(uint256 unstakeAmount) external;
@@ -33,6 +36,8 @@ interface IBNPLNodeStakingPool is IBankNodeStakingPoolInitializableV1 {
     function slash(uint256 slashAmount) external;
 
     function getPoolTotalAssetsValue() external view returns (uint256);
+
+    function isApproveLoanAvailable() external view returns (bool);
 
     function claimNodeOwnerPoolTokenRewards(address to) external;
 }
