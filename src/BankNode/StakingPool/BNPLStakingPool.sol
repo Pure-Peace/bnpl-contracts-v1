@@ -131,9 +131,9 @@ contract BNPLStakingPool is
         return baseTokenBalance;
     }
 
-    function isApproveLoanAvailable() public view override returns (bool) {
+    function isNodeDecomissioning() public view override returns (bool) {
         return
-            getPoolWithdrawConversion(POOL_LIQUIDITY_TOKEN.balanceOf(address(this))) >=
+            getPoolWithdrawConversion(POOL_LIQUIDITY_TOKEN.balanceOf(address(this))) <
             ((bankNodeManager.minimumBankNodeBondedAmount() * 75) / 100);
     }
 
@@ -291,6 +291,7 @@ contract BNPLStakingPool is
     function _addLiquidity(address user, uint256 depositAmount) private returns (uint256) {
         require(user != address(this), "user cannot be self");
         require(user != address(0), "user cannot be null");
+        require(!isNodeDecomissioning(), "BankNode bonded amount is less than 75% of the minimum");
 
         require(depositAmount != 0, "depositAmount cannot be 0");
         if (poolTokenEffectiveSupply == 0) {

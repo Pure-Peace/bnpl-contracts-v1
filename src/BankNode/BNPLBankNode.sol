@@ -390,6 +390,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     function _addLiquidity(address user, uint256 depositAmount) private returns (uint256) {
         require(user != address(this), "user cannot be self");
         require(user != address(0), "user cannot be null");
+        require(!nodeStakingPool.isNodeDecomissioning(), "BankNode bonded amount is less than 75% of the minimum");
 
         require(depositAmount != 0, "depositAmount cannot be 0");
         if (poolTokensCirculating == 0) {
@@ -516,10 +517,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         LoanRequest storage loanRequest = loanRequests[loanRequestId];
         require(loanRequest.borrower != address(0));
         require(loanRequest.status == 0, "loan must not already be approved/rejected");
-        require(
-            nodeStakingPool.isApproveLoanAvailable(),
-            "BankNode bonded amount is less than 75% of the minimum bonded"
-        );
+        require(!nodeStakingPool.isNodeDecomissioning(), "BankNode bonded amount is less than 75% of the minimum");
 
         uint256 loanAmount = loanRequest.loanAmount;
         require(
