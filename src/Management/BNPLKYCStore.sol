@@ -48,6 +48,21 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         return userKycStatuses[encodeKYCUserDomainKey(domain, user)];
     }
 
+    function _verifyProof(
+        uint32 domain,
+        address user,
+        uint32 status,
+        uint256 nonce,
+        bytes calldata signature
+    ) internal {
+        require(domain != 0 && domain <= domainCount, "invalid domain");
+        require(publicKeys[domain] != address(0), "this domain is disabled");
+        bytes32 proofHash = getKYCSignatureHash(domain, user, status, nonce);
+        require(proofHash.toEthSignedMessageHash().recover(signature) == publicKeys[domain], "invalid signature");
+        require(proofUsed[proofHash] == 0, "proof already used");
+        proofUsed[proofHash] = 1;
+    }
+
     function _setKYCStatusUser(
         uint32 domain,
         address user,
@@ -140,14 +155,18 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         uint256 nonce,
         bytes calldata signature
     ) external {
-        require(domain != 0 && domain <= domainCount, "invalid domain");
-        require(publicKeys[domain] != address(0), "this domain is disabled");
-        bytes32 proofHash = getKYCSignatureHash(domain, user, status, nonce);
-        require(proofHash.toEthSignedMessageHash().recover(signature) == publicKeys[domain], "invalid signature");
-        require(proofUsed[proofHash] == 0, "proof already used");
-        proofUsed[proofHash] = 1;
-
+        _verifyProof(domain, user, status, nonce, signature);
         _orKYCStatusUser(domain, user, status);
+    }
+
+    function clearKYCStatusWithProof(
+        uint32 domain,
+        address user,
+        uint256 nonce,
+        bytes calldata signature
+    ) external {
+        _verifyProof(domain, user, 0, nonce, signature);
+        _setKYCStatusUser(domain, user, 0);
     }
 
     function initialize() external initializer nonReentrant {
