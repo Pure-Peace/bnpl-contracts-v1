@@ -619,7 +619,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         TransferHelper.safeApprove(address(baseLiquidityToken), address(bnplSwapMarket), amountInBaseToken);
         //(uint256 amountOut) = bnplSwapMarket.swapTokenForBNPL(address(baseLiquidityToken), amountInBaseToken);
 
-        IBNPLSwapMarket.ExactInputSingleParams memory params = IBNPLSwapMarket.ExactInputSingleParams({
+        /* IBNPLSwapMarket.ExactInputSingleParams memory params = IBNPLSwapMarket.ExactInputSingleParams({
             tokenIn: address(baseLiquidityToken),
             tokenOut: address(bnplToken),
             fee: bnplSwapMarketPoolFee,
@@ -628,8 +628,11 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             amountIn: amountInBaseToken,
             amountOutMinimum: 0,
             sqrtPriceLimitX96: 0
-        });
-        uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
+        }); */
+        address[] memory path;
+        (path[0], path[1]) = (address(baseLiquidityToken), address(bnplToken));
+        uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(amountInBaseToken, 0, path, address(this));
+        // uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
         require(amountOut > 0, "swap amount must be > 0");
         TransferHelper.safeApprove(address(bnplToken), address(nodeStakingPool), amountOut);
         nodeStakingPool.donate(amountOut);
@@ -638,7 +641,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     function _marketSellBNPLForSlashing(uint256 bnplAmount) private {
         require(bnplAmount > 0);
         TransferHelper.safeApprove(address(bnplToken), address(bnplSwapMarket), bnplAmount);
-        IBNPLSwapMarket.ExactInputSingleParams memory params = IBNPLSwapMarket.ExactInputSingleParams({
+        /* IBNPLSwapMarket.ExactInputSingleParams memory params = IBNPLSwapMarket.ExactInputSingleParams({
             tokenIn: address(bnplToken),
             tokenOut: address(baseLiquidityToken),
             fee: bnplSwapMarketPoolFee,
@@ -647,9 +650,12 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             amountIn: bnplAmount,
             amountOutMinimum: 0,
             sqrtPriceLimitX96: 0
-        });
-        uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
-        //bnplSwapMarket.swapBNPLForToken(address(baseLiquidityToken), bnplAmount);
+        }); */
+        address[] memory path;
+        (path[0], path[1]) = (address(bnplToken), address(baseLiquidityToken));
+        uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(bnplAmount, 0, path, address(this));
+        // uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
+        // bnplSwapMarket.swapBNPLForToken(address(baseLiquidityToken), bnplAmount);
         require(amountOut > 0, "swap amount must be > 0");
         baseTokenBalance += amountOut;
     }
