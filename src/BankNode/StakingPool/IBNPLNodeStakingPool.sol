@@ -27,7 +27,7 @@ interface IBNPLNodeStakingPool is IBankNodeStakingPoolInitializableV1 {
 
     function bondTokens(uint256 bondAmount) external;
 
-    function unbondTokens(uint256 unbondAmount) external;
+    function unbondTokens() external;
 
     function stakeTokens(uint256 stakeAmount) external;
 

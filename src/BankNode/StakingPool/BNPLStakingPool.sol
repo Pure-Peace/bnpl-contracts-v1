@@ -220,27 +220,23 @@ contract BNPLStakingPool is
         emit Bond(sender, depositAmount);
     }
 
-    function _processUnbondTokens(address sender, uint256 unbondAmount) private {
+    function _processUnbondTokens(address sender) private {
         require(sender != address(this), "sender cannot be self");
         require(sender != address(0), "sender cannot be null");
-        require(unbondAmount != 0, "unbondAmount cannot be 0");
-
         require(bankNode.onGoingLoanCount() == 0, "Cannot unbond, there are ongoing loans");
-        uint256 bondedAmount = getPoolDepositConversion(unbondAmount);
-        require(unbondAmount <= bondedAmount, "The unbondAmount must be <= the bondedAmount");
-        require(
-            getPoolWithdrawConversion(POOL_LIQUIDITY_TOKEN.balanceOf(address(this))) >= unbondAmount,
-            "Insufficient bonded amount"
-        );
 
-        TransferHelper.safeTransfer(address(BASE_LIQUIDITY_TOKEN), sender, unbondAmount);
-        POOL_LIQUIDITY_TOKEN.burn(bondedAmount);
+        uint256 pTokens = POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
+        uint256 totalBonded = getPoolWithdrawConversion(pTokens);
+        require(totalBonded != 0, "Insufficient bonded amount");
 
-        poolTokenEffectiveSupply -= bondedAmount;
-        virtualPoolTokensCount -= bondedAmount;
-        baseTokenBalance -= unbondAmount;
+        TransferHelper.safeTransfer(address(BASE_LIQUIDITY_TOKEN), sender, totalBonded);
+        POOL_LIQUIDITY_TOKEN.burn(pTokens);
 
-        emit Unbond(sender, unbondAmount);
+        poolTokenEffectiveSupply -= pTokens;
+        virtualPoolTokensCount -= pTokens;
+        baseTokenBalance -= totalBonded;
+
+        emit Unbond(sender, totalBonded);
     }
 
     function _setupLiquidityFirst(address user, uint256 depositAmount) private returns (uint256) {
@@ -347,10 +343,9 @@ contract BNPLStakingPool is
         _processBondTokens(msg.sender, bondAmount);
     }
 
-    /// @notice Allows a user to unbond `unbondAmount` of BNPL from the pool
-    function unbondTokens(uint256 unbondAmount) external override nonReentrant onlyRole(NODE_REWARDS_MANAGER_ROLE) {
-        require(unbondAmount != 0, "unbondAmount cannot be 0");
-        _processUnbondTokens(msg.sender, unbondAmount);
+    /// @notice Allows a user to unbond BNPL from the pool
+    function unbondTokens() external override nonReentrant onlyRole(NODE_REWARDS_MANAGER_ROLE) {
+        _processUnbondTokens(msg.sender);
     }
 
     /// @notice Allows a user to stake `unstakeAmount` of BNPL to the pool (user must first approve)
