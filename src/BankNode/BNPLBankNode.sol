@@ -231,6 +231,13 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         return (poolBalance * slashRatio) / PRBMathUD60x18.scale();
     }
 
+    function getSwapExactTokensPath(address tokenIn, address tokenOut) private pure returns (address[] memory) {
+        address[] memory path = new address[](2);
+        path[0] = address(tokenIn);
+        path[1] = address(tokenOut);
+        return path;
+    }
+
     function getMonthlyInterestPayment(
         uint256 loanAmount,
         uint256 interestAmount,
@@ -629,9 +636,12 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             amountOutMinimum: 0,
             sqrtPriceLimitX96: 0
         }); */
-        address[] memory path;
-        (path[0], path[1]) = (address(baseLiquidityToken), address(bnplToken));
-        uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(amountInBaseToken, 0, path, address(this));
+        uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(
+            amountInBaseToken,
+            0,
+            getSwapExactTokensPath(address(baseLiquidityToken), address(bnplToken)),
+            address(this)
+        );
         // uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
         require(amountOut > 0, "swap amount must be > 0");
         TransferHelper.safeApprove(address(bnplToken), address(nodeStakingPool), amountOut);
@@ -651,9 +661,12 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             amountOutMinimum: 0,
             sqrtPriceLimitX96: 0
         }); */
-        address[] memory path;
-        (path[0], path[1]) = (address(bnplToken), address(baseLiquidityToken));
-        uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(bnplAmount, 0, path, address(this));
+        uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(
+            bnplAmount,
+            0,
+            getSwapExactTokensPath(address(bnplToken), address(baseLiquidityToken)),
+            address(this)
+        );
         // uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
         // bnplSwapMarket.swapBNPLForToken(address(baseLiquidityToken), bnplAmount);
         require(amountOut > 0, "swap amount must be > 0");
