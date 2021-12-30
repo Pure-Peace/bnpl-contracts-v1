@@ -658,7 +658,7 @@ describe('BankNodeCombos', function () {
       .equals(startBondedBNPLAmount);
 
     const o = await h.getSubContractsForBankNodeWithSigner(bankNodeIdA, u.bankNodeMakerA)
-    await o.StakingPool.unbondTokens(await o.StakingPool.getPoolWithdrawConversion(await o.StakingPool.virtualPoolTokensCount()))
+    await o.StakingPool.unbondTokens()
 
 
     let result
@@ -683,7 +683,7 @@ describe('BankNodeCombos', function () {
       result = true
     }
 
-    expect(result, "After unbond: BankNode bonded amount is less than 75% of the minimum bonded")
+    expect(result, "After unbond we should cannot operate")
       .equals(true);
   });
 });
