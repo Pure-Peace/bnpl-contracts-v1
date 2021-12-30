@@ -25,12 +25,12 @@ interface IBNPLSwapMarket {
     function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
 
     /// @notice Swaps `amountIn` of one token for as much as possible of another token
-    /// @return amountOut The amount of the received token
+    /// @return amounts The amount of the received token
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external payable returns (uint256 amountOut);
+    ) external payable returns (uint256[] memory amounts);
 }

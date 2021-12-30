@@ -126,14 +126,17 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external payable override returns (uint256 amountOut) {
+    ) external payable override returns (uint256[] memory amounts) {
         require(block.timestamp <= deadline, "Transaction too old");
+
+        amounts = new uint256[](path.length);
+        amounts[0] = amountIn;
         if (path[0] == BNPL_TOKEN_ADDRESS) {
-            amountOut = _swapBNPLForToken(path[1], amountIn, to);
+            amounts[1] = _swapBNPLForToken(path[1], amountIn, to);
         } else {
             require(path[1] == BNPL_TOKEN_ADDRESS, "only supports swaps with BNPL token involved!");
-            amountOut = _swapTokenForBNPL(path[0], amountIn, to);
+            amounts[1] = _swapTokenForBNPL(path[0], amountIn, to);
         }
-        require(amountOut >= amountOutMin, "Too little received");
+        require(amounts[1] >= amountOutMin, "Too little received");
     }
 }
