@@ -102,6 +102,7 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
         amountOut = actualAmountOut;
     }
 
+    /// @notice Uniswap V3
     function exactInputSingle(IBNPLSwapMarket.ExactInputSingleParams calldata params)
         external
         payable
@@ -116,5 +117,21 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
             amountOut = _swapTokenForBNPL(params.tokenIn, params.amountIn, params.recipient);
         }
         require(amountOut >= params.amountOutMinimum, "Too little received");
+    }
+
+    /// @notice Sushiswap or Uniswap V2
+    function swapExactTokensForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to
+    ) external payable override returns (uint256 amountOut) {
+        if (path[0] == BNPL_TOKEN_ADDRESS) {
+            amountOut = _swapBNPLForToken(path[1], amountIn, to);
+        } else {
+            require(path[1] == BNPL_TOKEN_ADDRESS, "only supports swaps with BNPL token involved!");
+            amountOut = _swapTokenForBNPL(path[0], amountIn, to);
+        }
+        require(amountOut >= amountOutMin, "Too little received");
     }
 }

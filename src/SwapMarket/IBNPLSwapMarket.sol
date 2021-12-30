@@ -3,7 +3,7 @@
 pragma solidity ^0.8.0;
 
 /**
- * @dev Interface of the IBNPLSwapMarket standard 
+ * @dev Interface of the IBNPLSwapMarket standard
  */
 interface IBNPLSwapMarket {
     /// @title Router token swapping functionality
@@ -24,5 +24,12 @@ interface IBNPLSwapMarket {
     /// @return amountOut The amount of the received token
     function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
 
-   
+    /// @notice Swaps `amountIn` of one token for as much as possible of another token
+    /// @return amountOut The amount of the received token
+    function swapExactTokensForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to
+    ) external payable returns (uint256 amountOut);
 }
