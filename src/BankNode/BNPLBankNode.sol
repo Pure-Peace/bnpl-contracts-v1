@@ -640,7 +640,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             amountInBaseToken,
             0,
             getSwapExactTokensPath(address(baseLiquidityToken), address(bnplToken)),
-            address(this)
+            address(this),
+            block.timestamp
         );
         // uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
         require(amountOut > 0, "swap amount must be > 0");
@@ -665,7 +666,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             bnplAmount,
             0,
             getSwapExactTokensPath(address(bnplToken), address(baseLiquidityToken)),
-            address(this)
+            address(this),
+            block.timestamp
         );
         // uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
         // bnplSwapMarket.swapBNPLForToken(address(baseLiquidityToken), bnplAmount);

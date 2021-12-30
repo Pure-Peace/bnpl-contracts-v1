@@ -119,13 +119,15 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
         require(amountOut >= params.amountOutMinimum, "Too little received");
     }
 
-    /// @notice Sushiswap or Uniswap V2
+    /// @notice Sushiswap
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path,
-        address to
+        address to,
+        uint256 deadline
     ) external payable override returns (uint256 amountOut) {
+        require(block.timestamp <= deadline, "Transaction too old");
         if (path[0] == BNPL_TOKEN_ADDRESS) {
             amountOut = _swapBNPLForToken(path[1], amountIn, to);
         } else {

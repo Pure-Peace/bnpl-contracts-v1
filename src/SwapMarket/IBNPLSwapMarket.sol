@@ -30,6 +30,7 @@ interface IBNPLSwapMarket {
         uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path,
-        address to
+        address to,
+        uint256 deadline
     ) external payable returns (uint256 amountOut);
 }
