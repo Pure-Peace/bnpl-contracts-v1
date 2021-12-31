@@ -161,6 +161,8 @@ contract UserTokenLockup is Initializable {
     function _claimNextTokenLockup(address user) internal returns (uint256) {
         require(user != address(0), "cannot claim for null user");
         (uint256 tokensLocked, uint32 currentVaultIndex, uint32 numberOfActiveVaults) = userLockupStatus(user);
+        currentVaultIndex = currentVaultIndex + 1 - numberOfActiveVaults;
+
         require(tokensLocked > 0 && numberOfActiveVaults > 0 && currentVaultIndex > 0, "user has no tokens locked up!");
         (uint256 tokenAmount, uint64 unlockDate) = getTokenLockup(user, currentVaultIndex);
         require(tokenAmount > 0 && unlockDate <= _getTime(), "cannot claim tokens that have not matured yet!");
@@ -180,6 +182,8 @@ contract UserTokenLockup is Initializable {
         require(user != address(0), "cannot claim for null user");
         require(maxNumberOfClaims > 0, "cannot claim 0 lockups");
         (uint256 tokensLocked, uint32 currentVaultIndex, uint32 numberOfActiveVaults) = userLockupStatus(user);
+        currentVaultIndex = currentVaultIndex + 1 - numberOfActiveVaults;
+
         require(tokensLocked > 0 && numberOfActiveVaults > 0 && currentVaultIndex > 0, "user has no tokens locked up!");
         uint256 curTimeShifted = _getTime() << 192;
         uint32 maxVaultIndex = (maxNumberOfClaims > numberOfActiveVaults ? numberOfActiveVaults : maxNumberOfClaims) +
