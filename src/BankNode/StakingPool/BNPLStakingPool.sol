@@ -193,7 +193,11 @@ contract BNPLStakingPool is
         require(poolTokenEffectiveSupply == newMintTokensCirculating);
     }
 
-    function _processDonation(address sender, uint256 depositAmount) private {
+    function _processDonation(
+        address sender,
+        uint256 depositAmount,
+        bool countedIntoTotal
+    ) private {
         require(sender != address(this), "sender cannot be self");
         require(sender != address(0), "sender cannot be null");
         require(depositAmount != 0, "depositAmount cannot be 0");
@@ -201,7 +205,9 @@ contract BNPLStakingPool is
         require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
         TransferHelper.safeTransferFrom(address(BASE_LIQUIDITY_TOKEN), sender, address(this), depositAmount);
         baseTokenBalance += depositAmount;
-        totalDonatedAllTime += depositAmount;
+        if (countedIntoTotal) {
+            totalDonatedAllTime += depositAmount;
+        }
         emit Donation(sender, depositAmount);
     }
 
@@ -334,7 +340,13 @@ contract BNPLStakingPool is
     /// @notice Allows a user to donate `donateAmount` of BNPL to the pool (user must first approve)
     function donate(uint256 donateAmount) external override nonReentrant {
         require(donateAmount != 0, "donateAmount cannot be 0");
-        _processDonation(msg.sender, donateAmount);
+        _processDonation(msg.sender, donateAmount, true);
+    }
+
+    /// @notice Allows a user to donate `donateAmount` of BNPL to the pool (not conted in total) (user must first approve)
+    function donateNotCountedInTotal(uint256 donateAmount) external override nonReentrant {
+        require(donateAmount != 0, "donateAmount cannot be 0");
+        _processDonation(msg.sender, donateAmount, false);
     }
 
     /// @notice Allows a user to bond `bondAmount` of BNPL to the pool (user must first approve)

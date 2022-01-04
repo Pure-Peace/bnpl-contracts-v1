@@ -646,7 +646,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         // uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
         require(amountOut > 0, "swap amount must be > 0");
         TransferHelper.safeApprove(address(bnplToken), address(nodeStakingPool), amountOut);
-        nodeStakingPool.donate(amountOut);
+        nodeStakingPool.donateNotCountedInTotal(amountOut);
     }
 
     function _marketSellBNPLForSlashing(uint256 bnplAmount) private {

@@ -25,6 +25,8 @@ interface IBankNodeStakingPoolInitializableV1 {
 interface IBNPLNodeStakingPool is IBankNodeStakingPoolInitializableV1 {
     function donate(uint256 donateAmount) external;
 
+    function donateNotCountedInTotal(uint256 donateAmount) external;
+
     function bondTokens(uint256 bondAmount) external;
 
     function unbondTokens() external;
