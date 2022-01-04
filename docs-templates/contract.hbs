@@ -39,9 +39,13 @@
 ### {{name}}
 ```solidity
   event {{name}}(
+    {{#if natspec.params}}
     {{#natspec.params}}
     {{#lookup ../args.types @index}}{{/lookup}} {{param}}{{#if @last}}{{else}},{{/if}}
     {{/natspec.params}}
+    {{else}}
+    {{args}}
+    {{/if}}
   )
 ```
 {{#if natspec.userdoc}}{{natspec.userdoc}}{{/if}}
