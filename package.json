@@ -47,6 +47,7 @@
     "mocha": "^9.1.1",
     "prettier": "^2.3.2",
     "prettier-plugin-solidity": "^1.0.0-beta.17",
+    "solc-0.8.10": "npm:solc@^0.8.10",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.17",
@@ -57,7 +58,8 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.2",
-    "@openzeppelin/contracts-upgradeable": "^4.3.2"
+    "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "solidity-docgen": "^0.5.16"
   },
   "scripts": {
     "prepare": "node ./.setup.js && hardhat typechain",
@@ -80,6 +82,7 @@
     "fork:deploy": "node ./_scripts.js fork:deploy",
     "fork:dev": "node ./_scripts.js fork:dev",
     "fork:node": "node ./_scripts.js fork:node",
-    "fork:test": "echo hi && node ./_scripts.js fork:test"
+    "fork:test": "echo hi && node ./_scripts.js fork:test",
+    "docs": "solidity-docgen -i ./src -t ./docs-templates --solc-module solc-0.8.10"
   }
 }

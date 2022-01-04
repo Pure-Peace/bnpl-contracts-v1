@@ -1,5 +1,11 @@
 # Boilerplate for ethereum solidity smart contract development
 
+## Docs generate
+
+```
+yarn docs
+```
+
 ## INSTALL
 
 ```bash
