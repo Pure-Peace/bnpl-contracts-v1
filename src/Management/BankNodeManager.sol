@@ -84,6 +84,45 @@ contract BankNodeManager is
         return bankNodes[bankNodeId].lendableToken;
     }
 
+    function getBankNodeList(uint32 start, uint32 count)
+        external
+        view
+        override
+        returns (BankNodeData[] memory, uint32)
+    {
+        if (start > bankNodeCount) {
+            return (new BankNodeData[](0), bankNodeCount);
+        }
+        uint32 end = start + count;
+        if (end > bankNodeCount) {
+            end = bankNodeCount;
+            count = end - start;
+        }
+        BankNodeData[] memory tmp = new BankNodeData[](count);
+        uint32 tmpIndex = 0;
+        for (uint32 i = start; i < end; i++) {
+            BankNode memory _node = bankNodes[i + 1];
+            tmp[tmpIndex++] = BankNodeData(_node, getBankNodeDetail(_node.bankNodeContract));
+        }
+        return (tmp, bankNodeCount);
+    }
+
+    function getBankNodeDetail(address bankNode) public view returns (BankNodeDetail memory) {
+        IBNPLBankNode node = IBNPLBankNode(bankNode);
+        IBNPLNodeStakingPool pool = IBNPLNodeStakingPool(node.nodeStakingPool());
+        return
+            BankNodeDetail({
+                totalAssetsValueBankNode: node.getPoolTotalAssetsValue(),
+                totalAssetsValueStakingPool: pool.getPoolTotalAssetsValue(),
+                tokensCirculatingBankNode: node.poolTokensCirculating(),
+                tokensCirculatingStakingPool: pool.poolTokensCirculating(),
+                totalLiquidAssetsValue: node.getPoolTotalLiquidAssetsValue(),
+                baseTokenBalance: node.baseTokenBalance(),
+                baseLiquidityToken: address(node.baseLiquidityToken()),
+                poolLiquidityToken: address(node.poolLiquidityToken())
+            });
+    }
+
     function initialize(
         IBNPLProtocolConfig _protocolConfig,
         address _configurator,

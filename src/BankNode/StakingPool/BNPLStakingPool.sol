@@ -119,7 +119,7 @@ contract BNPLStakingPool is
         emit Bond(tokenBonder, tokensToBond);
     }
 
-    function poolTokensCirculating() external view returns (uint256) {
+    function poolTokensCirculating() external view override returns (uint256) {
         return poolTokenEffectiveSupply - POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
     }
 

@@ -53,6 +53,10 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
 
     function bankNodeId() external view returns (uint32);
 
+    function getPoolTotalAssetsValue() external view returns (uint256);
+
+    function getPoolTotalLiquidAssetsValue() external view returns (uint256);
+
     function nodeStakingPool() external view returns (IBNPLNodeStakingPool);
 
     function bankNodeManager() external view returns (IBankNodeManager);

@@ -203,11 +203,11 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         return unusedFundsLendingToken.balanceOf(address(this));
     }
 
-    function getPoolTotalAssetsValue() public view returns (uint256) {
+    function getPoolTotalAssetsValue() public view override returns (uint256) {
         return baseTokenBalance + getValueOfUnusedFundsLendingDeposits() + accountsReceivableFromLoans;
     }
 
-    function getPoolTotalLiquidAssetsValue() public view returns (uint256) {
+    function getPoolTotalLiquidAssetsValue() public view override returns (uint256) {
         return baseTokenBalance + getValueOfUnusedFundsLendingDeposits();
     }
 

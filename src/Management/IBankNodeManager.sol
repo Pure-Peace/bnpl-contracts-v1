@@ -31,6 +31,23 @@ interface IBankNodeManager {
         string website;
         string configUrl;
     }
+
+    struct BankNodeDetail {
+        uint256 totalAssetsValueBankNode;
+        uint256 totalAssetsValueStakingPool;
+        uint256 tokensCirculatingBankNode;
+        uint256 tokensCirculatingStakingPool;
+        uint256 totalLiquidAssetsValue;
+        uint256 baseTokenBalance;
+        address baseLiquidityToken;
+        address poolLiquidityToken;
+    }
+
+    struct BankNodeData {
+        BankNode data;
+        BankNodeDetail detail;
+    }
+
     struct CreateBankNodeContractsInput {
         uint32 bankNodeId;
         address operatorAdmin;
@@ -112,6 +129,8 @@ interface IBankNodeManager {
     function bankNodeLendingRewards() external view returns (BankNodeLendingRewards);
 
     function protocolConfig() external view returns (IBNPLProtocolConfig);
+
+    function getBankNodeList(uint32 start, uint32 count) external view returns (BankNodeData[] memory, uint32);
 
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled) external;
 
