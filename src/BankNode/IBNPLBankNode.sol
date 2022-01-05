@@ -156,7 +156,8 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
         uint32 numberOfPayments,
         uint256 amountPerPayment,
         uint8 messageType,
-        string memory message
+        string memory message,
+        string memory uuid
     ) external;
 
     function denyLoanRequest(uint256 loanRequestId) external;

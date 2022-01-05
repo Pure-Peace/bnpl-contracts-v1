@@ -34,7 +34,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     /**
      * @dev Emitted when user `user` requests a loan of `loanAmount` with a loan request id of loanRequestId
      */
-    event LoanRequested(address indexed borrower, uint256 loanAmount, uint256 loanRequestId);
+    event LoanRequested(address indexed borrower, uint256 loanAmount, uint256 loanRequestId, string uuid);
 
     /**
      * @dev Emitted when a node manager `operator` denies a loan request with id `loanRequestId`
@@ -199,7 +199,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         );
     }
 
-    function getValueOfUnusedFundsLendingDeposits() public view returns (uint256) {
+    function getValueOfUnusedFundsLendingDeposits() public view override returns (uint256) {
         return unusedFundsLendingToken.balanceOf(address(this));
     }
 
@@ -459,7 +459,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         uint32 numberOfPayments,
         uint256 interestRatePerPayment,
         uint8 messageType,
-        string memory message
+        string memory message,
+        string memory uuid
     ) private {
         require(loanAmount <= MAX_LOAN_AMOUNT);
         require(loanAmount >= MIN_LOAN_AMOUNT);
@@ -492,7 +493,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         loanRequest.status = 0;
         loanRequest.messageType = messageType;
         loanRequest.message = message;
-        emit LoanRequested(borrower, loanAmount, currentLoanRequestId);
+        emit LoanRequested(borrower, loanAmount, currentLoanRequestId, uuid);
     }
 
     /// @notice Allows users to request a loan from the bank node
@@ -502,7 +503,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         uint32 numberOfPayments,
         uint256 interestRatePerPayment,
         uint8 messageType,
-        string memory message
+        string memory message,
+        string memory uuid
     ) external override nonReentrant {
         require(
             bnplKYCStore.checkUserBasicBitwiseMode(kycDomainId, msg.sender, BORROWER_NEEDS_KYC) == 1,
@@ -515,7 +517,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             numberOfPayments,
             interestRatePerPayment,
             messageType,
-            message
+            message,
+            uuid
         );
     }
 
