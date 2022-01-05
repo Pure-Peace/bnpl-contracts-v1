@@ -38,9 +38,27 @@ interface IBankNodeManager {
         uint256 tokensCirculatingBankNode;
         uint256 tokensCirculatingStakingPool;
         uint256 totalLiquidAssetsValue;
-        uint256 baseTokenBalance;
+        uint256 baseTokenBalanceBankNode;
+        uint256 baseTokenBalanceStakingPool;
+        uint256 accountsReceivableFromLoans;
+        uint256 virtualPoolTokensCount;
         address baseLiquidityToken;
         address poolLiquidityToken;
+        bool isNodeDecomissioning;
+        uint256 nodeOperatorBalance;
+        uint256 loanRequestIndex;
+        uint256 loanIndex;
+        uint256 valueOfUnusedFundsLendingDeposits;
+        uint256 totalLossAllTime;
+        uint256 onGoingLoanCount;
+        uint256 totalTokensLocked;
+        uint256 getUnstakeLockupPeriod;
+        uint256 tokensBondedAllTime;
+        uint256 poolTokenEffectiveSupply;
+        uint256 nodeTotalStaked;
+        uint256 nodeBondedBalance;
+        uint256 nodeOwnerBNPLRewards;
+        uint256 nodeOwnerPoolTokenRewards;
     }
 
     struct BankNodeData {
@@ -130,7 +148,11 @@ interface IBankNodeManager {
 
     function protocolConfig() external view returns (IBNPLProtocolConfig);
 
-    function getBankNodeList(uint32 start, uint32 count) external view returns (BankNodeData[] memory, uint32);
+    function getBankNodeList(
+        uint32 start,
+        uint32 count,
+        bool reverse
+    ) external view returns (BankNodeData[] memory, uint32);
 
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled) external;
 

@@ -3,8 +3,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./IUserTokenLockup.sol";
 
-contract UserTokenLockup is Initializable {
+contract UserTokenLockup is Initializable, IUserTokenLockup {
     /**
      * @dev Emitted when user `user` creates a lockup with an index of `vaultIndex` containing `amount` of tokens which can be claimed on `unlockDate`
      */
@@ -15,7 +16,7 @@ contract UserTokenLockup is Initializable {
      */
     event LockupClaimed(address indexed user, uint256 amount, uint32 vaultIndex);
 
-    uint256 public totalTokensLocked;
+    uint256 public override totalTokensLocked;
     mapping(address => uint256) public encodedLockupStatuses;
     mapping(uint256 => uint256) public encodedTokenLockups;
 

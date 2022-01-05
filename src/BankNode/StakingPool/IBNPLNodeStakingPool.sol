@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.0;
 import "../../Management/BNPLKYCStore.sol";
+import "./IUserTokenLockup.sol";
 
 /**
  * @dev Interface of the IBankNodeStakingPoolInitializableV1 standard
@@ -22,7 +23,7 @@ interface IBankNodeStakingPoolInitializableV1 {
 /**
  * @dev Interface of the IBankNode standard
  */
-interface IBNPLNodeStakingPool is IBankNodeStakingPoolInitializableV1 {
+interface IBNPLNodeStakingPool is IBankNodeStakingPoolInitializableV1, IUserTokenLockup {
     function donate(uint256 donateAmount) external;
 
     function donateNotCountedInTotal(uint256 donateAmount) external;
@@ -38,6 +39,22 @@ interface IBNPLNodeStakingPool is IBankNodeStakingPoolInitializableV1 {
     function slash(uint256 slashAmount) external;
 
     function getPoolTotalAssetsValue() external view returns (uint256);
+
+    function getPoolWithdrawConversion(uint256 withdrawAmount) external view returns (uint256);
+
+    function virtualPoolTokensCount() external view returns (uint256);
+
+    function baseTokenBalance() external view returns (uint256);
+
+    function getUnstakeLockupPeriod() external pure returns (uint256);
+
+    function tokensBondedAllTime() external view returns (uint256);
+
+    function poolTokenEffectiveSupply() external view returns (uint256);
+
+    function getNodeOwnerBNPLRewards() external view returns (uint256);
+
+    function getNodeOwnerPoolTokenRewards() external view returns (uint256);
 
     function poolTokensCirculating() external view returns (uint256);
 

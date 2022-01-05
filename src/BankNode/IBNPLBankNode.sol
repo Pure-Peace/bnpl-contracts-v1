@@ -63,6 +63,8 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
 
     function baseTokenBalance() external view returns (uint256);
 
+    function getValueOfUnusedFundsLendingDeposits() external view returns (uint256);
+
     function nodeOperatorBalance() external view returns (uint256);
 
     function accountsReceivableFromLoans() external view returns (uint256);

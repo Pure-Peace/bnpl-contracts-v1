@@ -65,10 +65,10 @@ contract BNPLStakingPool is
     IBNPLBankNode public bankNode;
     IBankNodeManager public bankNodeManager;
 
-    uint256 public baseTokenBalance;
-    uint256 public tokensBondedAllTime;
-    uint256 public poolTokenEffectiveSupply;
-    uint256 public virtualPoolTokensCount;
+    uint256 public override baseTokenBalance;
+    uint256 public override tokensBondedAllTime;
+    uint256 public override poolTokenEffectiveSupply;
+    uint256 public override virtualPoolTokensCount;
     uint256 public totalDonatedAllTime;
     uint256 public totalSlashedAllTime;
     BNPLKYCStore public bnplKYCStore;
@@ -123,7 +123,7 @@ contract BNPLStakingPool is
         return poolTokenEffectiveSupply - POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
     }
 
-    function getUnstakeLockupPeriod() public pure returns (uint256) {
+    function getUnstakeLockupPeriod() public pure override returns (uint256) {
         return 7 days;
     }
 
@@ -141,7 +141,7 @@ contract BNPLStakingPool is
         return (depositAmount * poolTokenEffectiveSupply) / getPoolTotalAssetsValue();
     }
 
-    function getPoolWithdrawConversion(uint256 withdrawAmount) public view returns (uint256) {
+    function getPoolWithdrawConversion(uint256 withdrawAmount) public view override returns (uint256) {
         return (withdrawAmount * getPoolTotalAssetsValue()) / poolTokenEffectiveSupply;
     }
 
@@ -389,7 +389,7 @@ contract BNPLStakingPool is
         _slash(slashAmount, msg.sender);
     }
 
-    function getNodeOwnerPoolTokenRewards() public view returns (uint256) {
+    function getNodeOwnerPoolTokenRewards() public view override returns (uint256) {
         uint256 equivalentPoolTokens = getPoolDepositConversion(tokensBondedAllTime);
         uint256 ownerPoolTokens = POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
         if (ownerPoolTokens > equivalentPoolTokens) {
@@ -398,7 +398,7 @@ contract BNPLStakingPool is
         return 0;
     }
 
-    function getNodeOwnerBNPLRewards() external view returns (uint256) {
+    function getNodeOwnerBNPLRewards() external view override returns (uint256) {
         uint256 rewardsAmount = getNodeOwnerPoolTokenRewards();
         if (rewardsAmount != 0) {
             return getPoolWithdrawConversion(rewardsAmount);

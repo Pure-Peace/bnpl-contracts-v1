@@ -84,25 +84,35 @@ contract BankNodeManager is
         return bankNodes[bankNodeId].lendableToken;
     }
 
-    function getBankNodeList(uint32 start, uint32 count)
-        external
-        view
-        override
-        returns (BankNodeData[] memory, uint32)
-    {
+    function getBankNodeList(
+        uint32 start,
+        uint32 count,
+        bool reverse
+    ) external view override returns (BankNodeData[] memory, uint32) {
+        uint32 end;
+        if (reverse) {
+            start = bankNodeCount - start;
+            end = (start > count) ? (start - count) : 0;
+            count = start - end;
+        } else {
+            end = (start + count) > bankNodeCount ? bankNodeCount : (start + count);
+            count = end - start;
+        }
         if (start > bankNodeCount) {
             return (new BankNodeData[](0), bankNodeCount);
         }
-        uint32 end = start + count;
-        if (end > bankNodeCount) {
-            end = bankNodeCount;
-            count = end - start;
-        }
         BankNodeData[] memory tmp = new BankNodeData[](count);
         uint32 tmpIndex = 0;
-        for (uint32 i = start; i < end; i++) {
-            BankNode memory _node = bankNodes[i + 1];
-            tmp[tmpIndex++] = BankNodeData(_node, getBankNodeDetail(_node.bankNodeContract));
+        if (reverse) {
+            for (uint32 i = start; i > end; i--) {
+                BankNode memory _node = bankNodes[i];
+                tmp[tmpIndex++] = BankNodeData(_node, getBankNodeDetail(_node.bankNodeContract));
+            }
+        } else {
+            for (uint32 i = start; i < end; i++) {
+                BankNode memory _node = bankNodes[i + 1];
+                tmp[tmpIndex++] = BankNodeData(_node, getBankNodeDetail(_node.bankNodeContract));
+            }
         }
         return (tmp, bankNodeCount);
     }
@@ -110,16 +120,36 @@ contract BankNodeManager is
     function getBankNodeDetail(address bankNode) public view returns (BankNodeDetail memory) {
         IBNPLBankNode node = IBNPLBankNode(bankNode);
         IBNPLNodeStakingPool pool = IBNPLNodeStakingPool(node.nodeStakingPool());
+        uint256 virtualPoolTokensCount = pool.virtualPoolTokensCount();
+        uint256 tokensCirculatingStakingPool = pool.poolTokensCirculating();
         return
             BankNodeDetail({
                 totalAssetsValueBankNode: node.getPoolTotalAssetsValue(),
                 totalAssetsValueStakingPool: pool.getPoolTotalAssetsValue(),
                 tokensCirculatingBankNode: node.poolTokensCirculating(),
-                tokensCirculatingStakingPool: pool.poolTokensCirculating(),
+                tokensCirculatingStakingPool: tokensCirculatingStakingPool,
                 totalLiquidAssetsValue: node.getPoolTotalLiquidAssetsValue(),
-                baseTokenBalance: node.baseTokenBalance(),
+                baseTokenBalanceBankNode: node.baseTokenBalance(),
+                baseTokenBalanceStakingPool: pool.baseTokenBalance(),
+                accountsReceivableFromLoans: node.accountsReceivableFromLoans(),
+                virtualPoolTokensCount: virtualPoolTokensCount,
                 baseLiquidityToken: address(node.baseLiquidityToken()),
-                poolLiquidityToken: address(node.poolLiquidityToken())
+                poolLiquidityToken: address(node.poolLiquidityToken()),
+                isNodeDecomissioning: pool.isNodeDecomissioning(),
+                nodeOperatorBalance: node.nodeOperatorBalance(),
+                loanRequestIndex: node.loanRequestIndex(),
+                loanIndex: node.loanIndex(),
+                valueOfUnusedFundsLendingDeposits: node.getValueOfUnusedFundsLendingDeposits(),
+                totalLossAllTime: node.totalLossAllTime(),
+                onGoingLoanCount: node.onGoingLoanCount(),
+                totalTokensLocked: pool.totalTokensLocked(),
+                getUnstakeLockupPeriod: pool.getUnstakeLockupPeriod(),
+                tokensBondedAllTime: pool.tokensBondedAllTime(),
+                poolTokenEffectiveSupply: pool.poolTokenEffectiveSupply(),
+                nodeTotalStaked: pool.getPoolWithdrawConversion(tokensCirculatingStakingPool),
+                nodeBondedBalance: pool.getPoolWithdrawConversion(virtualPoolTokensCount),
+                nodeOwnerBNPLRewards: pool.getNodeOwnerBNPLRewards(),
+                nodeOwnerPoolTokenRewards: pool.getNodeOwnerPoolTokenRewards()
             });
     }
 
