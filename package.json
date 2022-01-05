@@ -52,7 +52,6 @@
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.17",
     "ts-generator": "^0.1.1",
-    "ts-node": "^10.2.1",
     "typechain": "^5.1.2",
     "typescript": "^4.4.2"
   },
@@ -76,13 +75,14 @@
     "local:dev": "hardhat --network localhost deploy --watch",
     "local:hh": "hardhat --network hardhat deploy --watch",
     "execute": "node ./_scripts.js run",
-    "deploy": "node ./_scripts.js deploy",
     "export": "node ./_scripts.js export",
     "fork:execute": "node ./_scripts.js fork:run",
     "fork:deploy": "node ./_scripts.js fork:deploy",
     "fork:dev": "node ./_scripts.js fork:dev",
     "fork:node": "node ./_scripts.js fork:node",
     "fork:test": "echo hi && node ./_scripts.js fork:test",
-    "docs": "solidity-docgen -i ./src -t ./docs-templates --solc-module solc-0.8.10"
+    "docs": "solidity-docgen -i ./src -t ./docs-templates --solc-module solc-0.8.10",
+    "deploy-dev": "node ./_scripts.js deploy",
+    "deploy-prod": "hardhat run scripts/deploy.ts --network kovan"
   }
 }
