@@ -52,12 +52,14 @@
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.17",
     "ts-generator": "^0.1.1",
+    "ts-node": "^10.4.0",
     "typechain": "^5.1.2",
     "typescript": "^4.4.2"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.2",
     "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "prompts": "^2.4.2",
     "solidity-docgen": "^0.5.16"
   },
   "scripts": {
@@ -83,6 +85,7 @@
     "fork:test": "echo hi && node ./_scripts.js fork:test",
     "docs": "solidity-docgen -i ./src -t ./docs-templates --solc-module solc-0.8.10",
     "deploy-dev": "node ./_scripts.js deploy",
-    "deploy-prod": "hardhat run scripts/deploy.ts --network kovan"
+    "deploy-prod": "hardhat run scripts/deploy.ts --network kovan",
+    "upgrade-cli": "hardhat run scripts/upgrade-cli.ts --network kovan"
   }
 }

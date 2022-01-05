@@ -6,73 +6,26 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import hre from 'hardhat';
 import { DeployResult } from 'hardhat-deploy/types';
 import { getContractForEnvironment } from '../test/utils/getContractForEnvironment';
+import { setup } from './utils'
 
 import {
   BankNodeLendingRewards,
   BankNodeManager,
-  BNPLKYCStore,
   BNPLProtocolConfig,
-  IERC20
 } from '../typechain';
+import { ContractList, IMPL_PREFIX, PROXY_CONTRACTS, UPBEACON_PREFIX, UPGRADEABLE_CONTRACTS, ZERO_ADDRESS } from './constants';
 
 require('dotenv').config();
 
-const { deployments } = hre;
-const { deploy: _dep } = deployments;
-
-const GAS_LIMIT = 5500000;
-
-async function setup() {
-  const accounts = await hre.ethers.getSigners();
-  const deployer = accounts[0];
-  console.log('Deploying on network:', hre.network.name);
-  console.log('Deployer:', deployer.address);
-  console.log(
-    'Deployer balance:',
-    hre.ethers.utils.formatEther(await deployer.getBalance()).toString(),
-    'ETH'
-  );
-
-  return {
-    accounts,
-    deployer,
-    deploy: async (
-      deployName: string,
-      contractName: string,
-      args: string[] = []
-    ): Promise<DeployResult> => {
-      console.log(
-        `\n>> Deploying contract "${deployName}" ("${contractName}")...`
-      );
-      const deployResult = await _dep(deployName, {
-        contract: contractName,
-        args: args,
-        log: true,
-        skipIfAlreadyDeployed: false,
-        gasLimit: GAS_LIMIT,
-        from: deployer.address
-      });
-      console.log(
-        `${deployResult.newlyDeployed ? '[New]' : '[Reused]'
-        } contract "${deployName}" ("${contractName}") deployed at "${deployResult.address
-        }" \n - tx: "${deployResult.transactionHash}" \n - gas: ${deployResult.receipt?.gasUsed
-        } \n - deployer: "${deployer.address}"`
-      );
-      return deployResult;
-    }
-  };
-}
 
 type DeployFunction = (
   deployName: string,
   contractName: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args?: string[] | any[]
 ) => Promise<DeployResult>;
-type ContractList = (string | { [key: string]: string[] })[];
 type Deployments = { [key: string]: DeployResult };
 
-const IMPL_PREFIX = 'Impl';
-const UPBEACON_PREFIX = 'UpBeacon';
 
 async function deployImpl(deploy: DeployFunction, contracts: ContractList) {
   const results: Deployments = {};
@@ -136,26 +89,6 @@ async function deployBeaconProxy(
   return results;
 }
 
-const UPGRADEABLE_CONTRACTS: ContractList = [
-  'BankNodeManager',
-  'BankNodeLendingRewards',
-  'BNPLBankNode',
-  'BNPLStakingPool',
-  'BNPLKYCStore',
-  {
-    PoolTokenUpgradeable: [
-      'BankNodeLendingPoolToken',
-      'BankNodeStakingPoolToken'
-    ]
-  }
-];
-
-const PROXY_CONTRACTS: ContractList = [
-  'BankNodeManager',
-  'BankNodeLendingRewards',
-  'BNPLKYCStore'
-];
-
 const BNPL_TOKEN_ADDRESS = '0x0c6ec7437657cb501ae35718e5426815e83e9e00';
 const MIN_BONDING_AMOUNT = '100000000000000000000000';
 
@@ -218,7 +151,6 @@ async function deployContracts(deploy: DeployFunction) {
 }
 
 async function getDeployedContracts(
-  deploy: DeployFunction,
   deployer: SignerWithAddress
 ) {
   console.log('\n>>>>>>>>> Getting deployed contracts...\n');
@@ -250,10 +182,9 @@ async function initializeBankNodeManager(
 ) {
   console.log('\n>>>>>>>>> Initializing BankNodeManager...\n');
   if (
-    (await BankNodeManager.bnplToken()) !==
-    '0x0000000000000000000000000000000000000000'
+    (await BankNodeManager.bnplToken()) !== ZERO_ADDRESS
   ) {
-    console.log('\nBankNodeManager is already initialized!');
+    console.log('BankNodeManager is already initialized!');
     return;
   }
   await BankNodeManager.initialize(
@@ -263,6 +194,7 @@ async function initializeBankNodeManager(
     beaconProxyDeployments.BankNodeLendingRewardsProxy.address,
     beaconProxyDeployments.BNPLKYCStoreProxy.address
   );
+  console.log('BankNodeManager >> DONE')
 }
 
 async function initializeBankNodeLendingRewards(
@@ -272,10 +204,9 @@ async function initializeBankNodeLendingRewards(
 ) {
   console.log('\n>>>>>>>>> Initializing BankNodeLendingRewards...\n');
   if (
-    (await BankNodeLendingRewards.bankNodeManager()) !==
-    '0x0000000000000000000000000000000000000000'
+    (await BankNodeLendingRewards.bankNodeManager()) !== ZERO_ADDRESS
   ) {
-    console.log('\nBankNodeLendingRewards is already initialized!');
+    console.log('BankNodeLendingRewards is already initialized!');
     return;
   }
   await BankNodeLendingRewards.initialize(
@@ -285,11 +216,14 @@ async function initializeBankNodeLendingRewards(
     deployer.address,
     deployer.address
   );
+  console.log('BankNodeLendingRewards >> DONE')
 }
 
 async function options(BankNodeManager: BankNodeManager) {
   console.log('\n>>>>>>>>> Add lendable tokens...\n');
   await BankNodeManager.addLendableToken(LENDABLETOKEN_TUSD_KOVAN, 1);
+  console.log('lendable tokens >> DONE')
+
 }
 
 async function initializeContracts(
@@ -324,7 +258,7 @@ async function initializeContracts(
 async function main() {
   const { deployer, deploy } = await setup();
   const deployments = await deployContracts(deploy);
-  const deployedContracts = await getDeployedContracts(deploy, deployer);
+  const deployedContracts = await getDeployedContracts(deployer);
   await initializeContracts(deployments, deployedContracts, deployer);
   console.log('>>> CONTRACTS SETUP DONE <<<');
 }
