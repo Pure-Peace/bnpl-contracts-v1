@@ -97,6 +97,8 @@ const A_TUSD_KOVAN = '0x39914AdBe5fDbC2b9ADeedE8Bcd444b20B039204';
 const TUSD_TOKEN_DECIMALS = 18;
 const SUSHISWAP_KOVAN = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
 
+const DEFAULT_REWARD_DURATION = 60 * 60 * 24 * 7;
+
 const LENDABLETOKEN_TUSD_KOVAN = {
   tokenContract: TUSD_KOVAN,
   swapMarket: SUSHISWAP_KOVAN,
@@ -198,6 +200,7 @@ async function initializeBankNodeManager(
 }
 
 async function initializeBankNodeLendingRewards(
+  BankNodeManager: BankNodeManager,
   BankNodeLendingRewards: BankNodeLendingRewards,
   BNPLProtocolConfig: BNPLProtocolConfig,
   deployer: SignerWithAddress
@@ -210,9 +213,9 @@ async function initializeBankNodeLendingRewards(
     return;
   }
   await BankNodeLendingRewards.initialize(
-    60 * 60 * 24 * 7,
+    DEFAULT_REWARD_DURATION,
     await BNPLProtocolConfig.bnplToken(),
-    '0x177A5CA78b5f97F0ca8D0f3EEDfe971F794b2419',
+    BankNodeManager.address,
     deployer.address,
     deployer.address
   );
@@ -248,6 +251,7 @@ async function initializeContracts(
     deployer
   );
   await initializeBankNodeLendingRewards(
+    BankNodeManager,
     BankNodeLendingRewards,
     BNPLProtocolConfig,
     deployer
