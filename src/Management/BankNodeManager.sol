@@ -84,6 +84,21 @@ contract BankNodeManager is
         return bankNodes[bankNodeId].lendableToken;
     }
 
+    function getBankNodeLoansStatistic()
+        external
+        view
+        override
+        returns (uint256 totalAmountOfAllActiveLoans, uint256 totalAmountOfAllLoans)
+    {
+        totalAmountOfAllActiveLoans;
+        totalAmountOfAllLoans;
+        for (uint32 i = 0; i < bankNodeCount; i++) {
+            IBNPLBankNode node = IBNPLBankNode(bankNodes[i + 1].bankNodeContract);
+            totalAmountOfAllActiveLoans += node.totalAmountOfActiveLoans();
+            totalAmountOfAllLoans += node.totalAmountOfLoans();
+        }
+    }
+
     function getBankNodeList(
         uint32 start,
         uint32 count,
@@ -117,7 +132,7 @@ contract BankNodeManager is
         return (tmp, bankNodeCount);
     }
 
-    function getBankNodeDetail(address bankNode) public view returns (BankNodeDetail memory) {
+    function getBankNodeDetail(address bankNode) public view override returns (BankNodeDetail memory) {
         IBNPLBankNode node = IBNPLBankNode(bankNode);
         IBNPLNodeStakingPool pool = IBNPLNodeStakingPool(node.nodeStakingPool());
         uint256 virtualPoolTokensCount = pool.virtualPoolTokensCount();

@@ -91,6 +91,11 @@ interface IBankNodeManager {
 
     function getBankNodeLendableToken(uint32 bankNodeId) external view returns (address);
 
+    function getBankNodeLoansStatistic()
+        external
+        view
+        returns (uint256 totalAmountOfAllActiveLoans, uint256 totalAmountOfAllLoans);
+
     function bnplKYCStore() external view returns (BNPLKYCStore);
 
     function initialize(
@@ -153,6 +158,8 @@ interface IBankNodeManager {
         uint32 count,
         bool reverse
     ) external view returns (BankNodeData[] memory, uint32);
+
+    function getBankNodeDetail(address bankNode) external view returns (BankNodeDetail memory);
 
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled) external;
 
