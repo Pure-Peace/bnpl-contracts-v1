@@ -73,22 +73,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         string message;
     }
 
-    struct Loan {
-        address borrower;
-        uint256 loanAmount;
-        uint64 totalLoanDuration;
-        uint32 numberOfPayments;
-        uint64 loanStartedAt;
-        uint32 numberOfPaymentsMade;
-        uint256 amountPerPayment;
-        uint256 interestRatePerPayment;
-        uint256 totalAmountPaid;
-        uint256 remainingBalance;
-        uint8 status; // 0 = ongoing, 1 = completed, 2 = overdue, 3 = written off
-        uint64 statusUpdatedAt;
-        uint256 loanRequestId;
-    }
-
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant OPERATOR_ADMIN_ROLE = keccak256("OPERATOR_ADMIN_ROLE");
     //TODO: Source
@@ -153,6 +137,35 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
     function nodePublicKey() external view override returns (address) {
         return bnplKYCStore.publicKeys(kycDomainId);
+    }
+
+    function getLoansList(
+        uint256 start,
+        uint256 count,
+        bool reverse,
+        int8 status
+    ) external view override returns (Loan[] memory, uint256) {
+        if (start > loanIndex) {
+            return (new Loan[](0), loanIndex);
+        }
+        uint256 end;
+        if (reverse) {
+            start = loanIndex - start;
+            end = (start > count) ? (start - count) : 0;
+            count = start - end;
+        } else {
+            end = (start + count) > loanIndex ? loanIndex : (start + count);
+            count = end - start;
+        }
+        Loan[] memory tmp = new Loan[](count);
+        uint32 tmpIndex = 0;
+        while ((tmpIndex < count) && reverse ? start > 0 : start < loanIndex) {
+            Loan memory _loan = loans[reverse ? start - 1 : start];
+            reverse ? start-- : start++;
+            if (status > -1 && _loan.status != uint8(status)) continue;
+            tmp[tmpIndex++] = _loan;
+        }
+        return (tmp, loanIndex);
     }
 
     function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig)

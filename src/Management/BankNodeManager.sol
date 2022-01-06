@@ -104,6 +104,9 @@ contract BankNodeManager is
         uint32 count,
         bool reverse
     ) external view override returns (BankNodeData[] memory, uint32) {
+        if (start > bankNodeCount) {
+            return (new BankNodeData[](0), bankNodeCount);
+        }
         uint32 end;
         if (reverse) {
             start = bankNodeCount - start;
@@ -113,19 +116,18 @@ contract BankNodeManager is
             end = (start + count) > bankNodeCount ? bankNodeCount : (start + count);
             count = end - start;
         }
-        if (start > bankNodeCount) {
-            return (new BankNodeData[](0), bankNodeCount);
-        }
         BankNodeData[] memory tmp = new BankNodeData[](count);
         uint32 tmpIndex = 0;
         if (reverse) {
-            for (uint32 i = start; i > end; i--) {
-                BankNode memory _node = bankNodes[i];
+            while ((tmpIndex < count) && start > 0) {
+                BankNode memory _node = bankNodes[start];
+                start--;
                 tmp[tmpIndex++] = BankNodeData(_node, getBankNodeDetail(_node.bankNodeContract));
             }
         } else {
-            for (uint32 i = start; i < end; i++) {
-                BankNode memory _node = bankNodes[i + 1];
+            while ((tmpIndex < count) && start < bankNodeCount) {
+                BankNode memory _node = bankNodes[start + 1];
+                start++;
                 tmp[tmpIndex++] = BankNodeData(_node, getBankNodeDetail(_node.bankNodeContract));
             }
         }

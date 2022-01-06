@@ -39,6 +39,21 @@ interface IBankNodeInitializableV1 {
  */
 interface IBNPLBankNode is IBankNodeInitializableV1 {
     // start structs
+    struct Loan {
+        address borrower;
+        uint256 loanAmount;
+        uint64 totalLoanDuration;
+        uint32 numberOfPayments;
+        uint64 loanStartedAt;
+        uint32 numberOfPaymentsMade;
+        uint256 amountPerPayment;
+        uint256 interestRatePerPayment;
+        uint256 totalAmountPaid;
+        uint256 remainingBalance;
+        uint8 status; // 0 = ongoing, 1 = completed, 2 = overdue, 3 = written off
+        uint64 statusUpdatedAt;
+        uint256 loanRequestId;
+    }
 
     // end structs
     function unusedFundsLendingMode() external view returns (uint16);
@@ -102,6 +117,13 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
     function kycDomainId() external view returns (uint32);
 
     function bnplKYCStore() external view returns (BNPLKYCStore);
+
+    function getLoansList(
+        uint256 start,
+        uint256 count,
+        bool reverse,
+        int8 status
+    ) external view returns (Loan[] memory, uint256);
 
     function loanRequests(uint256 _loanRequestId)
         external
