@@ -27,6 +27,7 @@ interface IBankNodeManager {
         address creator;
         uint32 id;
         uint64 createdAt;
+        uint256 createBlock;
         string nodeName;
         string website;
         string configUrl;
@@ -136,6 +137,7 @@ interface IBankNodeManager {
             address creator,
             uint32 id,
             uint64 createdAt,
+            uint256 createBlock,
             string calldata nodeName,
             string calldata website,
             string calldata configUrl

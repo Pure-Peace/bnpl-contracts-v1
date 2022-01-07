@@ -413,6 +413,7 @@ contract BankNodeManager is
         bankNode.creator = msg.sender;
 
         bankNode.createdAt = uint64(block.timestamp);
+        bankNode.createBlock = block.number;
 
         bankNode.nodeName = nodeName;
         bankNode.website = website;

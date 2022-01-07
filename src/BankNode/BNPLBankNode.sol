@@ -71,6 +71,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         uint256 loanId;
         uint8 messageType; // 0 = plain text, 1 = encrypted with the public key
         string message;
+        string uuid;
     }
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
@@ -509,6 +510,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         loanRequest.status = 0;
         loanRequest.messageType = messageType;
         loanRequest.message = message;
+        loanRequest.uuid = uuid;
         emit LoanRequested(borrower, loanAmount, currentLoanRequestId, uuid);
     }
 

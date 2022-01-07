@@ -141,7 +141,8 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
             uint256 interestRate,
             uint256 loanId,
             uint8 messageType, // 0 = plain text, 1 = encrypted with the public key
-            string memory message
+            string memory message,
+            string memory uuid
         );
 
     function loans(uint256 _loanId)
