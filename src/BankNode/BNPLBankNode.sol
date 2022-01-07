@@ -127,7 +127,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     mapping(uint256 => uint256) public override loanBondedAmount;
     uint256 public override totalLossAllTime;
     uint256 public override totalLoansDefaulted;
-
+    uint256 public override netEarnings;
     uint256 public override totalDonatedAllTime;
     uint32 public override kycDomainId;
     BNPLKYCStore public override bnplKYCStore;
@@ -586,7 +586,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         loan.status = 0;
         loan.loanRequestId = loanRequestId;
 
-        onGoingLoanCount += 1;
+        onGoingLoanCount++;
         totalAmountOfLoans += loanAmount;
         totalAmountOfActiveLoans += loanAmount;
 
@@ -713,8 +713,9 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         uint256 startPoolTotalAssetValue = getPoolTotalAssetsValue();
         loan.status = 2;
 
-        onGoingLoanCount -= 1;
+        onGoingLoanCount--;
         totalAmountOfActiveLoans -= loan.loanAmount;
+        netEarnings += loan.totalAmountPaid;
 
         //loan.loanAmount-principalPaidForLoan[loanId]
         //uint256 total3rdPartyInterestPaid = loanBondedAmount[loanId]; // bnpl market buy is the same amount as the amount bonded, this must change if they are not equal
@@ -796,8 +797,9 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             loan.status = 1;
             loan.statusUpdatedAt = uint64(block.timestamp);
 
-            onGoingLoanCount -= 1;
+            onGoingLoanCount--;
             totalAmountOfActiveLoans -= loan.loanAmount;
+            netEarnings += loan.totalAmountPaid;
 
             nodeOperatorBalance += loanBondedAmount[loanId];
             loanBondedAmount[loanId] = 0;
