@@ -1,4 +1,5 @@
 import hre from 'hardhat';
+import { ContractTransaction } from 'ethers'
 import { DeployResult } from 'hardhat-deploy/types';
 import { GAS_LIMIT } from './constants';
 
@@ -45,4 +46,15 @@ export async function setup() {
       return deployResult;
     }
   };
+}
+
+export function waitContractCall(transcation: ContractTransaction): Promise<void> {
+  return new Promise<void>((resolve) => {
+    transcation.wait().then((receipt) => {
+      console.log(`Waiting transcation: "${receipt.transactionHash}" (block: ${receipt.blockNumber} gasUsed: ${receipt.gasUsed})`)
+      if (receipt.status === 1) {
+        return resolve()
+      }
+    })
+  })
 }

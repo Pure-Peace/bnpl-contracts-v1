@@ -85,7 +85,7 @@
     "fork:test": "echo hi && node ./_scripts.js fork:test",
     "docs": "solidity-docgen -i ./src -t ./docs-templates --solc-module solc-0.8.10",
     "deploy-dev": "node ./_scripts.js deploy",
-    "deploy-prod": "hardhat run scripts/deploy.ts --network kovan",
-    "upgrade-cli": "hardhat run scripts/upgrade-cli.ts --network kovan"
+    "deploy-prod": "node ./_scripts.js deploy-prod",
+    "upgrade-cli": "node ./_scripts.js upgrade-cli"
   }
 }

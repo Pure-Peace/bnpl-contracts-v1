@@ -6,7 +6,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import hre from 'hardhat';
 import { DeployResult } from 'hardhat-deploy/types';
 import { getContractForEnvironment } from '../test/utils/getContractForEnvironment';
-import { setup } from './utils'
+import { setup, waitContractCall } from './utils'
 
 import {
   BankNodeLendingRewards,
@@ -15,7 +15,14 @@ import {
 } from '../typechain';
 import { ContractList, IMPL_PREFIX, PROXY_CONTRACTS, UPBEACON_PREFIX, UPGRADEABLE_CONTRACTS, ZERO_ADDRESS } from './constants';
 
+import deployConfig from '../deploy.config'
+
 require('dotenv').config();
+
+const DEPLOY_CONFIG = deployConfig[hre.network.name]
+if (!DEPLOY_CONFIG) {
+  throw new Error(`Unconfigured network: "${hre.network.name}"`)
+}
 
 
 type DeployFunction = (
@@ -89,29 +96,6 @@ async function deployBeaconProxy(
   return results;
 }
 
-const BNPL_TOKEN_ADDRESS = '0x0c6ec7437657cb501ae35718e5426815e83e9e00';
-const MIN_BONDING_AMOUNT = '100000000000000000000000';
-
-const TUSD_KOVAN = '0x016750AC630F711882812f24Dba6c95b9D35856d';
-const A_TUSD_KOVAN = '0x39914AdBe5fDbC2b9ADeedE8Bcd444b20B039204';
-const TUSD_TOKEN_DECIMALS = 18;
-const SUSHISWAP_KOVAN = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
-
-const DEFAULT_REWARD_DURATION = 60 * 60 * 24 * 7;
-
-const LENDABLETOKEN_TUSD_KOVAN = {
-  tokenContract: TUSD_KOVAN,
-  swapMarket: SUSHISWAP_KOVAN,
-  swapMarketPoolFee: 3000,
-  decimals: TUSD_TOKEN_DECIMALS,
-  valueMultiplier: '1000000000000000000',
-  unusedFundsLendingMode: 1,
-  unusedFundsLendingContract: '0xE0fBa4Fc209b4948668006B2bE61711b7f465bAe',
-  unusedFundsLendingToken: A_TUSD_KOVAN,
-  symbol: 'TUSD',
-  poolSymbol: 'pTUSD'
-};
-
 async function deployContracts(deploy: DeployFunction) {
   console.log('\n>>>>>>>>> Deploying contracts...\n');
   const implDeployments = await deployImpl(deploy, UPGRADEABLE_CONTRACTS);
@@ -130,9 +114,9 @@ async function deployContracts(deploy: DeployFunction) {
     'BNPLProtocolConfig',
     'BNPLProtocolConfig',
     [
-      hre.network.live ? '1' : '13371337',
-      hre.network.live ? 'BNPL MAINNET' : 'BNPL TESTING',
-      BNPL_TOKEN_ADDRESS,
+      DEPLOY_CONFIG.networkId,
+      DEPLOY_CONFIG.networkName,
+      DEPLOY_CONFIG.bnplTokenAddress,
       upBeaconDeployments.UpBeaconBankNodeManager.address,
       upBeaconDeployments.UpBeaconBNPLBankNode.address,
       upBeaconDeployments.UpBeaconBankNodeLendingPoolToken.address,
@@ -189,13 +173,13 @@ async function initializeBankNodeManager(
     console.log('BankNodeManager is already initialized!');
     return;
   }
-  await BankNodeManager.initialize(
+  await waitContractCall(await BankNodeManager.initialize(
     BNPLProtocolConfig.address,
     deployer.address,
-    MIN_BONDING_AMOUNT,
+    DEPLOY_CONFIG.minBondingAmount,
     beaconProxyDeployments.BankNodeLendingRewardsProxy.address,
     beaconProxyDeployments.BNPLKYCStoreProxy.address
-  );
+  ));
   console.log('BankNodeManager >> DONE')
 }
 
@@ -212,19 +196,23 @@ async function initializeBankNodeLendingRewards(
     console.log('BankNodeLendingRewards is already initialized!');
     return;
   }
-  await BankNodeLendingRewards.initialize(
-    DEFAULT_REWARD_DURATION,
+  await waitContractCall(await BankNodeLendingRewards.initialize(
+    DEPLOY_CONFIG.defaultRewardDuration,
     await BNPLProtocolConfig.bnplToken(),
     BankNodeManager.address,
     deployer.address,
     deployer.address
-  );
+  ));
   console.log('BankNodeLendingRewards >> DONE')
 }
 
 async function options(BankNodeManager: BankNodeManager) {
   console.log('\n>>>>>>>>> Add lendable tokens...\n');
-  await BankNodeManager.addLendableToken(LENDABLETOKEN_TUSD_KOVAN, 1);
+  let num = 0
+  for (const lendableToken of DEPLOY_CONFIG.lendableTokens) {
+    console.log(` - (${++num}/${DEPLOY_CONFIG.lendableTokens.length}) Adding lendable token "${lendableToken.symbol}" ("${lendableToken.tokenContract}")...`)
+    await waitContractCall(await BankNodeManager.addLendableToken(lendableToken, lendableToken.enabled ? 1 : 0));
+  }
   console.log('lendable tokens >> DONE')
 
 }

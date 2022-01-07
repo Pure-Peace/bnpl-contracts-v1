@@ -146,6 +146,11 @@ async function performAction(rawArgs) {
         : ''
       } hardhat node --watch --export contractsInfo.json ${extra.join(' ')}`
     );
+  } else {
+    const { fixedArgs } = parseArgs(args, 1, {});
+    await execute(
+      `hardhat --network ${fixedArgs[0]} run scripts/${firstArg}.ts`
+    );
   }
 }
 
