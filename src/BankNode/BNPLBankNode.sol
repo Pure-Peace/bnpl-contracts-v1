@@ -715,7 +715,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
         onGoingLoanCount--;
         totalAmountOfActiveLoans -= loan.loanAmount;
-        netEarnings += loan.totalAmountPaid;
+        netEarnings = netEarnings + loan.totalAmountPaid - loan.loanAmount;
 
         //loan.loanAmount-principalPaidForLoan[loanId]
         //uint256 total3rdPartyInterestPaid = loanBondedAmount[loanId]; // bnpl market buy is the same amount as the amount bonded, this must change if they are not equal
@@ -799,7 +799,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
             onGoingLoanCount--;
             totalAmountOfActiveLoans -= loan.loanAmount;
-            netEarnings += loan.totalAmountPaid;
+            netEarnings = netEarnings + loan.totalAmountPaid - loan.loanAmount;
 
             nodeOperatorBalance += loanBondedAmount[loanId];
             loanBondedAmount[loanId] = 0;

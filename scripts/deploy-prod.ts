@@ -210,7 +210,7 @@ async function options(BankNodeManager: BankNodeManager) {
   console.log('\n>>>>>>>>> Add lendable tokens...\n');
   let num = 0
   for (const lendableToken of DEPLOY_CONFIG.lendableTokens) {
-    console.log(` - (${++num}/${DEPLOY_CONFIG.lendableTokens.length}) Adding lendable token "${lendableToken.symbol}" ("${lendableToken.tokenContract}")...`)
+    console.log(` - (${++num}/${DEPLOY_CONFIG.lendableTokens.length}) Adding lendable token "${lendableToken.symbol}" ("${lendableToken.tokenContract}")...\n`)
     await waitContractCall(await BankNodeManager.addLendableToken(lendableToken, lendableToken.enabled ? 1 : 0));
   }
   console.log('lendable tokens >> DONE')
