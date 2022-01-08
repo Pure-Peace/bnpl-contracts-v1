@@ -107,7 +107,7 @@ describe('BankNodeCombos', function () {
     const u = users;
 
     const startBondedBNPLAmount = ms`1000000*10^18`;
-    const startStakedBNPLAmount = ms`500000*10^18`;
+    const startStakedBNPLAmount = ms`1000000*10^18`;
     const startTotalBNPL = BigNumber.from(startBondedBNPLAmount).add(startStakedBNPLAmount);
     const startLiquidityAmount = ms`100000*10^18`;
     const bankNodeIdA = await h.setupBankNode(
@@ -263,7 +263,7 @@ describe('BankNodeCombos', function () {
     expect(BigNumber.from(finStateAAfterOperatorRewardsA.stakingPoolFinancialState.nodeOwnerBNPLRewards).gt(0), "should not be 0 bnpl rewards");
     //console.log(finStateAAfterOperatorRewardsA.stakingPoolFinancialState.nodeOwnerPoolTokenRewards)
 
-    await makerASC.StakingPool.claimNodeOwnerPoolTokenRewards(makerASC.address);
+    // await makerASC.StakingPool.claimNodeOwnerPoolTokenRewards(makerASC.address);
 
 
     const makerFinStatesAfterClaimPoolTokenRewardsA = await h.getKeyUserBalancesForBankNode(u.bankNodeMakerA, bankNodeIdA);
@@ -284,7 +284,7 @@ describe('BankNodeCombos', function () {
     const u = users;
 
     const startBondedBNPLAmount = ms`1000000*10^18`;
-    const startStakedBNPLAmount = ms`500000*10^18`;
+    const startStakedBNPLAmount = ms`1000000*10^18`;
     const startTotalBNPL = BigNumber.from(startBondedBNPLAmount).add(startStakedBNPLAmount);
     const startLiquidityAmount = ms`100000*10^18`;
     const bankNodeIdA = await h.setupBankNode(
@@ -448,7 +448,7 @@ describe('BankNodeCombos', function () {
     const u = users;
 
     const startBondedBNPLAmount = ms`1000000*10^18`;
-    const startStakedBNPLAmount = ms`500000*10^18`;
+    const startStakedBNPLAmount = ms`1000000*10^18`;
     const startTotalBNPL = BigNumber.from(startBondedBNPLAmount).add(startStakedBNPLAmount);
     const startLiquidityAmount = ms`100000*10^18`;
     const bankNodeIdA = await h.setupBankNode(
@@ -601,7 +601,7 @@ describe('BankNodeCombos', function () {
     const u = users;
 
     const startBondedBNPLAmount = ms`1000000*10^18`;
-    const startStakedBNPLAmount = ms`500000*10^18`;
+    const startStakedBNPLAmount = ms`1000000*10^18`;
     const startTotalBNPL = BigNumber.from(startBondedBNPLAmount).add(startStakedBNPLAmount);
     const startLiquidityAmount = ms`100000*10^18`;
     const bankNodeIdA = await h.setupBankNode(

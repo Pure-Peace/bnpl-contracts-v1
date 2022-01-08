@@ -22,7 +22,7 @@ const func = async function (hre: HardhatRuntimeEnvironment) {
     const u = users;
 
     const startBondedBNPLAmount = ms`1000000*10^18`;
-    const startStakedBNPLAmount = ms`500000*10^18`;
+    const startStakedBNPLAmount = ms`1000000*10^18`;
     const startTotalBNPL = BigNumber.from(startBondedBNPLAmount).add(startStakedBNPLAmount);
     const startLiquidityAmount = ms`100000*10^18`;
     const bankNodeIdA = await h.setupBankNode(
@@ -42,15 +42,8 @@ const func = async function (hre: HardhatRuntimeEnvironment) {
     await h.stakeLendingCoinToBankNode(u.lenderA1, bankNodeIdA, startLiquidityAmount, "USDT");
     const finStatesStart = await h.getBankNodeAllFinancialStates(bankNodeIdA);
     console.log(finStatesStart)
-
-
-
-
-  } else {
   }
-
-
-
-
 };
 export default func;
+func.id = "deploy_bnpl_protocol_eco";
+func.tags = ['BNPLProtocolDeployEco'];

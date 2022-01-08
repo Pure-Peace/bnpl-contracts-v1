@@ -114,7 +114,7 @@ describe('BankNodeManager', function () {
       .eq(nodeConfig.website, "BankNodeDef in BankNodeManager Should match our website in the nodeConfig");
 
     const loanConfig = {
-      lender1Amount: TEN_18.mul(25000),
+      lender1Amount: TEN_18.mul(50000),
       lender2Amount: TEN_18.mul(50000),
       borrower1Amount: TEN_18.mul(60000),
       borrower2Amount: TEN_18.mul(5000),
@@ -156,7 +156,8 @@ describe('BankNodeManager', function () {
       12,
       BigNumber.from(1).mul(BigNumber.from(10).pow(18)).div(120),
       0,
-      "I want money!"
+      "I want money!",
+      'test'
     );
     const loanRequest1 = await bnc.bankNodeMakerA.BNPLBankNode.loanRequests(0);
     expect(loanRequest1.borrower).equals(bnc.borrowerA1.address, "should be borrower 1");
@@ -171,7 +172,8 @@ describe('BankNodeManager', function () {
       3,
       BigNumber.from(1).mul(BigNumber.from(10).pow(18)).div(120),
       0,
-      "I want money!"
+      "I want money!",
+      'test'
     );
     const loanRequest2 = await bnc.bankNodeMakerA.BNPLBankNode.loanRequests(1);
     expect(loanRequest2.borrower).equals(bnc.borrowerA2.address, "should be borrower 2");

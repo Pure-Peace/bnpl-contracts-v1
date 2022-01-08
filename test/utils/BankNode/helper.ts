@@ -408,7 +408,8 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
       loanRequest.numberOfPayments,
       loanRequest.interestRatePerPayment,
       loanRequest.messageType,
-      loanRequest.message
+      loanRequest.message,
+      'test'
     )
     const newLoanRequestIndex = parseFloat((await b.BankNode.loanRequestIndex()).toString());
 
