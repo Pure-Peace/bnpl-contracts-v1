@@ -49,13 +49,24 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         address distributorAdmin,
         address managerAdmin
     ) external initializer {
-        _BankNodesRewardSystem_init_(
-            _defaultRewardsDuration,
-            _rewardsToken,
-            _bankNodeManager,
-            distributorAdmin,
-            managerAdmin
-        );
+        __ReentrancyGuard_init_unchained();
+        __Context_init_unchained();
+        __Pausable_init_unchained();
+        __ERC165_init_unchained();
+        __AccessControl_init_unchained();
+        rewardsToken = IERC20(_rewardsToken);
+        bankNodeManager = IBankNodeManager(_bankNodeManager);
+        defaultRewardsDuration = _defaultRewardsDuration;
+
+        _setupRole(REWARDS_DISTRIBUTOR_ROLE, _bankNodeManager);
+        _setupRole(REWARDS_DISTRIBUTOR_ROLE, distributorAdmin);
+        _setupRole(REWARDS_DISTRIBUTOR_ADMIN_ROLE, distributorAdmin);
+        _setRoleAdmin(REWARDS_DISTRIBUTOR_ROLE, REWARDS_DISTRIBUTOR_ADMIN_ROLE);
+
+        _setupRole(REWARDS_MANAGER, _bankNodeManager);
+        _setupRole(REWARDS_MANAGER, managerAdmin);
+        _setupRole(REWARDS_MANAGER_ROLE_ADMIN, managerAdmin);
+        _setRoleAdmin(REWARDS_MANAGER, REWARDS_MANAGER_ROLE_ADMIN);
     }
 
     function _bnplTokensStakedToBankNode(uint32 bankNodeId) internal view returns (uint256) {

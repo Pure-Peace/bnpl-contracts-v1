@@ -70,34 +70,6 @@ contract BankNodeRewardSystem is
     IERC20 public rewardsToken;
     uint256 public defaultRewardsDuration;
 
-    /* ========== INIT ========== */
-    function _BankNodesRewardSystem_init_(
-        uint256 _defaultRewardsDuration,
-        address _rewardsToken,
-        address _bankNodeManager,
-        address distributorAdmin,
-        address managerAdmin
-    ) internal initializer {
-        __ReentrancyGuard_init_unchained();
-        __Context_init_unchained();
-        __Pausable_init_unchained();
-        __ERC165_init_unchained();
-        __AccessControl_init_unchained();
-        rewardsToken = IERC20(_rewardsToken);
-        bankNodeManager = IBankNodeManager(_bankNodeManager);
-        defaultRewardsDuration = _defaultRewardsDuration;
-
-        _setupRole(REWARDS_DISTRIBUTOR_ROLE, _bankNodeManager);
-        _setupRole(REWARDS_DISTRIBUTOR_ROLE, distributorAdmin);
-        _setupRole(REWARDS_DISTRIBUTOR_ADMIN_ROLE, distributorAdmin);
-        _setRoleAdmin(REWARDS_DISTRIBUTOR_ROLE, REWARDS_DISTRIBUTOR_ADMIN_ROLE);
-
-        _setupRole(REWARDS_MANAGER, _bankNodeManager);
-        _setupRole(REWARDS_MANAGER, managerAdmin);
-        _setupRole(REWARDS_MANAGER_ROLE_ADMIN, managerAdmin);
-        _setRoleAdmin(REWARDS_MANAGER, REWARDS_MANAGER_ROLE_ADMIN);
-    }
-
     function encodeUserBankNodeKey(address user, uint32 bankNodeId) public pure returns (uint256) {
         return (uint256(uint160(user)) << 32) | uint256(bankNodeId);
     }
