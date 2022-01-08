@@ -22,3 +22,5 @@ docs/
 
 abibuild/
 deployments/
+*-lock.*
+*.lock
