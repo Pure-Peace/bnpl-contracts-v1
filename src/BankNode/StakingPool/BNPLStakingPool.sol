@@ -95,7 +95,6 @@ contract BNPLStakingPool is
         __ERC165_init_unchained();
         __AccessControl_init_unchained();
         __AccessControlEnumerable_init_unchained();
-        _UserTokenLockup_init_unchained();
 
         BASE_LIQUIDITY_TOKEN = IERC20(bnplToken);
         POOL_LIQUIDITY_TOKEN = IMintableBurnableTokenUpgradeable(poolBNPLToken);

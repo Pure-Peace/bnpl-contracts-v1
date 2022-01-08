@@ -35,7 +35,6 @@ contract MintableDebugToken is
         __AccessControlEnumerable_init_unchained();
 
         __ERC20_init_unchained(name_, symbol_);
-        __ERC20Burnable_init_unchained();
 
         _decimalsValue = decimalsValue_;
 
