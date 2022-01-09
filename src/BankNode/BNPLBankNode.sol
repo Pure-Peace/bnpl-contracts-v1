@@ -230,11 +230,11 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
     function getPoolDepositConversion(uint256 depositAmount) public view returns (uint256) {
         uint256 poolTotalAssetsValue = getPoolTotalAssetsValue();
-        return (depositAmount * poolTokensCirculating) / poolTotalAssetsValue > 0 ? poolTotalAssetsValue : 1;
+        return (depositAmount * poolTokensCirculating) / (poolTotalAssetsValue > 0 ? poolTotalAssetsValue : 1);
     }
 
     function getPoolWithdrawConversion(uint256 withdrawAmount) public view returns (uint256) {
-        return (withdrawAmount * getPoolTotalAssetsValue()) / poolTokensCirculating > 0 ? poolTokensCirculating : 1;
+        return (withdrawAmount * getPoolTotalAssetsValue()) / (poolTokensCirculating > 0 ? poolTokensCirculating : 1);
     }
 
     function calculateSlashAmount(

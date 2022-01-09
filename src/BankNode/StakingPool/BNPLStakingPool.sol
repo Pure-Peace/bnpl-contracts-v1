@@ -138,12 +138,13 @@ contract BNPLStakingPool is
 
     function getPoolDepositConversion(uint256 depositAmount) public view returns (uint256) {
         uint256 poolTotalAssetsValue = getPoolTotalAssetsValue();
-        return (depositAmount * poolTokenEffectiveSupply) / poolTotalAssetsValue > 0 ? poolTotalAssetsValue : 1;
+        return (depositAmount * poolTokenEffectiveSupply) / (poolTotalAssetsValue > 0 ? poolTotalAssetsValue : 1);
     }
 
     function getPoolWithdrawConversion(uint256 withdrawAmount) public view override returns (uint256) {
         return
-            (withdrawAmount * getPoolTotalAssetsValue()) / poolTokenEffectiveSupply > 0 ? poolTokenEffectiveSupply : 1;
+            (withdrawAmount * getPoolTotalAssetsValue()) /
+            (poolTokenEffectiveSupply > 0 ? poolTokenEffectiveSupply : 1);
     }
 
     function _issueUnlockedTokensToUser(address user, uint256 amount) internal override returns (uint256) {

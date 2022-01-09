@@ -114,7 +114,7 @@ describe('BankNodeManager', function () {
       .eq(nodeConfig.website, "BankNodeDef in BankNodeManager Should match our website in the nodeConfig");
 
     const loanConfig = {
-      lender1Amount: TEN_18.mul(50000),
+      lender1Amount: TEN_18.mul(25000),
       lender2Amount: TEN_18.mul(50000),
       borrower1Amount: TEN_18.mul(60000),
       borrower2Amount: TEN_18.mul(5000),
