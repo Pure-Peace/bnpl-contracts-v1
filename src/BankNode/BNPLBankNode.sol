@@ -124,7 +124,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     mapping(uint256 => Loan) public override loans;
 
     mapping(uint256 => uint256) public override interestPaidForLoan;
-    mapping(uint256 => uint256) public override loanBondedAmount;
     uint256 public override totalLossAllTime;
     uint256 public override totalLoansDefaulted;
     uint256 public override netEarnings;
@@ -726,8 +725,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
         uint256 accountsReceivableLoss = loan.loanAmount - (loan.totalAmountPaid - interestPaidForLoan[loanId]);
         accountsReceivableFromLoans -= accountsReceivableLoss;
-        baseTokenBalance += loanBondedAmount[loanId];
-        loanBondedAmount[loanId] = 0;
 
         uint256 prevBalanceEquivalent = startPoolTotalAssetValue - interestRecirculated;
         totalLossAllTime += prevBalanceEquivalent - getPoolTotalAssetsValue();
@@ -791,7 +788,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         accountsReceivableFromLoans -= Math.min(amountPerPayment - interestAmount, accountsReceivableFromLoans);
         interestPaidForLoan[loanId] += interestAmount;
         loan.numberOfPaymentsMade = loan.numberOfPaymentsMade + 1;
-        loanBondedAmount[loanId] += bondedInterest;
+        nodeOperatorBalance += bondedInterest;
 
         baseTokenBalance += amountPerPayment - holdInterest;
         _marketBuyBNPLForStakingPool(marketBuyInterest);
@@ -805,8 +802,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             if (loan.totalAmountPaid >= loan.loanAmount) {
                 netEarnings = netEarnings + loan.totalAmountPaid - loan.loanAmount;
             }
-            nodeOperatorBalance += loanBondedAmount[loanId];
-            loanBondedAmount[loanId] = 0;
         }
         _processMigrateUnusedFundsToLendingPool();
 
