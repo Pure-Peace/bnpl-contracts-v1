@@ -7,6 +7,9 @@ type DeployConfig = {
   bnplTokenAddress: string,
   minBondingAmount: BigNumber,
   defaultRewardDuration: number,
+  distributorAdmin: string,
+  managerAdmin: string,
+  bankNodeManagerConfigurator: string,
   lendableTokens: LendableTokenConfig[]
 }
 
@@ -59,6 +62,9 @@ const config: { [key: string]: DeployConfig } = {
     bnplTokenAddress: BNPL_TOKEN_ADDRESS_KOVAN,
     minBondingAmount: toTokenAmount(100_000, BNPL_TOKEN_DECIMALS),
     defaultRewardDuration: ONE_WEEK,
+    distributorAdmin: 'deployer',
+    managerAdmin: 'deployer',
+    bankNodeManagerConfigurator: 'deployer',
     lendableTokens: [
       {
         enabled: true,

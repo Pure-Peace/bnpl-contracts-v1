@@ -34,6 +34,11 @@ type DeployFunction = (
 type Deployments = { [key: string]: DeployResult };
 
 
+function nullOrDeployer(address: string | undefined | null, deployer: SignerWithAddress): string {
+  if (!address || address === 'deployer') return deployer.address
+  return address
+}
+
 async function deployImpl(deploy: DeployFunction, contracts: ContractList) {
   const results: Deployments = {};
   for (const i of contracts) {
@@ -175,7 +180,7 @@ async function initializeBankNodeManager(
   }
   await waitContractCall(await BankNodeManager.initialize(
     BNPLProtocolConfig.address,
-    deployer.address,
+    nullOrDeployer(DEPLOY_CONFIG.bankNodeManagerConfigurator, deployer),
     DEPLOY_CONFIG.minBondingAmount,
     beaconProxyDeployments.BankNodeLendingRewardsProxy.address,
     beaconProxyDeployments.BNPLKYCStoreProxy.address
@@ -200,8 +205,8 @@ async function initializeBankNodeLendingRewards(
     DEPLOY_CONFIG.defaultRewardDuration,
     await BNPLProtocolConfig.bnplToken(),
     BankNodeManager.address,
-    deployer.address,
-    deployer.address
+    nullOrDeployer(DEPLOY_CONFIG.distributorAdmin, deployer),
+    nullOrDeployer(DEPLOY_CONFIG.managerAdmin, deployer)
   ));
   console.log('BankNodeLendingRewards >> DONE')
 }
