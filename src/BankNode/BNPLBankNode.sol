@@ -630,6 +630,10 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         bnplKYCStore.setKYCDomainPublicKey(kycDomainId, nodePublicKey_);
     }
 
+    function setKYCDomainMode(uint32 domain, uint256 mode) external override nonReentrant onlyRole(OPERATOR_ROLE) {
+        bnplKYCStore.setKYCDomainMode(domain, mode);
+    }
+
     function withdrawNodeOperatorBalance(uint256 amount, address to)
         external
         override

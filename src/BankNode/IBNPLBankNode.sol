@@ -198,4 +198,6 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
     function withdrawNodeOperatorBalance(uint256 amount, address to) external;
 
     function setKYCSettings(uint256 kycMode_, address nodePublicKey_) external;
+
+    function setKYCDomainMode(uint32 domain, uint256 mode) external;
 }
