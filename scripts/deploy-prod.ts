@@ -182,6 +182,7 @@ async function initializeBankNodeManager(
     BNPLProtocolConfig.address,
     nullOrDeployer(DEPLOY_CONFIG.bankNodeManagerConfigurator, deployer),
     DEPLOY_CONFIG.minBondingAmount,
+    DEPLOY_CONFIG.loanOverdueGracePeriod,
     beaconProxyDeployments.BankNodeLendingRewardsProxy.address,
     beaconProxyDeployments.BNPLKYCStoreProxy.address
   ));

@@ -4,7 +4,7 @@ import { getContractForEnvironment } from "./getContractForEnvironment";
 
 
 // 100,000 BNPL Min bonding amount
-async function setupProtocol(hre: HardhatRuntimeEnvironment, minBondingAmount = "100000000000000000000000") {
+async function setupProtocol(hre: HardhatRuntimeEnvironment, minBondingAmount = "100000000000000000000000", loanOverdueGracePeriod = 0) {
 
   const { protocolDeployer, protocolAdmin } = await hre.getNamedAccounts();
 
@@ -19,7 +19,7 @@ async function setupProtocol(hre: HardhatRuntimeEnvironment, minBondingAmount = 
     BNPLProtocolConfig.address,
     protocolAdmin,
     minBondingAmount,
-
+    loanOverdueGracePeriod,
     BankNodeLendingRewards.address,
     BNPLKYCStore.address,
     { gasLimit: 5500000 }
@@ -39,7 +39,7 @@ async function setupProtocol(hre: HardhatRuntimeEnvironment, minBondingAmount = 
 
 }
 
-async function setupProtocolTestNet(hre: HardhatRuntimeEnvironment, minBondingAmount = "100000000000000000000000") {
+async function setupProtocolTestNet(hre: HardhatRuntimeEnvironment, minBondingAmount = "100000000000000000000000", loanOverdueGracePeriod = 0) {
 
   const { protocolDeployer, protocolAdmin } = await hre.getNamedAccounts();
 
@@ -55,6 +55,7 @@ async function setupProtocolTestNet(hre: HardhatRuntimeEnvironment, minBondingAm
     BNPLProtocolConfig.address,
     protocolAdmin,
     minBondingAmount,
+    loanOverdueGracePeriod,
     BankNodeLendingRewards.address,
     BNPLKYCStore.address,
 

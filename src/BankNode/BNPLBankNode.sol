@@ -80,7 +80,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint256 public constant UNUSED_FUNDS_MIN_DEPOSIT_SIZE = 1;
 
     uint256 public constant MIN_LOAN_DURATION = 10; //30 days;
-    uint256 public constant OVERDUE_GRACE_PERIOD = 7; //7 days;
     uint256 public constant MIN_LOAN_PAYMENT_INTERVAL = 2; //2 days;
 
     //TODO: Add max duration and max payment interval
@@ -713,7 +712,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         require(loan.status == 0 || loan.status != 2, "loan must not be paid off or already overdue");
 
         require(
-            getLoanNextDueDate(loanId) < uint64(block.timestamp - OVERDUE_GRACE_PERIOD),
+            getLoanNextDueDate(loanId) < uint64(block.timestamp - bankNodeManager.loanOverdueGracePeriod()),
             "loan must be overdue (and exceeding the grace period) to write off"
         );
         require(loan.loanAmount > loan.totalAmountPaid);
@@ -767,7 +766,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         );
 
         require(
-            uint64(block.timestamp - OVERDUE_GRACE_PERIOD) <= getLoanNextDueDate(loanId),
+            uint64(block.timestamp - bankNodeManager.loanOverdueGracePeriod()) <= getLoanNextDueDate(loanId),
             "loan is overdue and exceeding the grace period"
         );
 

@@ -47,6 +47,8 @@ contract BankNodeManager is
     mapping(address => uint32) public override bankNodeAddressToId;
 
     uint256 public override minimumBankNodeBondedAmount;
+    uint256 public override loanOverdueGracePeriod;
+
     uint32 public override bankNodeCount;
     IERC20 public override bnplToken;
 
@@ -174,6 +176,7 @@ contract BankNodeManager is
         IBNPLProtocolConfig _protocolConfig,
         address _configurator,
         uint256 _minimumBankNodeBondedAmount,
+        uint256 _loanOverdueGracePeriod,
         BankNodeLendingRewards _bankNodeLendingRewards,
         BNPLKYCStore _bnplKYCStore
     ) external override initializer nonReentrant {
@@ -191,6 +194,7 @@ contract BankNodeManager is
         protocolConfig = _protocolConfig;
 
         minimumBankNodeBondedAmount = _minimumBankNodeBondedAmount;
+        loanOverdueGracePeriod = _loanOverdueGracePeriod;
         bankNodeCount = 0;
         bnplKYCStore = _bnplKYCStore;
         bnplToken = IERC20(_protocolConfig.bnplToken());
@@ -247,6 +251,15 @@ contract BankNodeManager is
         onlyRole(CONFIGURE_NODE_MANAGER_ROLE)
     {
         minimumBankNodeBondedAmount = _minimumBankNodeBondedAmount;
+    }
+
+    /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to set the loan overdue grace period per node
+    function setLoanOverdueGracePeriod(uint256 _loanOverdueGracePeriod)
+        external
+        override
+        onlyRole(CONFIGURE_NODE_MANAGER_ROLE)
+    {
+        loanOverdueGracePeriod = _loanOverdueGracePeriod;
     }
 
     function _createBankNodeLendingPoolTokenClone(

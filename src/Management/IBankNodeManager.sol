@@ -103,6 +103,7 @@ interface IBankNodeManager {
         IBNPLProtocolConfig _protocolConfig,
         address _configurator,
         uint256 _minimumBankNodeBondedAmount,
+        uint256 _loanOverdueGracePeriod,
         BankNodeLendingRewards _bankNodeLendingRewards,
         BNPLKYCStore _bnplKYCStore
     ) external;
@@ -147,6 +148,8 @@ interface IBankNodeManager {
 
     function minimumBankNodeBondedAmount() external view returns (uint256);
 
+    function loanOverdueGracePeriod() external view returns (uint256);
+
     function bankNodeCount() external view returns (uint32);
 
     function bnplToken() external view returns (IERC20);
@@ -168,6 +171,8 @@ interface IBankNodeManager {
     function setLendableTokenStatus(address tokenContract, uint8 enabled) external;
 
     function setMinimumBankNodeBondedAmount(uint256 _minimumBankNodeBondedAmount) external;
+
+    function setLoanOverdueGracePeriod(uint256 _loanOverdueGracePeriod) external;
 
     function createBondedBankNode(
         address operator,

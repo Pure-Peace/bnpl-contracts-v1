@@ -19,6 +19,7 @@ contract BNPLFirstDeploySetup is Initializable {
         address implBankNodeLendingRewards;
         address configurator;
         uint256 minimumBankNodeBondedAmount;
+        uint256 loanOverdueGracePeriod;
     }
 
     function deployBNPLWithImplementations(IDeployWithImplementationsParams calldata params)
@@ -52,6 +53,7 @@ contract BNPLFirstDeploySetup is Initializable {
             protocolConfig,
             params.configurator,
             params.minimumBankNodeBondedAmount,
+            params.loanOverdueGracePeriod,
             bankNodeLendingRewards,
             BNPLKYCStore(address(0))
         );
