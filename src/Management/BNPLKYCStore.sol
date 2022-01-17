@@ -165,8 +165,8 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         uint256 nonce,
         bytes calldata signature
     ) external {
-        _verifyProof(domain, user, 0, nonce, signature);
-        _setKYCStatusUser(domain, user, 0);
+        _verifyProof(domain, user, 1, nonce, signature);
+        _setKYCStatusUser(domain, user, 1);
     }
 
     function initialize() external initializer nonReentrant {
