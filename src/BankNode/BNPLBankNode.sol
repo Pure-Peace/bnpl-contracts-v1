@@ -79,8 +79,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     //TODO: Source
     uint256 public constant UNUSED_FUNDS_MIN_DEPOSIT_SIZE = 1;
 
-    uint256 public constant MIN_LOAN_DURATION = 10; //30 days;
-    uint256 public constant MIN_LOAN_PAYMENT_INTERVAL = 2; //2 days;
+    uint256 public constant MIN_LOAN_DURATION = 30 days;
+    uint256 public constant MIN_LOAN_PAYMENT_INTERVAL = 2 days;
 
     //TODO: Add max duration and max payment interval
 
@@ -88,7 +88,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint32 public constant BORROWER_NEEDS_KYC = 1 << 2;
 
     uint256 public constant MAX_LOAN_AMOUNT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFF00;
-    uint256 public constant MIN_LOAN_AMOUNT = 100;
+    uint256 public constant MIN_LOAN_AMOUNT = 0x5f5e100;
 
     IERC20 public override baseLiquidityToken; // = IERC20(0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD);
     IMintableBurnableTokenUpgradeable public override poolLiquidityToken; // = IMintableToken(0x63801824694C6a0482C7416Ea255D6a3745F82f2);
