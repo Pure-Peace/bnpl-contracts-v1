@@ -228,11 +228,8 @@ contract BankNodeRewardSystem is
         // This keeps the reward rate in the right range, preventing overflows due to
         // very high values of rewardRate in the earned and rewardsPerToken functions;
         // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        /* uint256 balance = getInternalValueForStakedTokenAmount(
-            getStakingTokenForBankNode(bankNodeId).balanceOf(address(this))
-        ); */
-        // TODO: ENSURE THIS
-        // require(rewardRate[bankNodeId] <= (balance / rewardsDuration[bankNodeId]), "Provided reward too high");
+        uint256 balance = rewardsToken.balanceOf(address(this));
+        require(rewardRate[bankNodeId] <= (balance / rewardsDuration[bankNodeId]), "Provided reward too high");
 
         lastUpdateTime[bankNodeId] = block.timestamp;
         periodFinish[bankNodeId] = block.timestamp + (rewardsDuration[bankNodeId]);
