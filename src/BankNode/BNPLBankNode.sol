@@ -780,7 +780,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             loan.numberOfPayments,
             loan.numberOfPaymentsMade + 1
         );
-        uint256 holdInterest = interestAmount / 5;
+        uint256 holdInterest = (interestAmount * 3) / 10;
         //uint returnInterest = interestAmount - holdInterest;
         uint256 bondedInterest = holdInterest / 2;
         uint256 marketBuyInterest = holdInterest - bondedInterest;
