@@ -24,6 +24,7 @@ type LendableTokenConfig = {
   unusedFundsLendingMode: number,
   unusedFundsLendingContract: string,
   unusedFundsLendingToken: string,
+  unusedFundsIncentivesController: string,
   symbol: string,
   poolSymbol: string
 }
@@ -48,6 +49,7 @@ const SUSHISWAP_KOVAN = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
 const AAVE_LENDING_POOL_KOVAN = '0xE0fBa4Fc209b4948668006B2bE61711b7f465bAe'
 const STAKE_AAVE_KOVAN = '0xf2fbf9a6710afda1c4aab2e922de9d69e0c97fd2'
 const AAVE_KOVAN = '0xB597cd8D3217ea6477232F9217fa70837ff667Af'
+const AAVE_INCENTIVES_CONTROLLER_KOVAN = '0x146159b1f7Fb867fC60f16644E33378006E1Fff4'
 
 // Mainnet addresses
 const BNPL_TOKEN_ADDRESS_MAINNET = '0x84d821F7FbDD595c4C4A50842913e6b1E07d7a53'
@@ -55,6 +57,9 @@ const USDT_MAINNET = '0xdac17f958d2ee523a2206206994597c13d831ec7'
 const A_USDT_MAINNET = '0x3ed3b47dd13ec9a98b44e6204a523e766b225811'
 const SUSHISWAP_MAINNET = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
 const AAVE_LENDING_POOL_MAINNET = '0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9'
+const STAKE_AAVE_MAINNET = '0x4da27a545c0c5b758a6ba100e3a049001de870f5'
+const AAVE_MAINNET = '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'
+const AAVE_INCENTIVES_CONTROLLER_MAINNET = '0xd784927Ff2f95ba542BfC824c8a8a98F3495f6b5'
 
 
 const toTokenAmount = (amount: BigNumberish, tokenDecimal: BigNumberish) => {
@@ -88,6 +93,7 @@ const config: { [key: string]: DeployConfig } = {
         unusedFundsLendingMode: 1,
         unusedFundsLendingContract: AAVE_LENDING_POOL_KOVAN,
         unusedFundsLendingToken: A_TUSD_KOVAN,
+        unusedFundsIncentivesController: AAVE_INCENTIVES_CONTROLLER_KOVAN,
         symbol: 'TUSD',
         poolSymbol: 'pTUSD'
       }
@@ -114,6 +120,7 @@ const config: { [key: string]: DeployConfig } = {
         unusedFundsLendingMode: 1,
         unusedFundsLendingContract: AAVE_LENDING_POOL_MAINNET,
         unusedFundsLendingToken: A_USDT_MAINNET,
+        unusedFundsIncentivesController: AAVE_INCENTIVES_CONTROLLER_MAINNET,
         symbol: 'USDT',
         poolSymbol: 'pUSDT'
       }
