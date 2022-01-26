@@ -52,6 +52,13 @@ const DEF_GET_CONTRACT_FOR_ENVIRONMENT = {
       "mainnet": "0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9",
     }, { abiName: "FakeAaveLendingPool" }
   ),
+  "AaveIncentivesController": generateEnvNameContractDefHelper(
+    {
+      "hardhat": "FakeAaveStakedTokenIncentivesController",
+      "kovan": "0x146159b1f7Fb867fC60f16644E33378006E1Fff4",
+      "mainnet": "0xd784927Ff2f95ba542BfC824c8a8a98F3495f6b5",
+    }, { abiName: "FakeAaveStakedTokenIncentivesController" }
+  ),
   "UniswapV3Router": generateEnvNameContractDefHelper(
     {
       "hardhat": "BNPLSwapMarketExample",

@@ -14,6 +14,7 @@ interface IBankNodeManager {
         uint16 unusedFundsLendingMode;
         address unusedFundsLendingContract;
         address unusedFundsLendingToken;
+        address unusedFundsIncentivesController;
         string symbol;
         string poolSymbol;
     }
@@ -122,6 +123,7 @@ interface IBankNodeManager {
             uint16 unusedFundsLendingMode,
             address unusedFundsLendingContract,
             address unusedFundsLendingToken,
+            address unusedFundsIncentivesController,
             string calldata symbol,
             string calldata poolSymbol
         );

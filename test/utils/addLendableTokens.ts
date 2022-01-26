@@ -1,9 +1,10 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { BankNodeManager, FakeAaveLendingPool, IAaveLendingPool, IBankNodeManager, IBNPLSwapMarket, IERC20 } from "../../typechain";
+import { BankNodeManager, FakeAaveLendingPool, FakeAaveStakedTokenIncentivesController, IAaveLendingPool, IBankNodeManager, IBNPLSwapMarket, IERC20 } from "../../typechain";
 import { getContractForEnvironment } from "./getContractForEnvironment";
 
 async function addLendableTokens(hre: HardhatRuntimeEnvironment) {
   const AaveLendingPool = await getContractForEnvironment<FakeAaveLendingPool>(hre, "AaveLendingPool");
+  const AaveIncentivesController = { address: '0x0000000000000000000000000000000000000000' } //await getContractForEnvironment<FakeAaveStakedTokenIncentivesController>(hre, "AaveIncentivesController");
   const UniswapV3Router = await getContractForEnvironment<IBNPLSwapMarket>(hre, "UniswapV3Router");
 
   const lendableTokenDAI = {
@@ -15,6 +16,7 @@ async function addLendableTokens(hre: HardhatRuntimeEnvironment) {
     unusedFundsLendingMode: 1,
     unusedFundsLendingContract: AaveLendingPool.address,
     unusedFundsLendingToken: (await getContractForEnvironment<IERC20>(hre, "aDAI")).address,
+    unusedFundsIncentivesController: AaveIncentivesController.address,
     symbol: "DAI",
     poolSymbol: "pDAI",
   };
@@ -28,6 +30,7 @@ async function addLendableTokens(hre: HardhatRuntimeEnvironment) {
     unusedFundsLendingMode: 1,
     unusedFundsLendingContract: AaveLendingPool.address,
     unusedFundsLendingToken: (await getContractForEnvironment<IERC20>(hre, "aUSDT")).address,
+    unusedFundsIncentivesController: AaveIncentivesController.address,
     symbol: "USDT",
     poolSymbol: "pUSDT",
   };
@@ -41,6 +44,7 @@ async function addLendableTokens(hre: HardhatRuntimeEnvironment) {
     unusedFundsLendingMode: 1,
     unusedFundsLendingContract: AaveLendingPool.address,
     unusedFundsLendingToken: (await getContractForEnvironment<IERC20>(hre, "aUSDC")).address,
+    unusedFundsIncentivesController: AaveIncentivesController.address,
     symbol: "USDC",
     poolSymbol: "pUSDC",
   };
@@ -70,6 +74,7 @@ async function addLendableTokens(hre: HardhatRuntimeEnvironment) {
 }
 async function addLendableTokensTestNet(hre: HardhatRuntimeEnvironment) {
   const AaveLendingPool = await getContractForEnvironment<FakeAaveLendingPool>(hre, "AaveLendingPool");
+  const AaveIncentivesController = { address: '0x0000000000000000000000000000000000000000' } // await getContractForEnvironment<FakeAaveStakedTokenIncentivesController>(hre, "AaveIncentivesController");
   const UniswapV3Router = await getContractForEnvironment<IBNPLSwapMarket>(hre, "UniswapV3Router");
 
   /*
@@ -82,6 +87,7 @@ async function addLendableTokensTestNet(hre: HardhatRuntimeEnvironment) {
       unusedFundsLendingMode: 1,
       unusedFundsLendingContract: AaveLendingPool.address,
       unusedFundsLendingToken: (await getContractForEnvironment<IERC20>(hre, "aUSDT")).address,
+      unusedFundsIncentivesController: AaveIncentivesController.address,
       symbol: "USDT",
       poolSymbol: "pUSDT",
     };
@@ -97,6 +103,7 @@ async function addLendableTokensTestNet(hre: HardhatRuntimeEnvironment) {
     unusedFundsLendingMode: 1,
     unusedFundsLendingContract: AaveLendingPool.address,
     unusedFundsLendingToken: (await getContractForEnvironment<IERC20>(hre, "aTUSD")).address,
+    unusedFundsIncentivesController: AaveIncentivesController.address,
     symbol: "TUSD",
     poolSymbol: "pTUSD",
   };

@@ -3,6 +3,7 @@
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../ERC20/IMintableBurnableTokenUpgradeable.sol";
 import "../Aave/IAaveLendingPool.sol";
+import "../Aave/IAaveIncentivesController.sol";
 import "./StakingPool/IBNPLNodeStakingPool.sol";
 import "../SwapMarket/IBNPLSwapMarket.sol";
 import "../Management/IBankNodeManager.sol";
@@ -24,6 +25,7 @@ interface IBankNodeInitializableV1 {
         uint16 unusedFundsLendingMode;
         address unusedFundsLendingContract;
         address unusedFundsLendingToken;
+        address unusedFundsIncentivesController;
         address nodeStakingPool;
         address baseLiquidityToken;
         address poolLiquidityToken;
@@ -61,6 +63,8 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
     function unusedFundsLendingContract() external view returns (IAaveLendingPool);
 
     function unusedFundsLendingToken() external view returns (IERC20);
+
+    function unusedFundsIncentivesController() external view returns (IAaveIncentivesController);
 
     function bnplSwapMarket() external view returns (IBNPLSwapMarket);
 

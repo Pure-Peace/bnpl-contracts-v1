@@ -348,6 +348,7 @@ contract BankNodeManager is
                 bnplSwapMarket: lendableToken.swapMarket,
                 unusedFundsLendingMode: lendableToken.unusedFundsLendingMode,
                 unusedFundsLendingContract: lendableToken.unusedFundsLendingContract,
+                unusedFundsIncentivesController: lendableToken.unusedFundsIncentivesController,
                 unusedFundsLendingToken: lendableToken.unusedFundsLendingToken,
                 nodeStakingPool: output.bnplStakingPoolContract,
                 baseLiquidityToken: lendableToken.tokenContract,

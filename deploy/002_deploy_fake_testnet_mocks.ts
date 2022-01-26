@@ -63,6 +63,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       log: true,
       gasLimit: 5500000,
     });
+
+    /* const FakeAaveStakedTokenIncentivesController = await deploy('FakeAaveStakedTokenIncentivesController', {
+      from: mockContractsDeployer,
+      args: [stakeAAVE.address, mockContractsDeployer],
+      log: true,
+      gasLimit: 5500000,
+    }); */
   }
   if (shouldSetupFakeUniswap(hre)) {
     const bnplToken = await getContractForEnvironment<BNPLToken>(hre, "BNPLToken", bnplTokenDeployer);

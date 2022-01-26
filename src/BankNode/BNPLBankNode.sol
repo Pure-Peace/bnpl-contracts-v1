@@ -98,6 +98,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint16 public override unusedFundsLendingMode;
     IAaveLendingPool public override unusedFundsLendingContract;
     IERC20 public override unusedFundsLendingToken;
+    IAaveIncentivesController public override unusedFundsIncentivesController;
 
     IBNPLSwapMarket public override bnplSwapMarket; // = IBNPLSwapMarket(0x121E2e269fD5B33cc6a381EA81E1A6D7ec142692);
     uint24 public override bnplSwapMarketPoolFee;
@@ -191,6 +192,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         unusedFundsLendingMode = bankNodeInitConfig.unusedFundsLendingMode;
         unusedFundsLendingToken = IERC20(bankNodeInitConfig.unusedFundsLendingToken);
         unusedFundsLendingContract = IAaveLendingPool(bankNodeInitConfig.unusedFundsLendingContract);
+        unusedFundsIncentivesController = IAaveIncentivesController(bankNodeInitConfig.unusedFundsIncentivesController);
 
         bnplSwapMarket = IBNPLSwapMarket(bankNodeInitConfig.bnplSwapMarket);
 
