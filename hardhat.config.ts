@@ -3,6 +3,7 @@ import { HardhatUserConfig } from 'hardhat/types';
 import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers';
 import "@nomiclabs/hardhat-waffle";
+import "@nomiclabs/hardhat-etherscan";
 import 'hardhat-gas-reporter';
 import '@typechain/hardhat';
 import 'solidity-coverage';
@@ -119,6 +120,9 @@ const config = {
       accounts: accounts('ropsten'),
 
     }
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEYS
   },
   paths: {
     sources: 'src',
