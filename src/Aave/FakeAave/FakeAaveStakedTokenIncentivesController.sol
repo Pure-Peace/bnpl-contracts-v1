@@ -5,7 +5,7 @@ import {DistributionTypes} from "../lib/DistributionTypes.sol";
 import "../IScaledBalanceToken.sol";
 import "../IStakedTokenWithConfig.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../lib/SafeErc20.sol";
+import "../lib/SafeERC20.sol";
 
 contract FakeAaveStakedTokenIncentivesController is IAaveIncentivesController {
     using SafeERC20 for IERC20;
