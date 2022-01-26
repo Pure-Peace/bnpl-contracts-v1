@@ -8,12 +8,12 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import "./IBNPLBankNode.sol";
 import "../ERC20/IMintableBurnableTokenUpgradeable.sol";
 import "../Utils/TransferHelper.sol";
-import "../Utils/Math/PRBMathUD60x18.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "./BankNodeUtils.sol";
 
 contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, ReentrancyGuardUpgradeable, IBNPLBankNode {
     /**
@@ -79,8 +79,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     //TODO: Source
     uint256 public constant UNUSED_FUNDS_MIN_DEPOSIT_SIZE = 1;
 
-    uint256 public constant MIN_LOAN_DURATION = 30 days;
-    uint256 public constant MIN_LOAN_PAYMENT_INTERVAL = 2 days;
+    uint256 public constant MIN_LOAN_DURATION = 30;
+    uint256 public constant MIN_LOAN_PAYMENT_INTERVAL = 2;
 
     //TODO: Add max duration and max payment interval
 
@@ -139,35 +139,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         return bnplKYCStore.publicKeys(kycDomainId);
     }
 
-    function getLoansList(
-        uint256 start,
-        uint256 count,
-        bool reverse,
-        int8 status
-    ) external view override returns (Loan[] memory, uint256) {
-        if (start > loanIndex) {
-            return (new Loan[](0), loanIndex);
-        }
-        uint256 end;
-        if (reverse) {
-            start = loanIndex - start;
-            end = (start > count) ? (start - count) : 0;
-            count = start - end;
-        } else {
-            end = (start + count) > loanIndex ? loanIndex : (start + count);
-            count = end - start;
-        }
-        Loan[] memory tmp = new Loan[](count);
-        uint32 tmpIndex = 0;
-        while ((tmpIndex < count) && reverse ? start > 0 : start < loanIndex) {
-            Loan memory _loan = loans[reverse ? start - 1 : start];
-            reverse ? start-- : start++;
-            if (status > -1 && _loan.status != uint8(status)) continue;
-            tmp[tmpIndex++] = _loan;
-        }
-        return (tmp, loanIndex);
-    }
-
     function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig)
         external
         override
@@ -216,6 +187,10 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         );
     }
 
+    function rewardToken() public view override returns (IStakedToken) {
+        return IStakedToken(unusedFundsIncentivesController.REWARD_TOKEN());
+    }
+
     function getValueOfUnusedFundsLendingDeposits() public view override returns (uint256) {
         return unusedFundsLendingToken.balanceOf(address(this));
     }
@@ -237,76 +212,12 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         return (withdrawAmount * getPoolTotalAssetsValue()) / (poolTokensCirculating > 0 ? poolTokensCirculating : 1);
     }
 
-    function calculateSlashAmount(
-        uint256 prevNodeBalance,
-        uint256 nodeLoss,
-        uint256 poolBalance
-    ) public pure returns (uint256) {
-        uint256 slashRatio = PRBMathUD60x18.div(
-            nodeLoss * PRBMathUD60x18.scale(),
-            prevNodeBalance * PRBMathUD60x18.scale()
-        );
-        return (poolBalance * slashRatio) / PRBMathUD60x18.scale();
-    }
-
-    function getSwapExactTokensPath(address tokenIn, address tokenOut) private pure returns (address[] memory) {
-        address[] memory path = new address[](2);
-        path[0] = address(tokenIn);
-        path[1] = address(tokenOut);
-        return path;
-    }
-
-    function getMonthlyInterestPayment(
-        uint256 loanAmount,
-        uint256 interestAmount,
-        uint256 numberOfPayments,
-        uint256 currentMonth
-    ) public pure returns (uint256) {
-        return
-            (loanAmount *
-                PRBMathUD60x18.mul(
-                    getPrincipleForMonth(interestAmount, numberOfPayments, currentMonth - 1),
-                    interestAmount
-                )) / PRBMathUD60x18.scale();
-    }
-
     function getLoanNextDueDate(uint256 loanId) public view returns (uint64) {
         Loan memory loan = loans[loanId];
-        require(loan.loanStartedAt > 0);
-        require(loan.numberOfPaymentsMade < loan.numberOfPayments);
+        require(loan.loanStartedAt > 0 && loan.numberOfPaymentsMade < loan.numberOfPayments);
         uint256 nextPaymentDate = ((uint256(loan.numberOfPaymentsMade + 1) * uint256(loan.totalLoanDuration)) /
             uint256(loan.numberOfPayments)) + uint256(loan.loanStartedAt);
         return uint64(nextPaymentDate);
-    }
-
-    function getPrincipleForMonth(
-        uint256 interestAmount,
-        uint256 numberOfPayments,
-        uint256 currentMonth
-    ) public pure returns (uint256) {
-        uint256 ip1 = (PRBMathUD60x18.scale() + interestAmount);
-        uint256 ip1m = PRBMathUD60x18.pow(ip1, currentMonth);
-        uint256 pin = getPaymentMultiplier(interestAmount, numberOfPayments);
-        uint256 rightFrac = PRBMathUD60x18.div(ip1m - PRBMathUD60x18.scale(), interestAmount);
-        uint256 right = PRBMathUD60x18.mul(pin, rightFrac);
-        return ip1m - right;
-    }
-
-    function getMonthlyPayment(
-        uint256 loanAmount,
-        uint256 interestAmount,
-        uint256 numberOfPayments
-    ) public pure returns (uint256) {
-        return (loanAmount * getPaymentMultiplier(interestAmount, numberOfPayments)) / PRBMathUD60x18.scale();
-    }
-
-    function getPaymentMultiplier(uint256 interestAmount, uint256 numberOfPayments) public pure returns (uint256) {
-        uint256 ip1 = (PRBMathUD60x18.scale() + interestAmount);
-        uint256 ip1n = PRBMathUD60x18.pow(ip1, numberOfPayments);
-        uint256 top = PRBMathUD60x18.mul(interestAmount, ip1n);
-        uint256 bottom = (ip1n - PRBMathUD60x18.scale());
-        uint256 result = PRBMathUD60x18.div(top, bottom);
-        return result;
     }
 
     function _withdrawFromAaveToBaseBalance(uint256 amount) private {
@@ -344,8 +255,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     function _mintPoolTokensForUser(address user, uint256 mintAmount) private {
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(0) && user != address(this), "invalid user");
         require(mintAmount != 0, "mint amount cannot be 0");
         uint256 newMintTokensCirculating = poolTokensCirculating + mintAmount;
         poolTokensCirculating = newMintTokensCirculating;
@@ -354,8 +264,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     function _processDonation(address sender, uint256 depositAmount) private {
-        require(sender != address(this), "sender cannot be self");
-        require(sender != address(0), "sender cannot be null");
+        require(sender != address(0) && sender != address(this), "invalid sender");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
         require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
@@ -368,8 +277,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     function _setupLiquidityFirst(address user, uint256 depositAmount) private returns (uint256) {
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(0) && user != address(this), "invalid user");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
         require(poolTokensCirculating == 0, "poolTokensCirculating must be 0");
@@ -391,8 +299,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     function _addLiquidityNormal(address user, uint256 depositAmount) private returns (uint256) {
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(0) && user != address(this), "invalid user");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
         require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
@@ -413,8 +320,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     function _addLiquidity(address user, uint256 depositAmount) private returns (uint256) {
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(0) && user != address(this), "");
         require(!nodeStakingPool.isNodeDecomissioning(), "BankNode bonded amount is less than 75% of the minimum");
 
         require(depositAmount != 0, "depositAmount cannot be 0");
@@ -426,8 +332,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     function _removeLiquidity(address user, uint256 poolTokensToConsume) private returns (uint256) {
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(0) && user != address(this), "invalid user");
 
         require(
             poolTokensToConsume != 0 && poolTokensToConsume <= poolTokensCirculating,
@@ -442,7 +347,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         _ensureBaseBalance(baseTokensOut);
         require(baseTokenBalance >= baseTokensOut, "base tokens balance must be >= out");
         TransferHelper.safeTransferFrom(address(poolLiquidityToken), user, address(this), poolTokensToConsume);
-        require(baseTokenBalance >= baseTokensOut, "base tokens balance must be >= out");
         baseTokenBalance -= baseTokensOut;
         TransferHelper.safeTransfer(address(baseLiquidityToken), user, baseTokensOut);
         emit LiquidityRemoved(user, baseTokensOut, poolTokensToConsume);
@@ -480,11 +384,13 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         string memory message,
         string memory uuid
     ) private {
-        require(loanAmount <= MAX_LOAN_AMOUNT);
-        require(loanAmount >= MIN_LOAN_AMOUNT);
-        require(interestRatePerPayment > 0);
+        require(loanAmount <= MAX_LOAN_AMOUNT && loanAmount >= MIN_LOAN_AMOUNT && interestRatePerPayment > 0);
 
-        uint256 amountPerPayment = getMonthlyPayment(loanAmount, interestRatePerPayment, numberOfPayments);
+        uint256 amountPerPayment = BankNodeUtils.getMonthlyPayment(
+            loanAmount,
+            interestRatePerPayment,
+            numberOfPayments
+        );
 
         require(loanAmount <= (amountPerPayment * uint256(numberOfPayments)), "payments not greater than loan amount!");
         require(
@@ -496,7 +402,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             (uint256(totalLoanDuration) / uint256(numberOfPayments)) >= MIN_LOAN_PAYMENT_INTERVAL,
             "must be greater than MIN_LOAN_PAYMENT_INTERVAL"
         );
-
         uint256 currentLoanRequestId = loanRequestIndex;
         loanRequestIndex += 1;
         LoanRequest storage loanRequest = loanRequests[currentLoanRequestId];
@@ -643,7 +548,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     {
         require(nodeOperatorBalance >= amount, "cannot withdraw more than nodeOperatorBalance");
         _ensureBaseBalance(amount);
-        require(nodeOperatorBalance >= amount, "cannot withdraw more than nodeOperatorBalance");
         nodeOperatorBalance -= amount;
         TransferHelper.safeTransfer(address(baseLiquidityToken), to, amount);
     }
@@ -667,7 +571,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(
             amountInBaseToken,
             0,
-            getSwapExactTokensPath(address(baseLiquidityToken), address(bnplToken)),
+            BankNodeUtils.getSwapExactTokensPath(address(baseLiquidityToken), address(bnplToken)),
             address(this),
             block.timestamp
         )[1];
@@ -693,7 +597,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(
             bnplAmount,
             0,
-            getSwapExactTokensPath(address(bnplToken), address(baseLiquidityToken)),
+            BankNodeUtils.getSwapExactTokensPath(address(bnplToken), address(baseLiquidityToken)),
             address(this),
             block.timestamp
         )[1];
@@ -715,7 +619,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
         require(
             getLoanNextDueDate(loanId) < uint64(block.timestamp - bankNodeManager.loanOverdueGracePeriod()),
-            "loan must be overdue (and exceeding the grace period) to write off"
+            "loan must be overdue"
         );
         require(loan.loanAmount > loan.totalAmountPaid);
         uint256 startPoolTotalAssetValue = getPoolTotalAssetsValue();
@@ -740,7 +644,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         require(prevBalanceEquivalent > getPoolTotalAssetsValue());
         uint256 poolBalance = nodeStakingPool.getPoolTotalAssetsValue();
         require(poolBalance > 0);
-        uint256 slashAmount = calculateSlashAmount(
+        uint256 slashAmount = BankNodeUtils.calculateSlashAmount(
             prevBalanceEquivalent,
             prevBalanceEquivalent - getPoolTotalAssetsValue(),
             poolBalance
@@ -773,10 +677,12 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         );
 
         uint256 currentPaymentId = loan.numberOfPaymentsMade;
-        require(currentPaymentId < loan.numberOfPayments);
-        require(loan.remainingBalance > 0);
-        require(loan.remainingBalance >= loan.amountPerPayment);
-        uint256 interestAmount = getMonthlyInterestPayment(
+        require(
+            currentPaymentId < loan.numberOfPayments &&
+                loan.remainingBalance > 0 &&
+                loan.remainingBalance >= loan.amountPerPayment
+        );
+        uint256 interestAmount = BankNodeUtils.getMonthlyInterestPayment(
             loan.loanAmount,
             loan.interestRatePerPayment,
             loan.numberOfPayments,
@@ -788,10 +694,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         uint256 marketBuyInterest = holdInterest - bondedInterest;
 
         uint256 amountPerPayment = loan.amountPerPayment;
-        require(interestAmount > 0);
-        require(bondedInterest > 0);
-        require(marketBuyInterest > 0);
-        require(amountPerPayment > interestAmount);
+        require(interestAmount > 0 && bondedInterest > 0 && marketBuyInterest > 0 && amountPerPayment > interestAmount);
         TransferHelper.safeTransferFrom(address(baseLiquidityToken), payer, address(this), amountPerPayment);
         loan.totalAmountPaid += amountPerPayment;
         loan.remainingBalance -= amountPerPayment;
@@ -822,5 +725,41 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     /// @notice Make a loan payment for loan with id `loanId`
     function makeLoanPayment(uint256 loanId) external override nonReentrant {
         _makeLoanPayment(msg.sender, loanId);
+    }
+
+    function _dividendAssets() internal view returns (address[] memory) {
+        address[] memory assets = new address[](1);
+        assets[0] = address(unusedFundsLendingToken);
+        return assets;
+    }
+
+    function getRewardsBalance() external view override returns (uint256) {
+        return unusedFundsIncentivesController.getRewardsBalance(_dividendAssets(), address(this));
+    }
+
+    function getCooldownStartTimestamp() external view override returns (uint256) {
+        return rewardToken().stakersCooldowns(address(nodeStakingPool));
+    }
+
+    function getStakedTokenRewardsBalance() external view override returns (uint256) {
+        return rewardToken().getTotalRewardsBalance(address(nodeStakingPool));
+    }
+
+    function getStakedTokenBalance() external view override returns (uint256) {
+        return IERC20(address(rewardToken())).balanceOf(address(nodeStakingPool));
+    }
+
+    function claimLendingTokenInterest() external override onlyRole(OPERATOR_ROLE) nonReentrant returns (uint256) {
+        TransferHelper.safeApprove(
+            rewardToken().REWARD_TOKEN(),
+            address(unusedFundsIncentivesController),
+            type(uint256).max
+        );
+        return
+            unusedFundsIncentivesController.claimRewards(
+                _dividendAssets(),
+                type(uint256).max,
+                address(nodeStakingPool)
+            );
     }
 }

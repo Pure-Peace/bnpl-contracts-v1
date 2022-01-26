@@ -17,6 +17,8 @@ import "../../Utils/Math/PRBMathUD60x18.sol";
 import "./UserTokenLockup.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
+import "../BankNodeUtils.sol";
+
 contract BNPLStakingPool is
     Initializable,
     ReentrancyGuardUpgradeable,
@@ -441,5 +443,33 @@ contract BNPLStakingPool is
     /// @notice Allows user `user` to claim the next `maxNumberOfClaims` token lockup vaults they have locked up in the contract
     function claimTokenNextNLockups(address user, uint32 maxNumberOfClaims) external nonReentrant returns (uint256) {
         return _claimUpToNextNTokenLockups(user, maxNumberOfClaims);
+    }
+
+    function unlockLendingTokenInterest() external onlyRole(NODE_REWARDS_MANAGER_ROLE) nonReentrant {
+        bankNode.rewardToken().cooldown();
+    }
+
+    function distributeDividends() external onlyRole(NODE_REWARDS_MANAGER_ROLE) nonReentrant {
+        bankNode.rewardToken().claimRewards(address(this), type(uint256).max);
+
+        uint256 rewardTokenAmount = IERC20(address(bankNode.rewardToken())).balanceOf(address(this));
+        require(rewardTokenAmount > 0, "rewardTokenAmount must be > 0");
+
+        TransferHelper.safeApprove(address(bankNode.rewardToken()), address(bankNode.rewardToken()), rewardTokenAmount);
+        bankNode.rewardToken().redeem(address(this), rewardTokenAmount);
+
+        IERC20 swapToken = IERC20(bankNode.rewardToken().REWARD_TOKEN());
+
+        uint256 donateAmount = bankNode.bnplSwapMarket().swapExactTokensForTokens(
+            swapToken.balanceOf(address(this)),
+            0,
+            BankNodeUtils.getSwapExactTokensPath(address(swapToken), address(BASE_LIQUIDITY_TOKEN)),
+            address(this),
+            block.timestamp
+        )[1];
+        require(donateAmount > 0, "swap amount must be > 0");
+
+        TransferHelper.safeApprove(address(BASE_LIQUIDITY_TOKEN), address(this), donateAmount);
+        _processDonation(msg.sender, donateAmount, false);
     }
 }

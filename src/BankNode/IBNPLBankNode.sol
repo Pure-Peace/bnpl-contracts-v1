@@ -7,6 +7,7 @@ import "../Aave/IAaveIncentivesController.sol";
 import "./StakingPool/IBNPLNodeStakingPool.sol";
 import "../SwapMarket/IBNPLSwapMarket.sol";
 import "../Management/IBankNodeManager.sol";
+import "../Aave/IStakedToken.sol";
 
 pragma solidity ^0.8.0;
 
@@ -122,13 +123,6 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
 
     function bnplKYCStore() external view returns (BNPLKYCStore);
 
-    function getLoansList(
-        uint256 start,
-        uint256 count,
-        bool reverse,
-        int8 status
-    ) external view returns (Loan[] memory, uint256);
-
     function loanRequests(uint256 _loanRequestId)
         external
         view
@@ -168,11 +162,6 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
             uint256 loanRequestId
         );
 
-    /*
-    mapping(uint256 => LoanRequest) public loanRequests;
-    mapping(uint256 => Loan) public loans;
-    */
-
     // end public vars
 
     function donate(uint256 depositAmount) external;
@@ -204,4 +193,16 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
     function setKYCSettings(uint256 kycMode_, address nodePublicKey_) external;
 
     function setKYCDomainMode(uint32 domain, uint256 mode) external;
+
+    function rewardToken() external view returns (IStakedToken);
+
+    function getRewardsBalance() external view returns (uint256);
+
+    function getCooldownStartTimestamp() external view returns (uint256);
+
+    function getStakedTokenRewardsBalance() external view returns (uint256);
+
+    function getStakedTokenBalance() external view returns (uint256);
+
+    function claimLendingTokenInterest() external returns (uint256);
 }
