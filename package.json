@@ -41,6 +41,7 @@
     "fs-extra": "^10.0.0",
     "hardhat": "^2.8.2",
     "hardhat-abi-exporter": "^2.3.0",
+    "hardhat-contract-sizer": "^2.4.0",
     "hardhat-deploy": "^0.9.24",
     "hardhat-docgen": "^1.1.2",
     "hardhat-gas-reporter": "^1.0.4",
@@ -87,6 +88,7 @@
     "docs": "solidity-docgen -i ./src -t ./docs-templates --solc-module solc-0.8.11",
     "deploy-dev": "node ./_scripts.js deploy",
     "deploy-prod": "node ./_scripts.js deploy-prod",
-    "upgrade-cli": "node ./_scripts.js upgrade-cli"
+    "upgrade-cli": "node ./_scripts.js upgrade-cli",
+    "size": "hardhat size-contracts"
   }
 }
