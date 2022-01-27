@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BigNumber, BigNumberish } from "ethers";
 
-type DeployConfig = {
+export type DeployConfig = {
   networkId: string,
   networkName: string,
   bnplTokenAddress: string,
@@ -14,7 +14,7 @@ type DeployConfig = {
   lendableTokens: LendableTokenConfig[]
 }
 
-type LendableTokenConfig = {
+export type LendableTokenConfig = {
   enabled: boolean,
   tokenContract: string,
   swapMarket: string,
@@ -63,7 +63,7 @@ const AAVE_INCENTIVES_CONTROLLER_MAINNET = '0xd784927Ff2f95ba542BfC824c8a8a98F34
 
 
 const toTokenAmount = (amount: BigNumberish, tokenDecimal: BigNumberish) => {
-  return BigNumber.from(amount).mul(BigNumber.from(10).mul(tokenDecimal))
+  return BigNumber.from(amount).mul(BigNumber.from(10).pow(tokenDecimal))
 }
 
 const swapMarketPoolFee = (amount: BigNumberish) => {
