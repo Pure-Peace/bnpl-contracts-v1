@@ -85,8 +85,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     //TODO: Source
     uint256 public constant UNUSED_FUNDS_MIN_DEPOSIT_SIZE = 1;
 
-    uint256 public constant MIN_LOAN_DURATION = 30;
-    uint256 public constant MIN_LOAN_PAYMENT_INTERVAL = 2;
+    uint256 public constant MIN_LOAN_DURATION = 30 days;
+    uint256 public constant MIN_LOAN_PAYMENT_INTERVAL = 2 days;
 
     //TODO: Add max duration and max payment interval
 
