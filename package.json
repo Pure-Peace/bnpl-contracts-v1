@@ -1,12 +1,12 @@
 {
-  "name": "template-ethereum-contracts",
+  "name": "bnpl-contracts",
   "version": "0.1.0",
-  "description": "Template to develop ethereum smart contracts",
+  "description": "BNPL contracts",
   "engines": {
     "node": ">= 12.18.0"
   },
-  "repository": "github:wighawag/template-ethereum-contracts",
-  "author": "wighawag",
+  "repository": "github:cf/bnpl-contracts-v5",
+  "author": "cf",
   "license": "MIT",
   "keywords": [
     "ethereum",

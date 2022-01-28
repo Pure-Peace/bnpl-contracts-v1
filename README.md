@@ -1,9 +1,27 @@
-# Boilerplate for ethereum solidity smart contract development
+# Bnpl-Contracts
 
 ## Docs generate
 
 ```
 yarn docs
+```
+
+## Display contract size
+
+```
+yarn size
+```
+
+## Contracts deploy
+
+```
+yarn deploy-prod <network>
+```
+
+## Contracts upgrade cli
+
+```
+yarn upgrade-cli <network>
 ```
 
 ## INSTALL
