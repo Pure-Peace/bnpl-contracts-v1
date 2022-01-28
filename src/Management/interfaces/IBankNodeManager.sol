@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../ProtocolDeploy/IBNPLProtocolConfig.sol";
-import "../Rewards/PlatformRewards/BankNodeLendingRewards.sol";
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {IBNPLProtocolConfig} from "../../ProtocolDeploy/interfaces/IBNPLProtocolConfig.sol";
+
+import {BNPLKYCStore} from "../BNPLKYCStore.sol";
+import {BankNodeLendingRewards} from "../../Rewards/PlatformRewards/BankNodeLendingRewards.sol";
 
 interface IBankNodeManager {
     struct LendableToken {
@@ -10,7 +14,7 @@ interface IBankNodeManager {
         address swapMarket;
         uint24 swapMarketPoolFee;
         uint8 decimals;
-        uint256 valueMultiplier; //USD_VALUE = amount * valueMultiplier / 10**18
+        uint256 valueMultiplier; // USD_VALUE = amount * valueMultiplier / 10**18
         uint16 unusedFundsLendingMode;
         address unusedFundsLendingContract;
         address unusedFundsLendingToken;

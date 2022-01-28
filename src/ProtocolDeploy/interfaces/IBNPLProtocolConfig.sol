@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../Management/IBankNodeManager.sol";
-import "../Management/BNPLKYCStore.sol";
-import "../Rewards/PlatformRewards/BankNodeLendingRewards.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {IBankNodeManager} from "../../Management/interfaces/IBankNodeManager.sol";
+import {BNPLKYCStore} from "../../Management/BNPLKYCStore.sol";
 
 interface IBNPLProtocolConfig {
     function networkId() external view returns (uint64);

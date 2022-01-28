@@ -1,18 +1,17 @@
-// contracts/ScrollToken.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
-import "../../ERC20/IMintableToken.sol";
-import "./IFakeAaveToken.sol";
+import {IMintableToken} from "../../ERC20/interfaces/IMintableToken.sol";
+import {IFakeAaveToken} from "../interfaces/IFakeAaveToken.sol";
 
 contract FakeAaveUSDToken is ERC20, AccessControl, ERC20Burnable, IMintableToken, IFakeAaveToken {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant MINTER_ADMIN_ROLE = keccak256("MINTER_ADMIN_ROLE");
-    uint8 _decimals;
+    uint8 private _decimals;
 
     constructor(
         string memory name_,
@@ -20,10 +19,8 @@ contract FakeAaveUSDToken is ERC20, AccessControl, ERC20Burnable, IMintableToken
         uint8 decimals_
     ) ERC20(name_, symbol_) {
         _decimals = decimals_;
-        // _setupRole(MINTER_ROLE, msg.sender);
         _setupRole(MINTER_ADMIN_ROLE, msg.sender);
         _setRoleAdmin(MINTER_ROLE, MINTER_ADMIN_ROLE);
-        // _mint(msg.sender, 100000000*(10**18));
     }
 
     function internalAaveMintFor(address to, uint256 amount) external override {

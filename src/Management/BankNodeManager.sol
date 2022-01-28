@@ -1,20 +1,22 @@
-// contracts/PoolTokenUpgradeable.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-import "../Utils/TransferHelper.sol";
+import {IBNPLBankNode, IBankNodeInitializableV1} from "../BankNode/interfaces/IBNPLBankNode.sol";
+import {IBNPLNodeStakingPool} from "../BankNode/interfaces/IBNPLNodeStakingPool.sol";
+import {ITokenInitializableV1} from "../ERC20/interfaces/ITokenInitializableV1.sol";
+import {IBNPLProtocolConfig} from "../ProtocolDeploy/interfaces/IBNPLProtocolConfig.sol";
+import {IBankNodeManager} from "./interfaces/IBankNodeManager.sol";
 
-import "../BankNode/IBNPLBankNode.sol";
-import "../BankNode/StakingPool/IBNPLNodeStakingPool.sol";
-import "../ERC20/ITokenInitializableV1.sol";
-import "./IBankNodeManager.sol";
-import "../ProtocolDeploy/IBNPLProtocolConfig.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {BankNodeLendingRewards} from "../Rewards/PlatformRewards/BankNodeLendingRewards.sol";
+import {BNPLKYCStore} from "./BNPLKYCStore.sol";
+
+import {TransferHelper} from "../Utils/TransferHelper.sol";
 
 contract BankNodeManager is
     Initializable,
@@ -274,7 +276,6 @@ contract BankNodeManager is
             address(protocolConfig.upBeaconBankNodeLendingPoolToken()),
             abi.encodeWithSelector(
                 ITokenInitializableV1.initialize.selector,
-                //initialize(string calldata name, string calldata symbol, uint8 decimalsValue, address minterAdmin, address minter) external;
                 name,
                 symbol,
                 decimalsValue,
@@ -296,7 +297,6 @@ contract BankNodeManager is
             address(protocolConfig.upBeaconBankNodeStakingPool()),
             abi.encodeWithSelector(
                 ITokenInitializableV1.initialize.selector,
-                //initialize(string calldata name, string calldata symbol, uint8 decimalsValue, address minterAdmin, address minter) external;
                 name,
                 symbol,
                 decimalsValue,
@@ -412,7 +412,6 @@ contract BankNodeManager is
                 kycMode: kycMode
             })
         );
-        //uint32 bankNodeId = bankNodeCount;
         BankNode storage bankNode = bankNodes[id];
         bankNode.id = id;
 

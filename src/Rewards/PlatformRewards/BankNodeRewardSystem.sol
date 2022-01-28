@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
-/*
 
-Borrowed heavily from Synthetix
+/* Borrowed heavily from Synthetix
 
 * MIT License
 * ===========
@@ -25,19 +24,18 @@ Borrowed heavily from Synthetix
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 */
-
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IBankNodeManager} from "../../Management/interfaces/IBankNodeManager.sol";
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../../Management/IBankNodeManager.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract BankNodeRewardSystem is
     Initializable,
@@ -47,6 +45,7 @@ contract BankNodeRewardSystem is
 {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
+
     bytes32 public constant REWARDS_DISTRIBUTOR_ROLE = keccak256("REWARDS_DISTRIBUTOR_ROLE");
     bytes32 public constant REWARDS_DISTRIBUTOR_ADMIN_ROLE = keccak256("REWARDS_DISTRIBUTOR_ADMIN_ROLE");
 
@@ -240,14 +239,13 @@ contract BankNodeRewardSystem is
         _notifyRewardAmount(bankNodeId, reward);
     }
 
-    /*
     // Added to support recovering LP Rewards from other systems such as BAL to be distributed to holders
-    function recoverERC20(address tokenAddress, uint256 tokenAmount) external {
+    /* function recoverERC20(address tokenAddress, uint256 tokenAmount) external {
         require(tokenAddress != address(stakingToken[]), "Cannot withdraw the staking token");
         IERC20(tokenAddress).safeTransfer(owner, tokenAmount);
         emit Recovered(tokenAddress, tokenAmount);
-    }
-*/
+    }*/
+
     function setRewardsDuration(uint32 bankNodeId, uint256 _rewardsDuration) external onlyRole(REWARDS_MANAGER) {
         require(
             block.timestamp > periodFinish[bankNodeId],

@@ -1,6 +1,7 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../Utils/Math/PRBMathUD60x18.sol";
+import {PRBMathUD60x18} from "../../Utils/Math/PRBMathUD60x18.sol";
 
 library BankNodeUtils {
     using PRBMathUD60x18 for uint256;
@@ -57,5 +58,12 @@ library BankNodeUtils {
         path[0] = address(tokenIn);
         path[1] = address(tokenOut);
         return path;
+    }
+
+    /**
+     * @dev Returns the smallest of two numbers.
+     */
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a < b ? a : b;
     }
 }

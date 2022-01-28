@@ -1,23 +1,23 @@
-// contracts/ExampleBankNode.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-import "../../Management/IBankNodeManager.sol";
-import "../IBNPLBankNode.sol";
-import "../../ERC20/IMintableBurnableTokenUpgradeable.sol";
-import "../../Utils/TransferHelper.sol";
-import "../../SwapMarket/IBNPLSwapMarket.sol";
-import "../../Aave/IAaveLendingPool.sol";
-import "../../Utils/Math/PRBMathUD60x18.sol";
-import "./UserTokenLockup.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {IMintableBurnableTokenUpgradeable} from "../../ERC20/interfaces/IMintableBurnableTokenUpgradeable.sol";
+import {IBankNodeManager} from "../../Management/interfaces/IBankNodeManager.sol";
 
-import "../BankNodeUtils.sol";
+import {IBNPLBankNode} from "../interfaces/IBNPLBankNode.sol";
+import {IBNPLNodeStakingPool} from "../interfaces/IBNPLNodeStakingPool.sol";
+
+import {UserTokenLockup} from "./UserTokenLockup.sol";
+import {BNPLKYCStore} from "../../Management/BNPLKYCStore.sol";
+
+import {BankNodeUtils} from "../lib/BankNodeUtils.sol";
+import {TransferHelper} from "../../Utils/TransferHelper.sol";
+import {PRBMathUD60x18} from "../../Utils/Math/PRBMathUD60x18.sol";
 
 contract BNPLStakingPool is
     Initializable,
@@ -26,6 +26,7 @@ contract BNPLStakingPool is
     UserTokenLockup,
     IBNPLNodeStakingPool
 {
+    using PRBMathUD60x18 for uint256;
     /**
      * @dev Emitted when user `user` is stakes `bnplStakeAmount` of BNPL tokens while receiving `poolTokensMinted` of pool tokens
      */
@@ -60,10 +61,9 @@ contract BNPLStakingPool is
 
     bytes32 public constant SLASHER_ROLE = keccak256("SLASHER_ROLE");
     bytes32 public constant NODE_REWARDS_MANAGER_ROLE = keccak256("NODE_REWARDS_MANAGER_ROLE");
-    //bytes32 public constant SLASHER_ADMIN_ROLE = keccak256("SLASHER_ADMIN_ROLE");
 
-    IERC20 public BASE_LIQUIDITY_TOKEN; // = IERC20(0x1d1781B0017CCBb3f0341420E5952aAfD9d8C083);
-    IMintableBurnableTokenUpgradeable public POOL_LIQUIDITY_TOKEN; // = IMintableToken(0x517D01e738F8E1fB473f905BCC736aaa41226761);
+    IERC20 public BASE_LIQUIDITY_TOKEN;
+    IMintableBurnableTokenUpgradeable public POOL_LIQUIDITY_TOKEN;
     IBNPLBankNode public bankNode;
     IBankNodeManager public bankNodeManager;
 
@@ -104,10 +104,8 @@ contract BNPLStakingPool is
         bankNode = IBNPLBankNode(bankNodeContract);
         bankNodeManager = IBankNodeManager(bankNodeManagerContract);
 
-        //_setupRole(SLASHER_ADMIN_ROLE, slasherAdmin);
         _setupRole(SLASHER_ROLE, bankNodeContract);
         _setupRole(NODE_REWARDS_MANAGER_ROLE, tokenBonder);
-        //_setRoleAdmin(SLASHER_ROLE, SLASHER_ADMIN_ROLE);
 
         require(BASE_LIQUIDITY_TOKEN.balanceOf(address(this)) >= tokensToBond, "tokens to bond not sent");
         baseTokenBalance = tokensToBond;
@@ -173,8 +171,7 @@ contract BNPLStakingPool is
         uint256 unstakeLockupPeriod
     ) internal returns (uint256) {
         require(unstakeLockupPeriod != 0, "lockup period cannot be 0");
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(this) && user != address(0), "invalid user");
 
         require(
             poolTokensToConsume > 0 && poolTokensToConsume <= poolTokenEffectiveSupply,
@@ -188,8 +185,8 @@ contract BNPLStakingPool is
     }
 
     function _mintPoolTokensForUser(address user, uint256 mintAmount) private {
-        //require(user != address(this), "user cannot be self");
         require(user != address(0), "user cannot be null");
+
         require(mintAmount != 0, "mint amount cannot be 0");
         uint256 newMintTokensCirculating = poolTokenEffectiveSupply + mintAmount;
         poolTokenEffectiveSupply = newMintTokensCirculating;
@@ -202,8 +199,7 @@ contract BNPLStakingPool is
         uint256 depositAmount,
         bool countedIntoTotal
     ) private {
-        require(sender != address(this), "sender cannot be self");
-        require(sender != address(0), "sender cannot be null");
+        require(sender != address(this) && sender != address(0), "invalid sender");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
         require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
@@ -216,8 +212,7 @@ contract BNPLStakingPool is
     }
 
     function _processBondTokens(address sender, uint256 depositAmount) private {
-        require(sender != address(this), "sender cannot be self");
-        require(sender != address(0), "sender cannot be null");
+        require(sender != address(this) && sender != address(0), "invalid sender");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
         require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
@@ -231,8 +226,7 @@ contract BNPLStakingPool is
     }
 
     function _processUnbondTokens(address sender) private {
-        require(sender != address(this), "sender cannot be self");
-        require(sender != address(0), "sender cannot be null");
+        require(sender != address(this) && sender != address(0), "invalid sender");
         require(bankNode.onGoingLoanCount() == 0, "Cannot unbond, there are ongoing loans");
 
         uint256 pTokens = POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
@@ -250,8 +244,7 @@ contract BNPLStakingPool is
     }
 
     function _setupLiquidityFirst(address user, uint256 depositAmount) private returns (uint256) {
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(this) && user != address(0), "invalid user");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
         require(poolTokenEffectiveSupply == 0, "poolTokenEffectiveSupply must be 0");
@@ -268,13 +261,11 @@ contract BNPLStakingPool is
         uint256 poolTokensOut = newTotalAssetValue;
         _mintPoolTokensForUser(user, poolTokensOut);
         emit Stake(user, depositAmount, poolTokensOut);
-        //_processMigrateUnusedFundsToLendingPool();
         return poolTokensOut;
     }
 
     function _addLiquidityNormal(address user, uint256 depositAmount) private returns (uint256) {
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(this) && user != address(0), "invalid user");
         require(depositAmount != 0, "depositAmount cannot be 0");
 
         require(poolTokenEffectiveSupply != 0, "poolTokenEffectiveSupply must not be 0");
@@ -290,13 +281,11 @@ contract BNPLStakingPool is
         baseTokenBalance += depositAmount;
         _mintPoolTokensForUser(user, poolTokensOut);
         emit Stake(user, depositAmount, poolTokensOut);
-        //_processMigrateUnusedFundsToLendingPool();
         return poolTokensOut;
     }
 
     function _addLiquidity(address user, uint256 depositAmount) private returns (uint256) {
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(this) && user != address(0), "invalid user");
         require(!isNodeDecomissioning(), "BankNode bonded amount is less than 75% of the minimum");
 
         require(depositAmount != 0, "depositAmount cannot be 0");
@@ -308,8 +297,7 @@ contract BNPLStakingPool is
     }
 
     function _removeLiquidityNoLockup(address user, uint256 poolTokensToConsume) private returns (uint256) {
-        require(user != address(this), "user cannot be self");
-        require(user != address(0), "user cannot be null");
+        require(user != address(this) && user != address(0), "invalid user");
 
         require(
             poolTokensToConsume != 0 && poolTokensToConsume <= poolTokenEffectiveSupply,
@@ -321,7 +309,6 @@ contract BNPLStakingPool is
 
         uint256 baseTokensOut = getPoolWithdrawConversion(poolTokensToConsume);
         poolTokenEffectiveSupply -= poolTokensToConsume;
-        //_ensureBaseBalance(baseTokensOut);
         require(baseTokenBalance >= baseTokensOut, "base tokens balance must be >= out");
         TransferHelper.safeTransferFrom(address(POOL_LIQUIDITY_TOKEN), user, address(this), poolTokensToConsume);
         require(baseTokenBalance >= baseTokensOut, "base tokens balance must be >= out");
@@ -428,10 +415,7 @@ contract BNPLStakingPool is
         uint256 nodeLoss,
         uint256 poolBalance
     ) external pure returns (uint256) {
-        uint256 slashRatio = PRBMathUD60x18.div(
-            nodeLoss * PRBMathUD60x18.scale(),
-            prevNodeBalance * PRBMathUD60x18.scale()
-        );
+        uint256 slashRatio = (nodeLoss * PRBMathUD60x18.scale()).div(prevNodeBalance * PRBMathUD60x18.scale());
         return (poolBalance * slashRatio) / PRBMathUD60x18.scale();
     }
 

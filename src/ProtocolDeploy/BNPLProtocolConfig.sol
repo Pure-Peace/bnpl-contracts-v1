@@ -1,8 +1,11 @@
-// contracts/BNPLProtocolConfig.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./IBNPLProtocolConfig.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+
+import {IBankNodeManager} from "../Management/interfaces/IBankNodeManager.sol";
+import {IBNPLProtocolConfig} from "./interfaces/IBNPLProtocolConfig.sol";
 
 contract BNPLProtocolConfig is IBNPLProtocolConfig {
     uint64 public override networkId;

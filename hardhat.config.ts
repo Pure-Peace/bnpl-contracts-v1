@@ -143,7 +143,8 @@ const config = {
     alphaSort: true,
     disambiguatePaths: false,
     runOnCompile: true,
-    strict: true
+    strict: true,
+    only: [':BNPLKYCStore$', ':BNPLStakingPool$', ':BNPLBankNode$', ':PoolTokenUpgradeable$', ':BankNodeLendingRewards$', ':BankNodeManager$'],
   },
   mocha: {
     timeout: 0,
@@ -157,7 +158,7 @@ const config = {
     path: './abibuild',
     clear: true,
     flat: true,
-    only: [':BNPLKYCStore$', ':BNPLStakingPool$', ':BNPLBankNode$', ':PoolTokenUpgradeable$', ':BankNodeManager$', ':BankNodeLendingRewards$', ':BNPLSwapMarketExample$', ':BankNodeManager$'],
+    only: [':BNPLKYCStore$', ':BNPLStakingPool$', ':BNPLBankNode$', ':PoolTokenUpgradeable$', ':BankNodeLendingRewards$', ':BNPLSwapMarketExample$', ':BankNodeManager$'],
     spacing: 2,
     pretty: true,
   }

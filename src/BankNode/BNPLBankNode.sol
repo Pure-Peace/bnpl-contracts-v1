@@ -1,19 +1,25 @@
-// contracts/ExampleBankNode.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {IAaveLendingPool} from "../Aave/interfaces/IAaveLendingPool.sol";
+import {IAaveIncentivesController} from "../Aave/interfaces/IAaveIncentivesController.sol";
+import {IStakedToken} from "../Aave/interfaces/IStakedToken.sol";
 
-import "./IBNPLBankNode.sol";
-import "../ERC20/IMintableBurnableTokenUpgradeable.sol";
-import "../Utils/TransferHelper.sol";
-import "./BankNodeUtils.sol";
+import {IBNPLBankNode} from "./interfaces/IBNPLBankNode.sol";
+import {IBNPLNodeStakingPool} from "./interfaces/IBNPLNodeStakingPool.sol";
+import {IBNPLSwapMarket} from "../SwapMarket/interfaces/IBNPLSwapMarket.sol";
+import {IMintableBurnableTokenUpgradeable} from "../ERC20/interfaces/IMintableBurnableTokenUpgradeable.sol";
+
+import {IBankNodeManager} from "../Management/BankNodeManager.sol";
+import {BNPLKYCStore} from "../Management/BNPLKYCStore.sol";
+
+import {TransferHelper} from "../Utils/TransferHelper.sol";
+import {BankNodeUtils} from "./lib/BankNodeUtils.sol";
 
 contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, ReentrancyGuardUpgradeable, IBNPLBankNode {
     /**
@@ -90,22 +96,22 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint256 public constant MAX_LOAN_AMOUNT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFF00;
     uint256 public constant MIN_LOAN_AMOUNT = 0x5f5e100;
 
-    IERC20 public override baseLiquidityToken; // = IERC20(0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD);
-    IMintableBurnableTokenUpgradeable public override poolLiquidityToken; // = IMintableToken(0x63801824694C6a0482C7416Ea255D6a3745F82f2);
+    IERC20 public override baseLiquidityToken;
+    IMintableBurnableTokenUpgradeable public override poolLiquidityToken;
 
-    IERC20 public bnplToken; // = IERC20(0x1d1781B0017CCBb3f0341420E5952aAfD9d8C083);
+    IERC20 public bnplToken;
 
     uint16 public override unusedFundsLendingMode;
     IAaveLendingPool public override unusedFundsLendingContract;
     IERC20 public override unusedFundsLendingToken;
     IAaveIncentivesController public override unusedFundsIncentivesController;
 
-    IBNPLSwapMarket public override bnplSwapMarket; // = IBNPLSwapMarket(0x121E2e269fD5B33cc6a381EA81E1A6D7ec142692);
+    IBNPLSwapMarket public override bnplSwapMarket;
     uint24 public override bnplSwapMarketPoolFee;
 
     uint32 public override bankNodeId;
 
-    IBNPLNodeStakingPool public override nodeStakingPool; // = IBNPLNodeStakingPool(0x2643be3DaeD4566B42150B291f75D19B1a23098E);
+    IBNPLNodeStakingPool public override nodeStakingPool;
     IBankNodeManager public override bankNodeManager;
 
     uint256 public override baseTokenBalance;
@@ -320,7 +326,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     function _addLiquidity(address user, uint256 depositAmount) private returns (uint256) {
-        require(user != address(0) && user != address(this), "");
+        require(user != address(0) && user != address(this), "invalid user");
         require(!nodeStakingPool.isNodeDecomissioning(), "BankNode bonded amount is less than 75% of the minimum");
 
         require(depositAmount != 0, "depositAmount cannot be 0");
@@ -554,20 +560,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
     function _marketBuyBNPLForStakingPool(uint256 amountInBaseToken) private {
         require(amountInBaseToken > 0);
-        //_ensureBaseBalance(amountInBaseToken);
         TransferHelper.safeApprove(address(baseLiquidityToken), address(bnplSwapMarket), amountInBaseToken);
-        //(uint256 amountOut) = bnplSwapMarket.swapTokenForBNPL(address(baseLiquidityToken), amountInBaseToken);
-
-        /* IBNPLSwapMarket.ExactInputSingleParams memory params = IBNPLSwapMarket.ExactInputSingleParams({
-            tokenIn: address(baseLiquidityToken),
-            tokenOut: address(bnplToken),
-            fee: bnplSwapMarketPoolFee,
-            recipient: address(this),
-            deadline: block.timestamp,
-            amountIn: amountInBaseToken,
-            amountOutMinimum: 0,
-            sqrtPriceLimitX96: 0
-        }); */
         uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(
             amountInBaseToken,
             0,
@@ -575,7 +568,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             address(this),
             block.timestamp
         )[1];
-        // uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
         require(amountOut > 0, "swap amount must be > 0");
         TransferHelper.safeApprove(address(bnplToken), address(nodeStakingPool), amountOut);
         nodeStakingPool.donateNotCountedInTotal(amountOut);
@@ -584,16 +576,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     function _marketSellBNPLForSlashing(uint256 bnplAmount) private {
         require(bnplAmount > 0);
         TransferHelper.safeApprove(address(bnplToken), address(bnplSwapMarket), bnplAmount);
-        /* IBNPLSwapMarket.ExactInputSingleParams memory params = IBNPLSwapMarket.ExactInputSingleParams({
-            tokenIn: address(bnplToken),
-            tokenOut: address(baseLiquidityToken),
-            fee: bnplSwapMarketPoolFee,
-            recipient: address(this),
-            deadline: block.timestamp,
-            amountIn: bnplAmount,
-            amountOutMinimum: 0,
-            sqrtPriceLimitX96: 0
-        }); */
         uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(
             bnplAmount,
             0,
@@ -601,8 +583,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             address(this),
             block.timestamp
         )[1];
-        // uint256 amountOut = bnplSwapMarket.exactInputSingle(params);
-        // bnplSwapMarket.swapBNPLForToken(address(baseLiquidityToken), bnplAmount);
         require(amountOut > 0, "swap amount must be > 0");
         baseTokenBalance += amountOut;
     }
@@ -699,7 +679,10 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         loan.totalAmountPaid += amountPerPayment;
         loan.remainingBalance -= amountPerPayment;
         // rounding errors can sometimes cause this to integer overflow, so we add a Math.min around the accountsReceivableFromLoans update
-        accountsReceivableFromLoans -= Math.min(amountPerPayment - interestAmount, accountsReceivableFromLoans);
+        accountsReceivableFromLoans -= BankNodeUtils.min(
+            amountPerPayment - interestAmount,
+            accountsReceivableFromLoans
+        );
         interestPaidForLoan[loanId] += interestAmount;
         loan.numberOfPaymentsMade = loan.numberOfPaymentsMade + 1;
         nodeOperatorBalance += bondedInterest;

@@ -1,11 +1,13 @@
+// SPDX-License-Identifier: agpl-3.0
 pragma solidity ^0.8.0;
 
-import "../IAaveIncentivesController.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {IAaveIncentivesController, IAaveDistributionManager} from "../interfaces/IAaveIncentivesController.sol";
+import {IStakedTokenWithConfig} from "../interfaces/IStakedTokenWithConfig.sol";
+
 import {DistributionTypes} from "../lib/DistributionTypes.sol";
-import "../IScaledBalanceToken.sol";
-import "../IStakedTokenWithConfig.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../lib/SafeERC20.sol";
+import {SafeERC20} from "../lib/SafeERC20.sol";
 
 contract FakeAaveStakedTokenIncentivesController is IAaveIncentivesController {
     using SafeERC20 for IERC20;

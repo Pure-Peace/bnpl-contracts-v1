@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
-/*
 
-Borrowed heavily from Synthetix
+/* Borrowed heavily from Synthetix
 
 * MIT License
 * ===========
@@ -25,19 +24,15 @@ Borrowed heavily from Synthetix
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 */
-
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../../Management/IBankNodeManager.sol";
-import "./BankNodeRewardSystem.sol";
+import {IBankNodeManager} from "../../Management/interfaces/IBankNodeManager.sol";
 
-import "hardhat/console.sol";
+import {BankNodeRewardSystem} from "./BankNodeRewardSystem.sol";
 
 contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
     using SafeERC20 for IERC20;

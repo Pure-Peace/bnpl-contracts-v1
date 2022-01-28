@@ -1,17 +1,16 @@
-// contracts/ScrollToken.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
-import "../../ERC20/IMintableToken.sol";
+import {IMintableToken} from "../../ERC20/interfaces/IMintableToken.sol";
 
 contract FakeUSDToken is ERC20, AccessControl, ERC20Burnable, IMintableToken {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant MINTER_ADMIN_ROLE = keccak256("MINTER_ADMIN_ROLE");
-    uint8 _decimals;
+    uint8 private _decimals;
 
     constructor(
         string memory name_,

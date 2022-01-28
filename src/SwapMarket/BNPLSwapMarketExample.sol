@@ -1,12 +1,12 @@
-// contracts/ScrollToken.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../Utils/TransferHelper.sol";
-import "./IBNPLSwapMarket.sol";
-import "./IBNPLPriceOracle.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+
+import {IBNPLSwapMarket} from "./interfaces/IBNPLSwapMarket.sol";
+import {IBNPLPriceOracle} from "./interfaces/IBNPLPriceOracle.sol";
+
+import {TransferHelper} from "../Utils/TransferHelper.sol";
 
 contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessControl {
     bytes32 public constant PRICE_SETTER_ROLE = keccak256("PRICE_SETTER_ROLE");

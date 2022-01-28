@@ -1,15 +1,18 @@
 // SPDX-License-Identifier: MIT
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../ERC20/IMintableBurnableTokenUpgradeable.sol";
-import "../Aave/IAaveLendingPool.sol";
-import "../Aave/IAaveIncentivesController.sol";
-import "./StakingPool/IBNPLNodeStakingPool.sol";
-import "../SwapMarket/IBNPLSwapMarket.sol";
-import "../Management/IBankNodeManager.sol";
-import "../Aave/IStakedToken.sol";
-
 pragma solidity ^0.8.0;
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {IStakedToken} from "../../Aave/interfaces/IStakedToken.sol";
+import {IAaveLendingPool} from "../../Aave/interfaces/IAaveLendingPool.sol";
+import {IAaveIncentivesController} from "../../Aave/interfaces/IAaveIncentivesController.sol";
+
+import {IMintableBurnableTokenUpgradeable} from "../../ERC20/interfaces/IMintableBurnableTokenUpgradeable.sol";
+import {IBNPLSwapMarket} from "../../SwapMarket/interfaces/IBNPLSwapMarket.sol";
+import {IBankNodeManager} from "../../Management/interfaces/IBankNodeManager.sol";
+
+import {BNPLKYCStore} from "../../Management/BNPLKYCStore.sol";
+import {IBNPLNodeStakingPool} from "./IBNPLNodeStakingPool.sol";
 
 /**
  * @dev Interface of the IBNPLBankNode standard
@@ -41,7 +44,6 @@ interface IBankNodeInitializableV1 {
  * @dev Interface of the IBNPLBankNode standard
  */
 interface IBNPLBankNode is IBankNodeInitializableV1 {
-    // start structs
     struct Loan {
         address borrower;
         uint256 loanAmount;
@@ -58,7 +60,6 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
         uint256 loanRequestId;
     }
 
-    // end structs
     function unusedFundsLendingMode() external view returns (uint16);
 
     function unusedFundsLendingContract() external view returns (IAaveLendingPool);
@@ -161,8 +162,6 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
             uint64 statusUpdatedAt,
             uint256 loanRequestId
         );
-
-    // end public vars
 
     function donate(uint256 depositAmount) external;
 

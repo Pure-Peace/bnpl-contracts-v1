@@ -1,15 +1,13 @@
-// contracts/PoolTokenUpgradeable.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "./ERC20BurnableUpgradeable.sol";
+import {ERC20BurnableUpgradeable} from "./ERC20BurnableUpgradeable.sol";
 
-import "./IMintableBurnableTokenUpgradeable.sol";
-import "./ITokenInitializableV1.sol";
+import {IMintableBurnableTokenUpgradeable} from "./interfaces/IMintableBurnableTokenUpgradeable.sol";
+import {ITokenInitializableV1} from "./interfaces/ITokenInitializableV1.sol";
 
 contract PoolTokenUpgradeable is
     Initializable,

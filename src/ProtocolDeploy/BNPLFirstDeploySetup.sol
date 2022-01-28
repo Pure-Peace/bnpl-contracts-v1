@@ -1,12 +1,16 @@
-// contracts/PoolTokenUpgradeable.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../Management/BankNodeManager.sol";
-import "./BNPLProtocolConfig.sol";
+import {BankNodeManager} from "../Management/BankNodeManager.sol";
+import {BNPLKYCStore} from "../Management/BNPLKYCStore.sol";
+
+import {BNPLProtocolConfig} from "./BNPLProtocolConfig.sol";
+import {BankNodeLendingRewards} from "../Rewards/PlatformRewards/BankNodeLendingRewards.sol";
 
 contract BNPLFirstDeploySetup is Initializable {
     struct IDeployWithImplementationsParams {

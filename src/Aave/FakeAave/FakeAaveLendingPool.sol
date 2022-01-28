@@ -1,11 +1,12 @@
-// contracts/FakeAaveLendingPool.sol
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: agpl-3.0
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "../IAaveLendingPool.sol";
-import "./IFakeAaveToken.sol";
-import "../../Utils/TransferHelper.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {IAaveLendingPool} from "../interfaces/IAaveLendingPool.sol";
+import {IFakeAaveToken} from "../interfaces/IFakeAaveToken.sol";
+
+import {TransferHelper} from "../../Utils/TransferHelper.sol";
 
 contract FakeAaveLendingPool is IAaveLendingPool {
     mapping(address => IFakeAaveToken) public depositAssetToAaveAsset;

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
-import "../../Management/BNPLKYCStore.sol";
-import "./IUserTokenLockup.sol";
+
+import {BNPLKYCStore} from "../../Management/BNPLKYCStore.sol";
+import {IUserTokenLockup} from "./IUserTokenLockup.sol";
 
 /**
  * @dev Interface of the IBankNodeStakingPoolInitializableV1 standard
