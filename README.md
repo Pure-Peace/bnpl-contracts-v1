@@ -1,4 +1,4 @@
-# Bnpl-Contracts
+# BNPL-Contracts
 
 ## Docs generate
 
