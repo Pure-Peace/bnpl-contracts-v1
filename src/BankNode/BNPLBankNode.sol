@@ -238,9 +238,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         require(amount != 0, "amount cannot be 0");
         require(amount <= baseTokenBalance, "amount exceeds base token balance!");
         baseTokenBalance -= amount;
-        baseLiquidityToken.approve(address(unusedFundsLendingContract), amount);
+        TransferHelper.safeApprove(address(baseLiquidityToken), address(unusedFundsLendingContract), amount);
         unusedFundsLendingContract.deposit(address(baseLiquidityToken), amount, address(this), 0);
-        // baseLiquidityToken.approve(address(unusedFundsLendingContract), 0);
     }
 
     function _ensureBaseBalance(uint256 amount) private {
