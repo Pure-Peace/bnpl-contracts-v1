@@ -88,7 +88,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint256 public constant MIN_LOAN_DURATION = 30 days;
     uint256 public constant MIN_LOAN_PAYMENT_INTERVAL = 2 days;
 
-    //TODO: Add max duration and max payment interval
+    uint256 public constant MAX_LOAN_DURATION = 1825 days;
+    uint256 public constant MAX_LOAN_PAYMENT_INTERVAL = 180 days;
 
     uint32 public constant LENDER_NEEDS_KYC = 1 << 1;
     uint32 public constant BORROWER_NEEDS_KYC = 1 << 2;
@@ -308,7 +309,6 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         require(depositAmount != 0, "depositAmount cannot be 0");
 
         require(poolTokensCirculating != 0, "poolTokensCirculating must not be 0");
-        require(getPoolTotalAssetsValue() != 0, "total asset value must not be 0");
 
         TransferHelper.safeTransferFrom(address(baseLiquidityToken), user, address(this), depositAmount);
         require(poolTokensCirculating != 0, "poolTokensCirculating cannot be 0");
@@ -403,10 +403,16 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             "totalLoanDuration must be a multiple of numberOfPayments"
         );
         require(totalLoanDuration >= MIN_LOAN_DURATION, "must be greater than MIN_LOAN_DURATION");
+        require(totalLoanDuration <= MAX_LOAN_DURATION, "must be lower than MAX_LOAN_DURATION");
         require(
             (uint256(totalLoanDuration) / uint256(numberOfPayments)) >= MIN_LOAN_PAYMENT_INTERVAL,
             "must be greater than MIN_LOAN_PAYMENT_INTERVAL"
         );
+        require(
+            (uint256(totalLoanDuration) / uint256(numberOfPayments)) <= MAX_LOAN_PAYMENT_INTERVAL,
+            "must be lower than MAX_LOAN_PAYMENT_INTERVAL"
+        );
+
         uint256 currentLoanRequestId = loanRequestIndex;
         loanRequestIndex += 1;
         LoanRequest storage loanRequest = loanRequests[currentLoanRequestId];
@@ -468,11 +474,18 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
                 uint256(loanRequest.numberOfPayments)) == loanRequest.totalLoanDuration,
             "totalLoanDuration must be a multiple of numberOfPayments"
         );
+
         require(loanRequest.totalLoanDuration >= MIN_LOAN_DURATION, "must be greater than MIN_LOAN_DURATION");
+        require(loanRequest.totalLoanDuration <= MAX_LOAN_DURATION, "must be lower than MAX_LOAN_DURATION");
         require(
             (uint256(loanRequest.totalLoanDuration) / uint256(loanRequest.numberOfPayments)) >=
                 MIN_LOAN_PAYMENT_INTERVAL,
             "must be greater than MIN_LOAN_PAYMENT_INTERVAL"
+        );
+        require(
+            (uint256(loanRequest.totalLoanDuration) / uint256(loanRequest.numberOfPayments)) <=
+                MAX_LOAN_PAYMENT_INTERVAL,
+            "must be lower than MAX_LOAN_PAYMENT_INTERVAL"
         );
 
         uint256 currentLoanId = loanIndex;
@@ -612,7 +625,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
         //loan.loanAmount-principalPaidForLoan[loanId]
         //uint256 total3rdPartyInterestPaid = loanBondedAmount[loanId]; // bnpl market buy is the same amount as the amount bonded, this must change if they are not equal
-        uint256 interestRecirculated = (interestPaidForLoan[loanId] * 8) / 10; // 10% paid to market buy bnpl, 10% bonded
+        uint256 interestRecirculated = (interestPaidForLoan[loanId] * 7) / 10; // 10% paid to market buy bnpl, 10% bonded
 
         uint256 accountsReceivableLoss = loan.loanAmount - (loan.totalAmountPaid - interestPaidForLoan[loanId]);
         accountsReceivableFromLoans -= accountsReceivableLoss;
@@ -669,7 +682,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         );
         uint256 holdInterest = (interestAmount * 3) / 10;
         //uint returnInterest = interestAmount - holdInterest;
-        uint256 bondedInterest = holdInterest / 2;
+        uint256 bondedInterest = holdInterest / 3;
         uint256 marketBuyInterest = holdInterest - bondedInterest;
 
         uint256 amountPerPayment = loan.amountPerPayment;
