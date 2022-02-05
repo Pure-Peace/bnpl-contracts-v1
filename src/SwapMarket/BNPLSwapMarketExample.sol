@@ -132,9 +132,9 @@ contract BNPLSwapMarketExample is IBNPLSwapMarket, IBNPLPriceOracle, AccessContr
         amounts = new uint256[](path.length);
         amounts[0] = amountIn;
         if (path[0] == BNPL_TOKEN_ADDRESS) {
-            amounts[1] = _swapBNPLForToken(path[1], amountIn, to);
+            amounts[1] = _swapBNPLForToken(path[2], amountIn, to);
         } else {
-            require(path[1] == BNPL_TOKEN_ADDRESS, "only supports swaps with BNPL token involved!");
+            require(path[2] == BNPL_TOKEN_ADDRESS, "only supports swaps with BNPL token involved!");
             amounts[1] = _swapTokenForBNPL(path[0], amountIn, to);
         }
         require(amounts[1] >= amountOutMin, "Too little received");

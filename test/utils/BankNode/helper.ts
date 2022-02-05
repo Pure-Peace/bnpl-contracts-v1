@@ -462,7 +462,7 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
     const userLTBalanceBefore = b.BaseLiquidityToken.balanceOf(user.address);
 
     await b.BaseLiquidityToken.approve(b.BankNode.address, loanBefore.amountPerPayment);
-    await b.BankNode.makeLoanPayment(loanId);
+    await b.BankNode.makeLoanPayment(loanId, 0);
     const userLTBalanceAfter = b.BaseLiquidityToken.balanceOf(user.address);
 
     const loan = await b.BankNode.loans(loanId);
@@ -507,7 +507,7 @@ async function BankNodeHelper(hre: HardhatRuntimeEnvironment) {
 
     const { newTime, dueDate } = await advanceToNextPaymentDatePlusOffset(bankNode, loanId, 1000 * 60 * 5, _reporter);
 
-    await b.BankNode.reportOverdueLoan(loanId);
+    await b.BankNode.reportOverdueLoan(loanId, 0);
     const financialStateAfter = await getPoolAssetReportForBankNode(b.BankNode, b.StakingPool);
 
     const loanAfter = await b.BankNode.loans(loanId);
