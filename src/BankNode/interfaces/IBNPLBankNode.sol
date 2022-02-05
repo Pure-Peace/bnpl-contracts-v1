@@ -183,9 +183,9 @@ interface IBNPLBankNode is IBankNodeInitializableV1 {
 
     function approveLoanRequest(uint256 loanRequestId) external;
 
-    function makeLoanPayment(uint256 loanId) external;
+    function makeLoanPayment(uint256 loanId, uint256 minTokenOut) external;
 
-    function reportOverdueLoan(uint256 loanId) external;
+    function reportOverdueLoan(uint256 loanId, uint256 minTokenOut) external;
 
     function withdrawNodeOperatorBalance(uint256 amount, address to) external;
 

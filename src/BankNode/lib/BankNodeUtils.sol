@@ -6,7 +6,7 @@ import {PRBMathUD60x18} from "../../Utils/Math/PRBMathUD60x18.sol";
 library BankNodeUtils {
     using PRBMathUD60x18 for uint256;
 
-    address public constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address internal constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     function calculateSlashAmount(
         uint256 prevNodeBalance,
@@ -55,6 +55,7 @@ library BankNodeUtils {
         return result;
     }
 
+    function getSwapExactTokensPath(address tokenIn, address tokenOut) internal pure returns (address[] memory) {
         address[] memory path = new address[](3);
         path[0] = address(tokenIn);
         path[1] = WETH;

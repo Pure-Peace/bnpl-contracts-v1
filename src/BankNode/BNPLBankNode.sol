@@ -570,36 +570,36 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         TransferHelper.safeTransfer(address(baseLiquidityToken), to, amount);
     }
 
-    function _marketBuyBNPLForStakingPool(uint256 amountInBaseToken) private {
+    function _marketBuyBNPLForStakingPool(uint256 amountInBaseToken, uint256 minTokenOut) private {
         require(amountInBaseToken > 0);
         TransferHelper.safeApprove(address(baseLiquidityToken), address(bnplSwapMarket), amountInBaseToken);
         uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(
             amountInBaseToken,
-            0,
+            minTokenOut,
             BankNodeUtils.getSwapExactTokensPath(address(baseLiquidityToken), address(bnplToken)),
             address(this),
             block.timestamp
         )[1];
-        require(amountOut > 0, "swap amount must be > 0");
+        require(amountOut >= minTokenOut, "swap amount must >= minTokenOut");
         TransferHelper.safeApprove(address(bnplToken), address(nodeStakingPool), amountOut);
         nodeStakingPool.donateNotCountedInTotal(amountOut);
     }
 
-    function _marketSellBNPLForSlashing(uint256 bnplAmount) private {
+    function _marketSellBNPLForSlashing(uint256 bnplAmount, uint256 minTokenOut) private {
         require(bnplAmount > 0);
         TransferHelper.safeApprove(address(bnplToken), address(bnplSwapMarket), bnplAmount);
         uint256 amountOut = bnplSwapMarket.swapExactTokensForTokens(
             bnplAmount,
-            0,
+            minTokenOut,
             BankNodeUtils.getSwapExactTokensPath(address(bnplToken), address(baseLiquidityToken)),
             address(this),
             block.timestamp
         )[1];
-        require(amountOut > 0, "swap amount must be > 0");
+        require(amountOut >= minTokenOut, "swap amount must >= minTokenOut");
         baseTokenBalance += amountOut;
     }
 
-    function _markLoanAsWriteOff(uint256 loanId) private {
+    function _markLoanAsWriteOff(uint256 loanId, uint256 minTokenOut) private {
         Loan storage loan = loans[loanId];
         require(loan.borrower != address(0));
         require(
@@ -643,17 +643,21 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         );
         require(slashAmount > 0);
         nodeStakingPool.slash(slashAmount);
-        _marketSellBNPLForSlashing(slashAmount);
+        _marketSellBNPLForSlashing(slashAmount, minTokenOut);
 
         //uint256 lossAmount = accountsReceivableLoss+amountPaidToBNPLMarketBuy;
     }
 
     /// @notice Report a loan with id `loanId` as being overdue
-    function reportOverdueLoan(uint256 loanId) external override nonReentrant {
-        _markLoanAsWriteOff(loanId);
+    function reportOverdueLoan(uint256 loanId, uint256 minTokenOut) external override nonReentrant {
+        _markLoanAsWriteOff(loanId, minTokenOut);
     }
 
-    function _makeLoanPayment(address payer, uint256 loanId) private {
+    function _makeLoanPayment(
+        address payer,
+        uint256 loanId,
+        uint256 minTokenOut
+    ) private {
         require(loanId < loanIndex, "loan request must exist");
 
         Loan storage loan = loans[loanId];
@@ -700,7 +704,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         nodeOperatorBalance += bondedInterest;
 
         baseTokenBalance += amountPerPayment - holdInterest;
-        _marketBuyBNPLForStakingPool(marketBuyInterest);
+        _marketBuyBNPLForStakingPool(marketBuyInterest, minTokenOut);
 
         if (loan.remainingBalance == 0) {
             loan.status = 1;
@@ -718,8 +722,8 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     }
 
     /// @notice Make a loan payment for loan with id `loanId`
-    function makeLoanPayment(uint256 loanId) external override nonReentrant {
-        _makeLoanPayment(msg.sender, loanId);
+    function makeLoanPayment(uint256 loanId, uint256 minTokenOut) external override nonReentrant {
+        _makeLoanPayment(msg.sender, loanId, minTokenOut);
     }
 
     function _dividendAssets() internal view returns (address[] memory) {
