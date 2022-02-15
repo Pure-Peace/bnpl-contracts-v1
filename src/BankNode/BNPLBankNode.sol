@@ -21,6 +21,25 @@ import {BNPLKYCStore} from "../Management/BNPLKYCStore.sol";
 import {TransferHelper} from "../Utils/TransferHelper.sol";
 import {BankNodeUtils} from "./lib/BankNodeUtils.sol";
 
+/**
+ * @title BNPL BankNode contract
+ * @notice
+ * - Features:
+ *   # Deposit USDT
+ *   # Withdraw USDT
+ *   # Donate USDT
+ *   # Loan request
+ *   # Loan approval/rejected
+ *   # Deposit USDT to AAVE
+ *   # Withdraw USDT from AAVE
+ *   # Claim stkAAVE
+ *   # Repayment:
+ *     ## Swap 20% USDT interests to BNPL in Sushiswap for bonder and staker interest
+ *   # Reportoverdue:
+ *     ## Swap BNPL to USDT in Sushiswap for the slashing functionPlatform
+ *   # Claim bank node rewards
+ * @author BNPL
+ **/
 contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, ReentrancyGuardUpgradeable, IBNPLBankNode {
     /**
      * @dev Emitted when user `user` is adds `depositAmount` of liquidity while receiving `issueAmount` of pool tokens
@@ -146,6 +165,11 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         return bnplKYCStore.publicKeys(kycDomainId);
     }
 
+    /**
+     * @dev BankNode contract is created and initialized by the BankNodeManager contract
+     * - This contract is called through the proxy.
+     * @param bankNodeInitConfig BankNode configuration (passed in by BankNodeManager contract)
+     **/
     function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig)
         external
         override
@@ -358,13 +382,17 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         return baseTokensOut;
     }
 
-    /// @notice Allows users to lend tokens to the bank node
+    /// @notice Allow users to donate `depositAmount` liquidity tokens to bankNode
     function donate(uint256 depositAmount) external override nonReentrant {
         require(depositAmount != 0, "depositAmount cannot be 0");
         _processDonation(msg.sender, depositAmount);
     }
 
-    /// @notice Allows users to lend tokens to the bank node
+    /**
+     * @notice Allow users to add liquidity tokens to liquidity pools.
+     * The user will be issued an equal number of pool tokens
+     * @param depositAmount Amount of user deposit to liquidity pool
+     **/
     function addLiquidity(uint256 depositAmount) external override nonReentrant {
         require(depositAmount != 0, "depositAmount cannot be 0");
         require(
@@ -375,6 +403,11 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         _addLiquidity(msg.sender, depositAmount);
     }
 
+    /**
+     * @notice Allow users to remove liquidity tokens from liquidity pools.
+     * Users need to replace liquidity tokens with the same amount of pool tokens
+     * @param poolTokensToConsume Amount of user removes from the liquidity pool
+     **/
     function removeLiquidity(uint256 poolTokensToConsume) external override nonReentrant {
         _removeLiquidity(msg.sender, poolTokensToConsume);
     }
@@ -431,7 +464,16 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         emit LoanRequested(borrower, loanAmount, currentLoanRequestId, uuid);
     }
 
-    /// @notice Allows users to request a loan from the bank node
+    /**
+     * @notice Allows users to request a loan from the bank node
+     * @param loanAmount The loan amount
+     * @param totalLoanDuration The total loan duration (secs)
+     * @param numberOfPayments The number of payments
+     * @param interestRatePerPayment The interest rate per payment
+     * @param messageType 0 = plain text, 1 = encrypted with the public key
+     * @param message Writing detailed messages may increase loan approval rates
+     * @param uuid The `LoanRequested` event contains this uuid for easy identification
+     **/
     function requestLoan(
         uint256 loanAmount,
         uint64 totalLoanDuration,
@@ -533,17 +575,25 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         emit LoanDenied(loanRequest.borrower, loanRequestId, operator);
     }
 
-    /// @notice Allows admins with role "OPERATOR_ROLE" to deny a loan request with id `loanRequestId`
+    /**
+     * @notice Allows admins with role "OPERATOR_ROLE" to deny a loan request with id `loanRequestId`
+     */
     function denyLoanRequest(uint256 loanRequestId) external override nonReentrant onlyRole(OPERATOR_ROLE) {
         _denyLoanRequest(msg.sender, loanRequestId);
     }
 
-    /// @notice Allows admins with role "OPERATOR_ROLE" to approve a loan request with id `loanRequestId` (this also sends the lending token requested to the borrower)
+    /**
+     * @notice Allows admins with role "OPERATOR_ROLE" to approve a loan request with id `loanRequestId`
+     * - This also sends the lending token requested to the borrower
+     */
     function approveLoanRequest(uint256 loanRequestId) external override nonReentrant onlyRole(OPERATOR_ROLE) {
         _approveLoanRequest(msg.sender, loanRequestId);
     }
 
-    /// @notice Allows admins with role "OPERATOR_ROLE" to approve a loan request with id `loanRequestId` (this also sends the lending token requested to the borrower)
+    /**
+     * @notice Allows admins with role "OPERATOR_ROLE" to change kyc settings of bankNode
+     * - Including `setKYCDomainMode` and `setKYCDomainPublicKey`
+     */
     function setKYCSettings(uint256 kycMode_, address nodePublicKey_)
         external
         override
@@ -554,10 +604,16 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         bnplKYCStore.setKYCDomainPublicKey(kycDomainId, nodePublicKey_);
     }
 
+    /**
+     * @notice Allows admins with role "OPERATOR_ROLE" to set kycmode for specified kycdomain
+     */
     function setKYCDomainMode(uint32 domain, uint256 mode) external override nonReentrant onlyRole(OPERATOR_ROLE) {
         bnplKYCStore.setKYCDomainMode(domain, mode);
     }
 
+    /**
+     * @notice Allows admins with role "OPERATOR_ROLE" to withdraw `amount` of balance to an address
+     */
     function withdrawNodeOperatorBalance(uint256 amount, address to)
         external
         override
@@ -648,7 +704,10 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         //uint256 lossAmount = accountsReceivableLoss+amountPaidToBNPLMarketBuy;
     }
 
-    /// @notice Report a loan with id `loanId` as being overdue
+    /**
+     * @notice Allows users report a loan with id `loanId` as being overdue
+     * @dev This method will call the swap contract, so minTokenOut is required
+     */
     function reportOverdueLoan(uint256 loanId, uint256 minTokenOut) external override nonReentrant {
         _markLoanAsWriteOff(loanId, minTokenOut);
     }
@@ -748,6 +807,9 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         return IERC20(address(rewardToken())).balanceOf(address(nodeStakingPool));
     }
 
+    /**
+     * @notice Allows admins with role "OPERATOR_ROLE" to claim lending token interest
+     */
     function claimLendingTokenInterest() external override onlyRole(OPERATOR_ROLE) nonReentrant returns (uint256) {
         TransferHelper.safeApprove(
             rewardToken().REWARD_TOKEN(),

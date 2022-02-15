@@ -19,6 +19,21 @@ import {BankNodeUtils} from "../lib/BankNodeUtils.sol";
 import {TransferHelper} from "../../Utils/TransferHelper.sol";
 import {PRBMathUD60x18} from "../../Utils/Math/PRBMathUD60x18.sol";
 
+/**
+ * @title BNPL StakingPool contract
+ * @notice
+ * - Features:
+ *   # Stake BNPL
+ *   # Unstake BNPL
+ *   # Lock BNPL
+ *   # Unlock BNPL
+ *   # Decommission a bank node
+ *   # Donate BNPL
+ *   # Redeem AAVE
+ *   # Claim AAVE rewards
+ *   # Cool down AAVE
+ * @author BNPL
+ **/
 contract BNPLStakingPool is
     Initializable,
     ReentrancyGuardUpgradeable,
@@ -76,6 +91,18 @@ contract BNPLStakingPool is
     BNPLKYCStore public bnplKYCStore;
     uint32 public kycDomainId;
 
+    /**
+     * @dev StakingPool contract is created and initialized by the BankNodeManager contract
+     * - This contract is called through the proxy.
+     * @param bnplToken BNPL token address
+     * @param poolBNPLToken pool BNPL token address
+     * @param bankNodeContract BankNode contract address associated with stakingPool
+     * @param bankNodeManagerContract BankNodeManager contract address
+     * @param tokenBonder The address of the BankNode creator
+     * @param tokensToBond The amount of BNPL bound by the BankNode creator (initial liquidity amount)
+     * @param bnplKYCStore_ KYC store contract address
+     * @param kycDomainId_ KYC store domain id
+     **/
     function initialize(
         address bnplToken,
         address poolBNPLToken,
@@ -130,6 +157,10 @@ contract BNPLStakingPool is
         return baseTokenBalance;
     }
 
+    /**
+     * @notice Returns whether the BankNode has been decommissioned
+     * - When the liquidity tokens amount of the BankNode is less than minimum BankNode bonded amount, it is decommissioned
+     */
     function isNodeDecomissioning() public view override returns (bool) {
         return
             getPoolWithdrawConversion(POOL_LIQUIDITY_TOKEN.balanceOf(address(this))) <
@@ -165,6 +196,9 @@ contract BNPLStakingPool is
         return baseTokensOut;
     }
 
+    /**
+     * @dev Remove liquidity tokens from the liquidity pool and lock these tokens for `unstakeLockupPeriod` duration
+     */
     function _removeLiquidityAndLock(
         address user,
         uint256 poolTokensToConsume,
@@ -243,6 +277,9 @@ contract BNPLStakingPool is
         emit Unbond(sender, totalBonded);
     }
 
+    /**
+     * @dev This function is called when poolTokenEffectiveSupply is zero
+     */
     function _setupLiquidityFirst(address user, uint256 depositAmount) private returns (uint256) {
         require(user != address(this) && user != address(0), "invalid user");
         require(depositAmount != 0, "depositAmount cannot be 0");
@@ -264,6 +301,9 @@ contract BNPLStakingPool is
         return poolTokensOut;
     }
 
+    /**
+     * @dev This function is called when poolTokenEffectiveSupply great than zero
+     */
     function _addLiquidityNormal(address user, uint256 depositAmount) private returns (uint256) {
         require(user != address(this) && user != address(0), "invalid user");
         require(depositAmount != 0, "depositAmount cannot be 0");
@@ -284,6 +324,9 @@ contract BNPLStakingPool is
         return poolTokensOut;
     }
 
+    /**
+     * @dev Add liquidity tokens to liquidity pools
+     */
     function _addLiquidity(address user, uint256 depositAmount) private returns (uint256) {
         require(user != address(this) && user != address(0), "invalid user");
         require(!isNodeDecomissioning(), "BankNode bonded amount is less than 75% of the minimum");
@@ -296,6 +339,9 @@ contract BNPLStakingPool is
         }
     }
 
+    /**
+     * @dev Remove liquidity tokens from the liquidity pool.
+     */
     function _removeLiquidityNoLockup(address user, uint256 poolTokensToConsume) private returns (uint256) {
         require(user != address(this) && user != address(0), "invalid user");
 
@@ -318,6 +364,9 @@ contract BNPLStakingPool is
         return baseTokensOut;
     }
 
+    /**
+     * @dev Add liquidity tokens from liquidity pools
+     */
     function _removeLiquidity(address user, uint256 poolTokensToConsume) internal returns (uint256) {
         require(poolTokensToConsume != 0, "poolTokensToConsume cannot be 0");
         uint256 unstakeLockupPeriod = getUnstakeLockupPeriod();
@@ -409,7 +458,10 @@ contract BNPLStakingPool is
         POOL_LIQUIDITY_TOKEN.transfer(to, poolTokenRewards);
     }
 
-    /// @notice Calculates the amount of BNPL to slash from the pool given a Bank Node loss of `nodeLoss` with a previous balance of `prevNodeBalance` and the current pool balance containing `poolBalance` BNPL
+    /**
+     * @notice Calculates the amount of BNPL to slash from the pool given a Bank Node loss of `nodeLoss`
+     * with a previous balance of `prevNodeBalance` and the current pool balance containing `poolBalance` BNPL.
+     */
     function calculateSlashAmount(
         uint256 prevNodeBalance,
         uint256 nodeLoss,
@@ -419,20 +471,31 @@ contract BNPLStakingPool is
         return (poolBalance * slashRatio) / PRBMathUD60x18.scale();
     }
 
-    /// @notice Allows user `user` to claim the next token lockup vault they have locked up in the contract
+    /**
+     * @notice Allows user `user` to claim the next token lockup vault they have locked up in the contract.
+     */
     function claimTokenLockup(address user) external nonReentrant returns (uint256) {
         return _claimNextTokenLockup(user);
     }
 
-    /// @notice Allows user `user` to claim the next `maxNumberOfClaims` token lockup vaults they have locked up in the contract
+    /**
+     * @notice Allows user `user` to claim the next `maxNumberOfClaims` token lockup vaults they have locked up in the contract.
+     */
     function claimTokenNextNLockups(address user, uint32 maxNumberOfClaims) external nonReentrant returns (uint256) {
         return _claimUpToNextNTokenLockups(user, maxNumberOfClaims);
     }
 
+    /**
+     * @notice Allows rewards manager to unlock lending token interest.
+     * - Distribute dividends can only be done after unlocking the lending token interest
+     */
     function unlockLendingTokenInterest() external onlyRole(NODE_REWARDS_MANAGER_ROLE) nonReentrant {
         bankNode.rewardToken().cooldown();
     }
 
+    /**
+     * @notice Allows rewards manager to distribute dividends with token interest.
+     */
     function distributeDividends() external onlyRole(NODE_REWARDS_MANAGER_ROLE) nonReentrant {
         bankNode.rewardToken().claimRewards(address(this), type(uint256).max);
 

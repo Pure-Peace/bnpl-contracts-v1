@@ -69,15 +69,29 @@ contract BankNodeRewardSystem is
     IERC20 public rewardsToken;
     uint256 public defaultRewardsDuration;
 
+    /**
+     * @dev Encode user address and bankNodeId into a uint256.
+     * @param user The address of user
+     * @param bankNodeId The bankNodeId of bankNode
+     * @return uint256 encoded user bankNode key.
+     **/
     function encodeUserBankNodeKey(address user, uint32 bankNodeId) public pure returns (uint256) {
         return (uint256(uint160(user)) << 32) | uint256(bankNodeId);
     }
 
+    /**
+     * @dev Decode user bankNode key to user address and bankNode id.
+     * @param stakingVaultKey The user bankNode key
+     **/
     function decodeUserBankNodeKey(uint256 stakingVaultKey) external pure returns (address user, uint32 bankNodeId) {
         bankNodeId = uint32(stakingVaultKey & 0xffffffff);
         user = address(uint160(stakingVaultKey >> 32));
     }
 
+    /**
+     * @dev Encode amount and depositTime into a uint256.
+     * @return uint256 encoded vault value.
+     **/
     function encodeVaultValue(uint256 amount, uint40 depositTime) external pure returns (uint256) {
         require(
             amount <= 0xffffffffffffffffffffffffffffffffffffffffffffffffffffff,
@@ -86,6 +100,9 @@ contract BankNodeRewardSystem is
         return (amount << 40) | uint256(depositTime);
     }
 
+    /**
+     * @dev Decode vault value to amount and depositTime.
+     **/
     function decodeVaultValue(uint256 vaultValue) external pure returns (uint256 amount, uint40 depositTime) {
         depositTime = uint40(vaultValue & 0xffffffffff);
         amount = vaultValue >> 40;
@@ -161,8 +178,11 @@ contract BankNodeRewardSystem is
         return rewardRate[bankNodeId] * rewardsDuration[bankNodeId];
     }
 
-    /* ========== MUTATIVE FUNCTIONS ========== */
-
+    /**
+     * @notice Stake `tokenAmount` to specified bankNode.
+     * @param bankNodeId The id of the bankNode to stake
+     * @param tokenAmount The amount to be staked
+     **/
     function stake(uint32 bankNodeId, uint256 tokenAmount)
         external
         nonReentrant
@@ -179,6 +199,11 @@ contract BankNodeRewardSystem is
         emit Staked(msg.sender, bankNodeId, tokenAmount);
     }
 
+    /**
+     * @notice Withdraw `tokenAmount` from specified bankNode.
+     * @param bankNodeId The id of the bankNode to withdraw
+     * @param tokenAmount The amount to be withdrawn
+     **/
     function withdraw(uint32 bankNodeId, uint256 tokenAmount) public nonReentrant updateReward(msg.sender, bankNodeId) {
         require(tokenAmount > 0, "Cannot withdraw 0");
         uint256 amount = getInternalValueForStakedTokenAmount(tokenAmount);
@@ -191,6 +216,10 @@ contract BankNodeRewardSystem is
         emit Withdrawn(msg.sender, bankNodeId, tokenAmount);
     }
 
+    /**
+     * @notice Get reward from specified bankNode.
+     * @param bankNodeId ID of the bankNode
+     **/
     function getReward(uint32 bankNodeId) public nonReentrant updateReward(msg.sender, bankNodeId) {
         uint256 reward = rewards[encodeUserBankNodeKey(msg.sender, bankNodeId)];
 
@@ -201,6 +230,10 @@ contract BankNodeRewardSystem is
         }
     }
 
+    /**
+     * @notice Withdraw tokens and get reward from specified bankNode.
+     * @param bankNodeId ID of the bankNode
+     **/
     function exit(uint32 bankNodeId) external {
         withdraw(
             bankNodeId,
@@ -246,6 +279,11 @@ contract BankNodeRewardSystem is
         emit Recovered(tokenAddress, tokenAmount);
     }*/
 
+    /**
+     * @notice Allow manager to set reward duration for a bankNode.
+     * @param bankNodeId ID of the bankNode
+     * @param _rewardsDuration Reward duration (secs)
+     **/
     function setRewardsDuration(uint32 bankNodeId, uint256 _rewardsDuration) external onlyRole(REWARDS_MANAGER) {
         require(
             block.timestamp > periodFinish[bankNodeId],
@@ -271,11 +309,28 @@ contract BankNodeRewardSystem is
         _;
     }
 
-    /* ========== EVENTS ========== */
-
+    /**
+     * @dev Emitted when `_notifyRewardAmount` is called.
+     */
     event RewardAdded(uint32 indexed bankNodeId, uint256 reward);
+
+    /**
+     * @dev Emitted when user `user` stake `tokenAmount` to specified `bankNodeId` bankNode.
+     */
     event Staked(address indexed user, uint32 indexed bankNodeId, uint256 amount);
+
+    /**
+     * @dev Emitted when user `user` withdraw `amount` of BNPL tokens from `bankNodeId` bankNode.
+     */
     event Withdrawn(address indexed user, uint32 indexed bankNodeId, uint256 amount);
+
+    /**
+     * @dev Emitted when user `user` calls `getReward`.
+     */
     event RewardPaid(address indexed user, uint32 indexed bankNodeId, uint256 reward);
+
+    /**
+     * @dev Emitted when `setRewardsDuration` is called.
+     */
     event RewardsDurationUpdated(uint32 indexed bankNodeId, uint256 newDuration);
 }

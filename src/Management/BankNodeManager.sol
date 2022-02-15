@@ -18,6 +18,16 @@ import {BNPLKYCStore} from "./BNPLKYCStore.sol";
 
 import {TransferHelper} from "../Utils/TransferHelper.sol";
 
+/**
+ * @title BNPL BankNodeManager contract
+ * @dev
+ * - Features:
+ *   # Create a bank node
+ *   # Add lendable token
+ *   # Set minimum BankNode bonded amount
+ *   # Set loan overdue grace period
+ * @author BNPL
+ **/
 contract BankNodeManager is
     Initializable,
     AccessControlEnumerableUpgradeable,
@@ -103,6 +113,9 @@ contract BankNodeManager is
         }
     }
 
+    /**
+     * @notice Get BankNode data list (pagination supported)
+     */
     function getBankNodeList(
         uint32 start,
         uint32 count,
@@ -138,6 +151,9 @@ contract BankNodeManager is
         return (tmp, bankNodeCount);
     }
 
+    /**
+     * @notice Get BankNode data with `bankNode` address
+     */
     function getBankNodeDetail(address bankNode) public view override returns (BankNodeDetail memory) {
         IBNPLBankNode node = IBNPLBankNode(bankNode);
         IBNPLNodeStakingPool pool = IBNPLNodeStakingPool(node.nodeStakingPool());
@@ -174,6 +190,15 @@ contract BankNodeManager is
             });
     }
 
+    /**
+     * @dev This contract is called through the proxy.
+     * @param _protocolConfig BNPLProtocolConfig contract address
+     * @param _configurator BNPL contract platform configurator address
+     * @param _minimumBankNodeBondedAmount The minimum BankNode bonded amount required to create the bankNode
+     * @param _loanOverdueGracePeriod Loan overdue grace period (secs)
+     * @param _bankNodeLendingRewards BankNodeLendingRewards contract address
+     * @param _bnplKYCStore BNPLKYCStore contract address
+     **/
     function initialize(
         IBNPLProtocolConfig _protocolConfig,
         address _configurator,
@@ -237,7 +262,10 @@ contract BankNodeManager is
         enabledLendableTokens[_lendableToken.tokenContract] = enabled;
     }
 
-    /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to enable/disable support for ERC20 tokens to be used as lendable tokens for new bank nodes (does not effect existing nodes)
+    /**
+     * @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to enable/disable support
+     * for ERC20 tokens to be used as lendable tokens for new bank nodes (does not effect existing nodes)
+     */
     function setLendableTokenStatus(address tokenContract, uint8 enabled)
         external
         override
@@ -307,6 +335,17 @@ contract BankNodeManager is
         return address(p);
     }
 
+    /**
+     * @dev Create BankNode contracts
+     * - Steps:
+     *   # Create BankNode proxy contract
+     *   # Create staking pool proxy contract
+     *   # Create staking pool ERC20 token
+     *   # Create banknode ERC20 token
+     *   # Initialize banknode proxy contract
+     *   # Bond tokens
+     *   # Initialize staking pool proxy contract
+     */
     function _createBankNodeContracts(CreateBankNodeContractsFncInput memory input)
         private
         returns (BankNodeContracts memory output)
@@ -378,12 +417,15 @@ contract BankNodeManager is
         );
     }
 
-    /// @notice creates a new bonded bank node
-    /// @param operator The node operator who will be assigned the permissions of bank node admin for the newly created bank node
-    /// @param tokensToBond The number of BNPL tokens to bond for the node
-    /// @param lendableTokenAddress Which lendable token will be lent to borrowers for this bank node (ex. the address of USDT's erc20 smart contract)
-    /// @param nodeName the official name of the bank node
-    /// @param website the official website of the bank node
+    /**
+     * @notice creates a new bonded bank node
+     * @param operator The node operator who will be assigned the permissions of bank node admin for the newly created bank node
+     * @param tokensToBond The number of BNPL tokens to bond for the node
+     * @param lendableTokenAddress Which lendable token will be lent to borrowers for this bank node (ex. the address of USDT's erc20 smart contract)
+     * @param nodeName the official name of the bank node
+     * @param website the official website of the bank node
+     * @return id uint32 BankNode id
+     */
     function createBondedBankNode(
         address operator,
         uint256 tokensToBond,

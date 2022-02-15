@@ -5,6 +5,17 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
+/**
+ * @title BNPL KYC store contract.
+ * @dev
+ * - Features:
+ *   # Create and store KYC status
+ *   # Create a KYC bank node
+ *   # Change the KYC mode
+ *   # Check the KYC status
+ *   # Approve or reject the applicant
+ * @author BNPL
+ **/
 contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
     using ECDSAUpgradeable for bytes32;
 
@@ -18,6 +29,12 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
     uint32 public constant DOMAIN_ADMIN_PERM = 0xffff;
     uint32 public domainCount;
 
+    /**
+     * @dev Encode KYC domain and user address into a uint256.
+     * @param domain Domain id
+     * @param user The address of user
+     * @return uint256 encoded user domain key
+     **/
     function encodeKYCUserDomainKey(uint32 domain, address user) internal pure returns (uint256) {
         return (uint256(uint160(user)) << 32) | uint256(domain);
     }
@@ -42,6 +59,12 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         domainPermissions[encodeKYCUserDomainKey(domain, user)] = permissions;
     }
 
+    /**
+     * @dev Get user KYC status
+     * @param domain Domain id
+     * @param user The address of user
+     * @return uint32 KYC status
+     **/
     function getKYCStatusUser(uint32 domain, address user) public view returns (uint32) {
         return userKycStatuses[encodeKYCUserDomainKey(domain, user)];
     }
@@ -77,6 +100,13 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         userKycStatuses[encodeKYCUserDomainKey(domain, user)] |= status;
     }
 
+    /**
+     * @dev Create new KYC store domain
+     * @param admin The address of admin
+     * @param publicKey KYC publicKey
+     * @param kycMode The KYC mode
+     * @return uint32 KYC domain id
+     **/
     function createNewKYCDomain(
         address admin,
         address publicKey,
@@ -91,10 +121,20 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         return id;
     }
 
+    /**
+     * @dev Allow domain admin to set KYC domain public key for domain
+     * @param domain The KYC domain id
+     * @param newPublicKey KYC publickey
+     **/
     function setKYCDomainPublicKey(uint32 domain, address newPublicKey) external onlyDomainAdmin(domain) {
         publicKeys[domain] = newPublicKey;
     }
 
+    /**
+     * @dev Allow domain admin to set KYC mode for domain
+     * @param domain The KYC domain id
+     * @param mode KYC mode
+     **/
     function setKYCDomainMode(uint32 domain, uint256 mode) external onlyDomainAdmin(domain) {
         domainKycMode[domain] = mode;
     }
@@ -112,6 +152,12 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         return 1;
     }
 
+    /**
+     * @dev Allow domain admin to set KYC status for user
+     * @param domain The KYC domain id
+     * @param user The address of user
+     * @param status KYC status
+     **/
     function setKYCStatusUser(
         uint32 domain,
         address user,
@@ -157,6 +203,11 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         _orKYCStatusUser(domain, user, status);
     }
 
+    /**
+     * @dev Allow domain admin to clear KYC status for user
+     * @param domain The KYC domain id
+     * @param user The address of user
+     **/
     function clearKYCStatusWithProof(
         uint32 domain,
         address user,
@@ -167,6 +218,9 @@ contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
         _setKYCStatusUser(domain, user, 1);
     }
 
+    /**
+     * @dev This contract is called through the proxy.
+     **/
     function initialize() external initializer nonReentrant {
         __ReentrancyGuard_init_unchained();
     }
