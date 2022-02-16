@@ -18,16 +18,16 @@ import {BNPLKYCStore} from "./BNPLKYCStore.sol";
 
 import {TransferHelper} from "../Utils/TransferHelper.sol";
 
-/**
- * @title BNPL BankNodeManager contract
- * @dev
- * - Features:
- *   # Create a bank node
- *   # Add lendable token
- *   # Set minimum BankNode bonded amount
- *   # Set loan overdue grace period
- * @author BNPL
- **/
+/// @title BNPL BankNodeManager contract
+///
+/// @notice
+/// - Features:
+///     **Create a bank node**
+///     **Add lendable token**
+///     **Set minimum BankNode bonded amount**
+///     **Set loan overdue grace period**
+///
+/// @author BNPL
 contract BankNodeManager is
     Initializable,
     AccessControlEnumerableUpgradeable,
@@ -40,6 +40,7 @@ contract BankNodeManager is
         address bnplStakingPoolContract;
         address bnplStakingPoolToken;
     }
+
     struct CreateBankNodeContractsFncInput {
         uint32 bankNodeId;
         address operatorAdmin;
@@ -49,55 +50,99 @@ contract BankNodeManager is
         address nodePublicKey;
         uint32 kycMode;
     }
+
     bytes32 public constant CONFIGURE_NODE_MANAGER_ROLE = keccak256("CONFIGURE_NODE_MANAGER_ROLE");
 
+    /// @notice Whether lendable tokens are enabled
     mapping(address => uint8) public override enabledLendableTokens;
 
+    /// @notice Lendable token data
     mapping(address => LendableToken) public override lendableTokens;
 
+    /// @notice Bank node data according to the specified id
     mapping(uint32 => BankNode) public override bankNodes;
+
+    /// @notice Bank node id with bank node address
     mapping(address => uint32) public override bankNodeAddressToId;
 
+    /// @notice BNPL platform protocol config contract
     uint256 public override minimumBankNodeBondedAmount;
+
+    /// @notice The loan overdue grace period currently configured on the platform
     uint256 public override loanOverdueGracePeriod;
 
+    /// @notice The current total number of platform bank nodes
     uint32 public override bankNodeCount;
+
+    /// @notice BNPL token contract
     IERC20 public override bnplToken;
 
+    /// @notice Bank node lending rewards contract
     BankNodeLendingRewards public override bankNodeLendingRewards;
 
+    /// @notice BNPL platform protocol config contract
     IBNPLProtocolConfig public override protocolConfig;
+
+    /// @notice BNPL KYC store contract
     BNPLKYCStore public override bnplKYCStore;
 
+    /// @notice whether the banknode exists
+    ///
+    /// @param bankNodeId Bank node ID
+    /// @return BankNodeIdExists Returns `0` when it does not exist, otherwise returns `1`
     function bankNodeIdExists(uint32 bankNodeId) external view override returns (uint256) {
         return (bankNodeId >= 1 && bankNodeId <= bankNodeCount) ? 1 : 0;
     }
 
+    /// @notice Get the contract address of the specified bank node
+    ///
+    /// @param bankNodeId Bank node ID
+    /// @return BankNodeContract The contract address of the node
     function getBankNodeContract(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bankNodeContract;
     }
 
+    /// @notice Get the token contract (ERC20) address of the specified bank node
+    ///
+    /// @param bankNodeId Bank node ID
+    /// @return BankNodeToken The token contract (ERC20) address of the node
     function getBankNodeToken(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bankNodeToken;
     }
 
+    /// @notice Get the staking pool contract address of the specified bank node
+    ///
+    /// @param bankNodeId Bank node ID
+    /// @return BankNodeStakingPoolContract The staking pool contract address of the node
     function getBankNodeStakingPoolContract(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bnplStakingPoolContract;
     }
 
+    /// @notice Get the staking pool token contract (ERC20) address of the specified bank node
+    ///
+    /// @param bankNodeId Bank node ID
+    /// @return BankNodeStakingPoolToken The staking pool token contract (ERC20) address of the node
     function getBankNodeStakingPoolToken(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bnplStakingPoolToken;
     }
 
+    /// @notice Get the lendable token contract (ERC20) address of the specified bank node
+    ///
+    /// @param bankNodeId Bank node ID
+    /// @return BankNodeLendableToken The lendable token contract (ERC20) address of the node
     function getBankNodeLendableToken(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].lendableToken;
     }
 
+    /// @notice Get all bank nodes loan statistic
+    ///
+    /// @return totalAmountOfAllActiveLoans uint256 Total amount of all activeLoans
+    /// @return totalAmountOfAllLoans uint256 Total amount of all loans
     function getBankNodeLoansStatistic()
         external
         view
@@ -113,9 +158,13 @@ contract BankNodeManager is
         }
     }
 
-    /**
-     * @notice Get BankNode data list (pagination supported)
-     */
+    /// @notice Get bank node details list (pagination supported)
+    ///
+    /// @param start Where to start getting bank node
+    /// @param count How many bank nodes to get
+    /// @param reverse Whether to return the list in reverse order
+    /// @return BankNodeList bank node details array
+    /// @return BankNodeCount bank node count
     function getBankNodeList(
         uint32 start,
         uint32 count,
@@ -151,9 +200,10 @@ contract BankNodeManager is
         return (tmp, bankNodeCount);
     }
 
-    /**
-     * @notice Get BankNode data with `bankNode` address
-     */
+    /// @notice Get bank node data with `bankNode` address
+    ///
+    /// @param bankNode bank node contract address
+    /// @return BankNodeDetail bank node detail struct
     function getBankNodeDetail(address bankNode) public view override returns (BankNodeDetail memory) {
         IBNPLBankNode node = IBNPLBankNode(bankNode);
         IBNPLNodeStakingPool pool = IBNPLNodeStakingPool(node.nodeStakingPool());
@@ -190,15 +240,14 @@ contract BankNodeManager is
             });
     }
 
-    /**
-     * @dev This contract is called through the proxy.
-     * @param _protocolConfig BNPLProtocolConfig contract address
-     * @param _configurator BNPL contract platform configurator address
-     * @param _minimumBankNodeBondedAmount The minimum BankNode bonded amount required to create the bankNode
-     * @param _loanOverdueGracePeriod Loan overdue grace period (secs)
-     * @param _bankNodeLendingRewards BankNodeLendingRewards contract address
-     * @param _bnplKYCStore BNPLKYCStore contract address
-     **/
+    /// @dev This contract is called through the proxy.
+    ///
+    /// @param _protocolConfig BNPLProtocolConfig contract address
+    /// @param _configurator BNPL contract platform configurator address
+    /// @param _minimumBankNodeBondedAmount The minimum BankNode bonded amount required to create the bankNode
+    /// @param _loanOverdueGracePeriod Loan overdue grace period (secs)
+    /// @param _bankNodeLendingRewards BankNodeLendingRewards contract address
+    /// @param _bnplKYCStore BNPLKYCStore contract address
     function initialize(
         IBNPLProtocolConfig _protocolConfig,
         address _configurator,
@@ -232,7 +281,13 @@ contract BankNodeManager is
         _setupRole(CONFIGURE_NODE_MANAGER_ROLE, _configurator);
     }
 
-    /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to add support for a new ERC20 token to be used as lendable tokens for new bank nodes
+    /// @notice Add support for a new ERC20 token to be used as lendable tokens for new bank nodes
+    ///
+    /// - PRIVILEGES REQUIRED:
+    ///     Admins with the role "CONFIGURE_NODE_MANAGER_ROLE"
+    ///
+    /// @param _lendableToken LendableToken configuration structure
+    /// @param enabled `0` or `1`, Whether to enable (cannot be used to create bank node after disable)
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled)
         external
         override
@@ -262,10 +317,13 @@ contract BankNodeManager is
         enabledLendableTokens[_lendableToken.tokenContract] = enabled;
     }
 
-    /**
-     * @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to enable/disable support
-     * for ERC20 tokens to be used as lendable tokens for new bank nodes (does not effect existing nodes)
-     */
+    /// @notice Enable/Disable support for ERC20 tokens to be used as lendable tokens for new bank nodes (does not effect existing nodes)
+    ///
+    /// - PRIVILEGES REQUIRED:
+    ///     Admins with the role "CONFIGURE_NODE_MANAGER_ROLE"
+    ///
+    /// @param tokenContract lendable token contract address
+    /// @param enabled `0` or `1`, Whether to enable (cannot be used to create bank node after disable)
     function setLendableTokenStatus(address tokenContract, uint8 enabled)
         external
         override
@@ -275,7 +333,12 @@ contract BankNodeManager is
         enabledLendableTokens[tokenContract] = enabled;
     }
 
-    /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to set the minimum BNPL to bond per node
+    /// @notice Set the minimum BNPL to bond per node
+    ///
+    /// - PRIVILEGES REQUIRED:
+    ///     Admins with the role "CONFIGURE_NODE_MANAGER_ROLE"
+    ///
+    /// @param _minimumBankNodeBondedAmount minium bank node bonded amount
     function setMinimumBankNodeBondedAmount(uint256 _minimumBankNodeBondedAmount)
         external
         override
@@ -284,7 +347,12 @@ contract BankNodeManager is
         minimumBankNodeBondedAmount = _minimumBankNodeBondedAmount;
     }
 
-    /// @notice allows admins with the role "CONFIGURE_NODE_MANAGER_ROLE" to set the loan overdue grace period per node
+    /// @notice Set the loan overdue grace period per node
+    ///
+    /// - PRIVILEGES REQUIRED:
+    ///     Admins with the role "CONFIGURE_NODE_MANAGER_ROLE"
+    ///
+    /// @param _loanOverdueGracePeriod loan overdue grace period (secs)
     function setLoanOverdueGracePeriod(uint256 _loanOverdueGracePeriod)
         external
         override
@@ -293,6 +361,14 @@ contract BankNodeManager is
         loanOverdueGracePeriod = _loanOverdueGracePeriod;
     }
 
+    /// @dev Create lending pool token contract
+    ///
+    /// @param name Token name
+    /// @param symbol Token symbol
+    /// @param decimalsValue Token decimals
+    /// @param minterAdmin Token minter admin address
+    /// @param minter Token minter address
+    /// @return LendingPoolToken The lending pool token proxy contract address
     function _createBankNodeLendingPoolTokenClone(
         string memory name,
         string memory symbol,
@@ -314,6 +390,14 @@ contract BankNodeManager is
         return address(p);
     }
 
+    /// @dev Create staking pool token contract
+    ///
+    /// @param name Token name
+    /// @param symbol Token symbol
+    /// @param decimalsValue Token decimals
+    /// @param minterAdmin Token minter admin address
+    /// @param minter Token minter address
+    /// @return StakingPoolToken The staking pool token proxy contract address
     function _createBankNodeStakingPoolTokenClone(
         string memory name,
         string memory symbol,
@@ -335,17 +419,7 @@ contract BankNodeManager is
         return address(p);
     }
 
-    /**
-     * @dev Create BankNode contracts
-     * - Steps:
-     *   # Create BankNode proxy contract
-     *   # Create staking pool proxy contract
-     *   # Create staking pool ERC20 token
-     *   # Create banknode ERC20 token
-     *   # Initialize banknode proxy contract
-     *   # Bond tokens
-     *   # Initialize staking pool proxy contract
-     */
+    /// @dev Create BankNode contracts
     function _createBankNodeContracts(CreateBankNodeContractsFncInput memory input)
         private
         returns (BankNodeContracts memory output)
@@ -357,11 +431,16 @@ contract BankNodeManager is
             "invalid lendable token"
         );
         require(enabledLendableTokens[input.lendableTokenAddress] == 1, "lendable token not enabled");
+
+        // Create bank node proxy contract
         output.bankNodeContract = address(new BeaconProxy(address(protocolConfig.upBeaconBankNode()), ""));
+
+        // Create staking pool proxy contract
         output.bnplStakingPoolContract = address(
             new BeaconProxy(address(protocolConfig.upBeaconBankNodeStakingPool()), "")
         );
 
+        // Create staking pool token
         output.bnplStakingPoolToken = _createBankNodeLendingPoolTokenClone(
             "Banking Node Pool BNPL",
             "pBNPL",
@@ -369,6 +448,8 @@ contract BankNodeManager is
             address(0),
             output.bnplStakingPoolContract
         );
+
+        // Create lending pool token
         output.bankNodeToken = _createBankNodeLendingPoolTokenClone(
             lendableToken.poolSymbol,
             lendableToken.poolSymbol,
@@ -377,6 +458,7 @@ contract BankNodeManager is
             output.bankNodeContract
         );
 
+        // Initialize bank node proxy contract
         IBankNodeInitializableV1(output.bankNodeContract).initialize(
             IBankNodeInitializableV1.BankNodeInitializeArgsV1({
                 bankNodeId: input.bankNodeId,
@@ -398,6 +480,7 @@ contract BankNodeManager is
             })
         );
 
+        // Bond tokens
         TransferHelper.safeTransferFrom(
             address(bnplToken),
             msg.sender,
@@ -405,6 +488,7 @@ contract BankNodeManager is
             input.tokensToBond
         );
 
+        // Initialize staking pool proxy contract
         IBNPLNodeStakingPool(output.bnplStakingPoolContract).initialize(
             address(bnplToken),
             output.bnplStakingPoolToken,
@@ -417,15 +501,28 @@ contract BankNodeManager is
         );
     }
 
-    /**
-     * @notice creates a new bonded bank node
-     * @param operator The node operator who will be assigned the permissions of bank node admin for the newly created bank node
-     * @param tokensToBond The number of BNPL tokens to bond for the node
-     * @param lendableTokenAddress Which lendable token will be lent to borrowers for this bank node (ex. the address of USDT's erc20 smart contract)
-     * @param nodeName the official name of the bank node
-     * @param website the official website of the bank node
-     * @return id uint32 BankNode id
-     */
+    /// @notice Creates a new bonded bank node
+    ///
+    /// @dev
+    /// - Steps:
+    ///    1) Create bank node proxy contract
+    ///    2) Create staking pool proxy contract
+    ///    3) Create staking pool ERC20 token
+    ///    4) Create bank node ERC20 token
+    ///    5) Initialize bank node proxy contract
+    ///    6) Bond tokens
+    ///    7) Initialize staking pool proxy contract
+    ///    8) Settings
+    ///
+    /// @param operator The node operator who will be assigned the permissions of bank node admin for the newly created bank node
+    /// @param tokensToBond The number of BNPL tokens to bond for the node
+    /// @param lendableTokenAddress Which lendable token will be lent to borrowers for this bank node (ex. the address of USDT's erc20 smart contract)
+    /// @param nodeName The official name of the bank node
+    /// @param website The official website of the bank node
+    /// @param configUrl The bank node config file url
+    /// @param nodePublicKey KYC public key
+    /// @param kycMode KYC mode
+    /// @return id uint32 bank node id
     function createBondedBankNode(
         address operator,
         uint256 tokensToBond,

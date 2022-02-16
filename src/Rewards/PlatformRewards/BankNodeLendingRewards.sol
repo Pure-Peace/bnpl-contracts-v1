@@ -34,30 +34,29 @@ import {IBankNodeManager} from "../../Management/interfaces/IBankNodeManager.sol
 
 import {BankNodeRewardSystem} from "./BankNodeRewardSystem.sol";
 
-/**
- * @title BNPL BankNode lending rewards contract
- * @dev
- * - Users:
- *   # Stake
- *   # Withdraw
- *   # GetReward
- * - Manager:
- *   # SetRewardsDuration
- * - Distributor:
- *   # distribute BNPL tokens to BankNodes
- * @author BNPL
- **/
+/// @title BNPL bank node lending rewards contract
+///
+/// @notice
+/// - Users:
+///   **Stake**
+///   **Withdraw**
+///   **GetReward**
+/// - Manager:
+///   **SetRewardsDuration**
+/// - Distributor:
+///   **distribute BNPL tokens to BankNodes**
+///
+/// @author BNPL
 contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
     using SafeERC20 for IERC20;
 
-    /**
-     * @dev This contract is called through the proxy.
-     * @param _defaultRewardsDuration The default reward duration (secs)
-     * @param _rewardsToken The address of the BNPL token
-     * @param _bankNodeManager The address of the BankNodeManagerProxy
-     * @param distributorAdmin The address of the distributor admin
-     * @param managerAdmin The address of the manager admin
-     **/
+    /// @dev This contract is called through the proxy.
+    ///
+    /// @param _defaultRewardsDuration The default reward duration (secs)
+    /// @param _rewardsToken The address of the BNPL token
+    /// @param _bankNodeManager The address of the BankNodeManagerProxy
+    /// @param distributorAdmin The address of the distributor admin
+    /// @param managerAdmin The address of the manager admin
     function initialize(
         uint256 _defaultRewardsDuration,
         address _rewardsToken,
@@ -85,6 +84,7 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         _setRoleAdmin(REWARDS_MANAGER, REWARDS_MANAGER_ROLE_ADMIN);
     }
 
+    /// @dev Get the amount of tokens staked by the node
     function _bnplTokensStakedToBankNode(uint32 bankNodeId) internal view returns (uint256) {
         return
             rewardsToken.balanceOf(
@@ -92,6 +92,10 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
             );
     }
 
+    /// @notice Get the amount of rewards that can be allocated by all bank nodes
+    ///
+    /// @param amount The distribute BNPL tokens amount
+    /// @return bnplTokensPerNode BNPL tokens amount per node
     function getBNPLTokenDistribution(uint256 amount) external view returns (uint256[] memory) {
         uint32 nodeCount = bankNodeManager.bankNodeCount();
         uint256[] memory bnplTokensPerNode = new uint256[](nodeCount);
@@ -114,10 +118,13 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         return bnplTokensPerNode;
     }
 
-    /**
-     * @notice Distribute rewards to all bankNodes (Method 1)
-     * @param amount The distribute BNPL tokens amount
-     **/
+    /// @notice Distribute rewards to all bank nodes (Method 1)
+    ///
+    /// - PRIVILEGES REQUIRED:
+    ///     Admins with the role "REWARDS_DISTRIBUTOR_ROLE"
+    ///
+    /// @param amount The distribute BNPL tokens amount
+    /// @return total Total Rewards
     function distributeBNPLTokensToBankNodes(uint256 amount)
         external
         onlyRole(REWARDS_DISTRIBUTOR_ROLE)
@@ -151,10 +158,13 @@ contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {
         return total;
     }
 
-    /**
-     * @notice Distribute rewards to all bankNodes (Method 2)
-     * @param amount The distribute BNPL tokens amount
-     **/
+    /// @notice Distribute rewards to all bank nodes (Method 2)
+    ///
+    /// - PRIVILEGES REQUIRED:
+    ///     Admins with the role "REWARDS_DISTRIBUTOR_ROLE"
+    ///
+    /// @param amount The distribute BNPL tokens amount
+    /// @return total Total Rewards
     function distributeBNPLTokensToBankNodes2(uint256 amount)
         external
         onlyRole(REWARDS_DISTRIBUTOR_ROLE)

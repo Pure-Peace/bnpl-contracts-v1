@@ -21,54 +21,40 @@ import {BNPLKYCStore} from "../Management/BNPLKYCStore.sol";
 import {TransferHelper} from "../Utils/TransferHelper.sol";
 import {BankNodeUtils} from "./lib/BankNodeUtils.sol";
 
-/**
- * @title BNPL BankNode contract
- * @notice
- * - Features:
- *   # Deposit USDT
- *   # Withdraw USDT
- *   # Donate USDT
- *   # Loan request
- *   # Loan approval/rejected
- *   # Deposit USDT to AAVE
- *   # Withdraw USDT from AAVE
- *   # Claim stkAAVE
- *   # Repayment:
- *     ## Swap 20% USDT interests to BNPL in Sushiswap for bonder and staker interest
- *   # Reportoverdue:
- *     ## Swap BNPL to USDT in Sushiswap for the slashing functionPlatform
- *   # Claim bank node rewards
- * @author BNPL
- **/
+/// @title BNPL BankNode contract
+/// @notice
+/// - Features:
+///   **Deposit USDT**
+///   **Withdraw USDT**
+///   **Donate USDT**
+///   **Loan request**
+///   **Loan approval/rejected**
+///   **Deposit USDT to AAVE**
+///   **Withdraw USDT from AAVE**
+///   **Claim stkAAVE**
+///   **Repayment:**
+///     **Swap 20% USDT interests to BNPL in Sushiswap for bonder and staker interest**
+///   **Reportoverdue:**
+///     **Swap BNPL to USDT in Sushiswap for the slashing functionPlatform**
+///   **Claim bank node rewards**
+/// @author BNPL
 contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, ReentrancyGuardUpgradeable, IBNPLBankNode {
-    /**
-     * @dev Emitted when user `user` is adds `depositAmount` of liquidity while receiving `issueAmount` of pool tokens
-     */
+    /// @dev Emitted when user `user` is adds `depositAmount` of liquidity while receiving `issueAmount` of pool tokens
     event LiquidityAdded(address indexed user, uint256 depositAmount, uint256 poolTokensIssued);
 
-    /**
-     * @dev Emitted when user `user` burns `withdrawAmount` of pool tokens while receiving `issueAmount` of pool tokens
-     */
+    /// @dev Emitted when user `user` burns `withdrawAmount` of pool tokens while receiving `issueAmount` of pool tokens
     event LiquidityRemoved(address indexed user, uint256 withdrawAmount, uint256 poolTokensConsumed);
 
-    /**
-     * @dev Emitted when user `user` donates `donationAmount` of base liquidity tokens to the pool
-     */
+    /// @dev Emitted when user `user` donates `donationAmount` of base liquidity tokens to the pool
     event Donation(address indexed user, uint256 donationAmount);
 
-    /**
-     * @dev Emitted when user `user` requests a loan of `loanAmount` with a loan request id of loanRequestId
-     */
+    /// @dev Emitted when user `user` requests a loan of `loanAmount` with a loan request id of loanRequestId
     event LoanRequested(address indexed borrower, uint256 loanAmount, uint256 loanRequestId, string uuid);
 
-    /**
-     * @dev Emitted when a node manager `operator` denies a loan request with id `loanRequestId`
-     */
+    /// @dev Emitted when a node manager `operator` denies a loan request with id `loanRequestId`
     event LoanDenied(address indexed borrower, uint256 loanRequestId, address operator);
 
-    /**
-     * @dev Emitted when a node manager `operator` approves a loan request with id `loanRequestId`
-     */
+    /// @dev Emitted when a node manager `operator` approves a loan request with id `loanRequestId`
     event LoanApproved(
         address indexed borrower,
         uint256 loanRequestId,
@@ -77,9 +63,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
         address operator
     );
 
-    /**
-     * @dev Emitted when user `borrower` makes a payment on the loan request with id `loanRequestId`
-     */
+    /// @dev Emitted when user `borrower` makes a payment on the loan request with id `loanRequestId`
     event LoanPayment(address indexed borrower, uint256 loanId, uint256 paymentAmount);
 
     struct LoanRequest {
@@ -101,13 +85,17 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant OPERATOR_ADMIN_ROLE = keccak256("OPERATOR_ADMIN_ROLE");
+
     //TODO: Source
     uint256 public constant UNUSED_FUNDS_MIN_DEPOSIT_SIZE = 1;
 
+    /// @notice The min loan duration (secs)
     uint256 public constant MIN_LOAN_DURATION = 30 days;
+    /// @notice The min loan payment interval (secs)
     uint256 public constant MIN_LOAN_PAYMENT_INTERVAL = 2 days;
-
+    /// @notice The max loan duration (secs)
     uint256 public constant MAX_LOAN_DURATION = 1825 days;
+    /// @notice The max loan payment interval (secs)
     uint256 public constant MAX_LOAN_PAYMENT_INTERVAL = 180 days;
 
     uint32 public constant LENDER_NEEDS_KYC = 1 << 1;
@@ -116,9 +104,13 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint256 public constant MAX_LOAN_AMOUNT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFF00;
     uint256 public constant MIN_LOAN_AMOUNT = 0x5f5e100;
 
+    /// @notice Liquidity token contract (ex. USDT)
     IERC20 public override baseLiquidityToken;
+
+    /// @notice Pool liquidity token contract (ex. Pool USDT)
     IMintableBurnableTokenUpgradeable public override poolLiquidityToken;
 
+    /// @notice BNPL token contract
     IERC20 public bnplToken;
 
     uint16 public override unusedFundsLendingMode;
@@ -129,9 +121,13 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     IBNPLSwapMarket public override bnplSwapMarket;
     uint24 public override bnplSwapMarketPoolFee;
 
+    /// @notice The id of bank node
     uint32 public override bankNodeId;
 
+    /// @notice The staking pool proxy contract
     IBNPLNodeStakingPool public override nodeStakingPool;
+
+    /// @notice The bank node manager proxy contract
     IBankNodeManager public override bankNodeManager;
 
     uint256 public override baseTokenBalance;
@@ -157,19 +153,23 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
     uint32 public override kycDomainId;
     BNPLKYCStore public override bnplKYCStore;
 
+    /// @notice Get bank node KYC mode
+    /// @return kycMode
     function kycMode() external view override returns (uint256) {
         return bnplKYCStore.domainKycMode(kycDomainId);
     }
 
+    /// @notice Get bank node KYC public key
+    /// @return nodeKycPublicKey
     function nodePublicKey() external view override returns (address) {
         return bnplKYCStore.publicKeys(kycDomainId);
     }
 
-    /**
-     * @dev BankNode contract is created and initialized by the BankNodeManager contract
-     * - This contract is called through the proxy.
-     * @param bankNodeInitConfig BankNode configuration (passed in by BankNodeManager contract)
-     **/
+    /// @dev BankNode contract is created and initialized by the BankNodeManager contract
+    ///
+    /// - This contract is called through the proxy.
+    ///
+    /// @param bankNodeInitConfig BankNode configuration (passed in by BankNodeManager contract)
     function initialize(BankNodeInitializeArgsV1 calldata bankNodeInitConfig)
         external
         override

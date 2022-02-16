@@ -7,23 +7,48 @@ import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/Upgradeabl
 import {IBankNodeManager} from "../Management/interfaces/IBankNodeManager.sol";
 import {IBNPLProtocolConfig} from "./interfaces/IBNPLProtocolConfig.sol";
 
+/// @title BNPL Protocol configuration contract
+///
+/// @notice
+/// - Include:
+///     **Network Info**
+///     **BNPL token contracts**
+///     **BNPL UpBeacon contracts**
+///     **BNPL BankNodeManager contract**
+///
+/// @author BNPL
 contract BNPLProtocolConfig is IBNPLProtocolConfig {
+    /// @notice Blockchain network id
     uint64 public override networkId;
+
+    /// @notice Blockchain network name
     string public override networkName;
 
+    /// @notice BNPL token address
     IERC20 public override bnplToken;
 
+    /// @notice Bank node manager upBeacon contract
     UpgradeableBeacon public override upBeaconBankNodeManager;
 
+    /// @notice Bank node upBeacon contract
     UpgradeableBeacon public override upBeaconBankNode;
+
+    /// @notice Bank node lending pool token upBeacon contract
     UpgradeableBeacon public override upBeaconBankNodeLendingPoolToken;
 
+    /// @notice Bank node staking pool upBeacon contract
     UpgradeableBeacon public override upBeaconBankNodeStakingPool;
+
+    /// @notice Bank node staking pool token upBeacon contract
     UpgradeableBeacon public override upBeaconBankNodeStakingPoolToken;
 
+    /// @notice Bank node lending rewards upBeacon contract
     UpgradeableBeacon public override upBeaconBankNodeLendingRewards;
+
+    /// @notice BNPL KYC store upBeacon contract
     UpgradeableBeacon public override upBeaconBNPLKYCStore;
 
+    /// @notice BankNodeManager contract
     IBankNodeManager public override bankNodeManager;
 
     constructor(
