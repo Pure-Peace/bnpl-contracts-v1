@@ -11,16 +11,24 @@ contract UserTokenLockup is Initializable, IUserTokenLockup {
     /// @dev Emitted when user `user` claims a lockup with an index of `vaultIndex` containing `amount` of tokens
     event LockupClaimed(address indexed user, uint256 amount, uint32 vaultIndex);
 
+    /// @notice Tokens locked amount
     uint256 public override totalTokensLocked;
+
+    /// @dev [user address] => [lockup status: Encoded(tokensLocked, currentVaultIndex, numberOfActiveVaults)]
     mapping(address => uint256) public encodedLockupStatuses;
+
+    /// @dev [user token lockup key: Encoded(user address, vaultIndex)] => [token lockup value: Encoded(tokenAmount, unlockDate)]
     mapping(uint256 => uint256) public encodedTokenLockups;
 
     function _UserTokenLockup_init_unchained() internal initializer {}
 
+    /// @dev Get current block timestamp
+    /// @return blockTimestamp
     function _getTime() internal view virtual returns (uint256) {
         return block.timestamp;
     }
 
+    /// @dev Should override this function
     function _issueUnlockedTokensToUser(
         address, /*user*/
         uint256 /*amount*/
@@ -29,6 +37,12 @@ contract UserTokenLockup is Initializable, IUserTokenLockup {
         return 0;
     }
 
+    /// @notice Encode user lockup status
+    ///
+    /// @param tokensLocked Tokens locked amount
+    /// @param currentVaultIndex The current vault index
+    /// @param numberOfActiveVaults The number of activeVaults
+    /// @return userLockupStatus Encoded user lockup status
     function createUserLockupStatus(
         uint256 tokensLocked,
         uint32 currentVaultIndex,
@@ -37,6 +51,12 @@ contract UserTokenLockup is Initializable, IUserTokenLockup {
         return (tokensLocked << 64) | (uint256(currentVaultIndex) << 32) | uint256(numberOfActiveVaults);
     }
 
+    /// @notice Decode an encoded user lockup status
+    ///
+    /// @param lockupStatus Encoded user lockup status
+    /// @return tokensLocked
+    /// @return currentVaultIndex
+    /// @return numberOfActiveVaults
     function decodeUserLockupStatus(uint256 lockupStatus)
         internal
         pure
@@ -73,6 +93,12 @@ contract UserTokenLockup is Initializable, IUserTokenLockup {
         unlockDate = uint32(tokenLockupValue >> 192);
     }
 
+    /// @notice Get user lockup status with address `user`
+    ///
+    /// @param user The address of user
+    /// @return tokensLocked
+    /// @return currentVaultIndex
+    /// @return numberOfActiveVaults
     function userLockupStatus(address user)
         public
         view
@@ -85,6 +111,12 @@ contract UserTokenLockup is Initializable, IUserTokenLockup {
         return decodeUserLockupStatus(encodedLockupStatuses[user]);
     }
 
+    /// @notice Get user lockup data
+    ///
+    /// @param user The address of user
+    /// @param vaultIndex vault index
+    /// @return tokenAmount
+    /// @return unlockDate
     function getTokenLockup(address user, uint32 vaultIndex)
         public
         view
@@ -93,6 +125,12 @@ contract UserTokenLockup is Initializable, IUserTokenLockup {
         return decodeTokenLockupValue(encodedTokenLockups[createTokenLockupKey(user, vaultIndex)]);
     }
 
+    /// @notice Get next token lockup for user
+    ///
+    /// @param user The address of user
+    /// @return tokenAmount
+    /// @return unlockDate
+    /// @return vaultIndex
     function getNextTokenLockupForUser(address user)
         external
         view
@@ -154,6 +192,7 @@ contract UserTokenLockup is Initializable, IUserTokenLockup {
         return currentVaultIndex;
     }
 
+    /// @dev Claim next token lockup
     function _claimNextTokenLockup(address user) internal returns (uint256) {
         require(user != address(0), "cannot claim for null user");
         (uint256 tokensLocked, uint32 currentVaultIndex, uint32 numberOfActiveVaults) = userLockupStatus(user);
@@ -174,6 +213,7 @@ contract UserTokenLockup is Initializable, IUserTokenLockup {
         return tokenAmount;
     }
 
+    /// @dev Claim up to next `N` token lockups
     function _claimUpToNextNTokenLockups(address user, uint32 maxNumberOfClaims) internal returns (uint256) {
         require(user != address(0), "cannot claim for null user");
         require(maxNumberOfClaims > 0, "cannot claim 0 lockups");

@@ -409,7 +409,6 @@ contract BNPLStakingPool is
     }
 
     /// @notice Allows a user to donate `donateAmount` of BNPL to the pool (user must first approve)
-    ///
     /// @param donateAmount The donate amount of BNPL
     function donate(uint256 donateAmount) external override nonReentrant {
         require(donateAmount != 0, "donateAmount cannot be 0");
@@ -417,7 +416,6 @@ contract BNPLStakingPool is
     }
 
     /// @notice Allows a user to donate `donateAmount` of BNPL to the pool (not conted in total) (user must first approve)
-    ///
     /// @param donateAmount The donate amount of BNPL
     function donateNotCountedInTotal(uint256 donateAmount) external override nonReentrant {
         require(donateAmount != 0, "donateAmount cannot be 0");
@@ -444,7 +442,8 @@ contract BNPLStakingPool is
         _processUnbondTokens(msg.sender);
     }
 
-    /// @notice Allows a user to stake `unstakeAmount` of BNPL to the pool (user must first approve)
+    /// @notice Allows a user to stake `stakeAmount` of BNPL to the pool (user must first approve)
+    /// @param stakeAmount Stake token amount
     function stakeTokens(uint256 stakeAmount) external override nonReentrant {
         require(
             bnplKYCStore.checkUserBasicBitwiseMode(kycDomainId, msg.sender, BNPL_STAKER_NEEDS_KYC) == 1,
@@ -455,6 +454,7 @@ contract BNPLStakingPool is
     }
 
     /// @notice Allows a user to unstake `unstakeAmount` of BNPL from the pool (puts it into a lock up for a 7 day cool down period)
+    /// @param unstakeAmount Unstake token amount
     function unstakeTokens(uint256 unstakeAmount) external override nonReentrant {
         require(unstakeAmount != 0, "unstakeAmount cannot be 0");
         _removeLiquidity(msg.sender, unstakeAmount);
@@ -479,7 +479,7 @@ contract BNPLStakingPool is
         _slash(slashAmount, msg.sender);
     }
 
-    /// @notice Claim node owner pool token rewards
+    /// @notice Claim node owner pool BNPL token rewards
     /// @return rewards Claimed reward pool token amount
     function getNodeOwnerPoolTokenRewards() public view override returns (uint256) {
         uint256 equivalentPoolTokens = getPoolDepositConversion(tokensBondedAllTime);
