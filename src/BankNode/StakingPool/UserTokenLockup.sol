@@ -5,14 +5,10 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {IUserTokenLockup} from "../interfaces/IUserTokenLockup.sol";
 
 contract UserTokenLockup is Initializable, IUserTokenLockup {
-    /**
-     * @dev Emitted when user `user` creates a lockup with an index of `vaultIndex` containing `amount` of tokens which can be claimed on `unlockDate`
-     */
+    /// @dev Emitted when user `user` creates a lockup with an index of `vaultIndex` containing `amount` of tokens which can be claimed on `unlockDate`
     event LockupCreated(address indexed user, uint32 vaultIndex, uint256 amount, uint64 unlockDate);
 
-    /**
-     * @dev Emitted when user `user` claims a lockup with an index of `vaultIndex` containing `amount` of tokens
-     */
+    /// @dev Emitted when user `user` claims a lockup with an index of `vaultIndex` containing `amount` of tokens
     event LockupClaimed(address indexed user, uint256 amount, uint32 vaultIndex);
 
     uint256 public override totalTokensLocked;

@@ -53,16 +53,16 @@ contract BankNodeManager is
 
     bytes32 public constant CONFIGURE_NODE_MANAGER_ROLE = keccak256("CONFIGURE_NODE_MANAGER_ROLE");
 
-    /// @notice Whether lendable tokens are enabled
+    /// @notice [Lendable token address] => [Enable status (0 or 1)]
     mapping(address => uint8) public override enabledLendableTokens;
 
-    /// @notice Lendable token data
+    /// @notice [Bank node address] => [Lendable token data]
     mapping(address => LendableToken) public override lendableTokens;
 
-    /// @notice Bank node data according to the specified id
+    /// @notice [Bank node id] => [Bank node data]
     mapping(uint32 => BankNode) public override bankNodes;
 
-    /// @notice Bank node id with bank node address
+    /// @notice [Bank node address] => [Bank node id]
     mapping(address => uint32) public override bankNodeAddressToId;
 
     /// @notice BNPL platform protocol config contract
@@ -88,7 +88,7 @@ contract BankNodeManager is
 
     /// @notice whether the banknode exists
     ///
-    /// @param bankNodeId Bank node ID
+    /// @param bankNodeId Bank node id
     /// @return BankNodeIdExists Returns `0` when it does not exist, otherwise returns `1`
     function bankNodeIdExists(uint32 bankNodeId) external view override returns (uint256) {
         return (bankNodeId >= 1 && bankNodeId <= bankNodeCount) ? 1 : 0;
@@ -96,17 +96,17 @@ contract BankNodeManager is
 
     /// @notice Get the contract address of the specified bank node
     ///
-    /// @param bankNodeId Bank node ID
+    /// @param bankNodeId Bank node id
     /// @return BankNodeContract The contract address of the node
     function getBankNodeContract(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bankNodeContract;
     }
 
-    /// @notice Get the token contract (ERC20) address of the specified bank node
+    /// @notice Get the lending pool token contract (ERC20) address of the specified bank node
     ///
-    /// @param bankNodeId Bank node ID
-    /// @return BankNodeToken The token contract (ERC20) address of the node
+    /// @param bankNodeId Bank node id
+    /// @return BankNodeToken The lending pool token contract (ERC20) address of the node
     function getBankNodeToken(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
         return bankNodes[bankNodeId].bankNodeToken;
@@ -114,7 +114,7 @@ contract BankNodeManager is
 
     /// @notice Get the staking pool contract address of the specified bank node
     ///
-    /// @param bankNodeId Bank node ID
+    /// @param bankNodeId Bank node id
     /// @return BankNodeStakingPoolContract The staking pool contract address of the node
     function getBankNodeStakingPoolContract(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
@@ -123,7 +123,7 @@ contract BankNodeManager is
 
     /// @notice Get the staking pool token contract (ERC20) address of the specified bank node
     ///
-    /// @param bankNodeId Bank node ID
+    /// @param bankNodeId Bank node id
     /// @return BankNodeStakingPoolToken The staking pool token contract (ERC20) address of the node
     function getBankNodeStakingPoolToken(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
@@ -132,7 +132,7 @@ contract BankNodeManager is
 
     /// @notice Get the lendable token contract (ERC20) address of the specified bank node
     ///
-    /// @param bankNodeId Bank node ID
+    /// @param bankNodeId Bank node id
     /// @return BankNodeLendableToken The lendable token contract (ERC20) address of the node
     function getBankNodeLendableToken(uint32 bankNodeId) external view override returns (address) {
         require(bankNodeId >= 1 && bankNodeId <= bankNodeCount, "Invalid or unregistered bank node id!");
@@ -281,13 +281,29 @@ contract BankNodeManager is
         _setupRole(CONFIGURE_NODE_MANAGER_ROLE, _configurator);
     }
 
-    /// @notice Add support for a new ERC20 token to be used as lendable tokens for new bank nodes
+    /// @dev Add support for a new ERC20 token to be used as lendable tokens for new bank nodes
     ///
     /// - PRIVILEGES REQUIRED:
     ///     Admins with the role "CONFIGURE_NODE_MANAGER_ROLE"
     ///
-    /// @param _lendableToken LendableToken configuration structure
+    /// @param _lendableToken LendableToken configuration structure.
     /// @param enabled `0` or `1`, Whether to enable (cannot be used to create bank node after disable)
+    ///
+    /// **`_lendableToken` parameters:**
+    ///
+    /// ```solidity
+    /// address tokenContract The lendable token contract (ERC20) address
+    /// address swapMarket The configured swap market contract address (ex. SushiSwap Router)
+    /// uint24 swapMarketPoolFee The configured swap market fee
+    /// uint8 decimals The decimals for lendable tokens
+    /// uint256 valueMultiplier `USD_VALUE = amount * valueMultiplier / 10 ** 18`
+    /// uint16 unusedFundsLendingMode lending mode (1)
+    /// address unusedFundsLendingContract (ex. AAVE lending pool contract address)
+    /// address unusedFundsLendingToken (ex. AAVE tokens contract address)
+    /// address unusedFundsIncentivesController (ex. AAVE incentives controller contract address)
+    /// string symbol The lendable token symbol
+    /// string poolSymbol The pool lendable token symbol
+    /// ```
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled)
         external
         override
@@ -420,6 +436,17 @@ contract BankNodeManager is
     }
 
     /// @dev Create BankNode contracts
+    ///
+    /// @param input `CreateBankNodeContractsFncInput` parameters structure:
+    /// ```solidity
+    /// uint32 bankNodeId
+    /// address operatorAdmin
+    /// address operator
+    /// uint256 tokensToBond
+    /// address lendableTokenAddress
+    /// address nodePublicKey
+    /// uint32 kycMode
+    /// ```
     function _createBankNodeContracts(CreateBankNodeContractsFncInput memory input)
         private
         returns (BankNodeContracts memory output)

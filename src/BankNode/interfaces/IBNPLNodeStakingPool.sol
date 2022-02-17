@@ -4,9 +4,8 @@ pragma solidity ^0.8.0;
 import {BNPLKYCStore} from "../../Management/BNPLKYCStore.sol";
 import {IUserTokenLockup} from "./IUserTokenLockup.sol";
 
-/**
- * @dev Interface of the IBankNodeStakingPoolInitializableV1 standard
- */
+/// @dev Interface of the IBankNodeStakingPoolInitializableV1 standard
+/// @author BNPL
 interface IBankNodeStakingPoolInitializableV1 {
     function initialize(
         address bnplToken,

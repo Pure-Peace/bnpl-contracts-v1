@@ -66,15 +66,31 @@ contract BankNodeRewardSystem is
     bytes32 public constant REWARDS_MANAGER = keccak256("REWARDS_MANAGER_ROLE");
     bytes32 public constant REWARDS_MANAGER_ROLE_ADMIN = keccak256("REWARDS_MANAGER_ROLE_ADMIN");
 
+    /// @notice [Bank node id] => [Previous rewards period]
     mapping(uint32 => uint256) public periodFinish;
+
+    /// @notice [Bank node id] => [Reward rate]
     mapping(uint32 => uint256) public rewardRate;
+
+    /// @notice [Bank node id] => [Rewards duration]
     mapping(uint32 => uint256) public rewardsDuration;
+
+    /// @notice [Bank node id] => [Rewards last update time]
     mapping(uint32 => uint256) public lastUpdateTime;
+
+    /// @notice [Bank node id] => [Reward per token stored]
     mapping(uint32 => uint256) public rewardPerTokenStored;
 
+    /// @notice [Encoded user bank node key (user, bankNodeId)] => [Reward per token paid]
     mapping(uint256 => uint256) public userRewardPerTokenPaid;
+
+    /// @notice [Encoded user bank node key (user, bankNodeId)] => [Rewards amount]
     mapping(uint256 => uint256) public rewards;
+
+    /// @notice [Bank node id] => [Stake amount]
     mapping(uint32 => uint256) public _totalSupply;
+
+    /// @notice [Encoded user bank node key (user, bankNodeId)] => [Staked balance]
     mapping(uint256 => uint256) private _balances;
 
     /// @notice BNPL bank node manager contract
@@ -89,7 +105,7 @@ contract BankNodeRewardSystem is
     /// @dev Encode user address and bank node id into a uint256.
     ///
     /// @param user The address of user
-    /// @param bankNodeId The id of bank node
+    /// @param bankNodeId The id of the bank node
     /// @return encodedUserBankNodeKey The encoded user bank node key.
     function encodeUserBankNodeKey(address user, uint32 bankNodeId) public pure returns (uint256) {
         return (uint256(uint160(user)) << 32) | uint256(bankNodeId);
@@ -99,7 +115,7 @@ contract BankNodeRewardSystem is
     ///
     /// @param stakingVaultKey The user bank node key
     /// @return user The address of user
-    /// @return bankNodeId The id of bank node
+    /// @return bankNodeId The id of the bank node
     function decodeUserBankNodeKey(uint256 stakingVaultKey) external pure returns (address user, uint32 bankNodeId) {
         bankNodeId = uint32(stakingVaultKey & 0xffffffff);
         user = address(uint160(stakingVaultKey >> 32));
@@ -121,8 +137,8 @@ contract BankNodeRewardSystem is
     /// @notice Decode vault value to amount and depositTime
     ///
     /// @param vaultValue The encoded vault value
-    /// @return amount An uint256 amount
-    /// @return depositTime An uint40 deposit time
+    /// @return amount An `uint256` amount
+    /// @return depositTime An `uint40` deposit time
     function decodeVaultValue(uint256 vaultValue) external pure returns (uint256 amount, uint40 depositTime) {
         depositTime = uint40(vaultValue & 0xffffffffff);
         amount = vaultValue >> 40;
@@ -142,30 +158,53 @@ contract BankNodeRewardSystem is
         return contractAddress;
     }
 
+    /// @dev Get the lending pool token contract (ERC20) address of the specified bank node
+    ///
+    /// @param bankNodeId The id of the bank node
+    /// @return BankNodeTokenContract The lending pool token contract (ERC20)
     function getStakingTokenForBankNode(uint32 bankNodeId) internal view returns (IERC20) {
         return _ensureAddressIERC20Not0(bankNodeManager.getBankNodeToken(bankNodeId));
     }
 
+    /// @notice Get the lending pool token amount in rewards of the specified bank node
+    ///
+    /// @param bankNodeId The id of the bank node
+    /// @return BankNodeTokenBalanceInRewards The lending pool token balance in rewards
     function getPoolLiquidityTokensStakedInRewards(uint32 bankNodeId) public view returns (uint256) {
         return getStakingTokenForBankNode(bankNodeId).balanceOf(address(this));
     }
 
+    /// @dev Returns the input `amount`
     function getInternalValueForStakedTokenAmount(uint256 amount) internal pure returns (uint256) {
         return amount;
     }
 
+    /// @dev Returns the input `amount`
     function getStakedTokenAmountForInternalValue(uint256 amount) internal pure returns (uint256) {
         return amount;
     }
 
+    /// @notice Get the stake amount of the specified bank node
+    ///
+    /// @param bankNodeId The id of the bank node
+    /// @return TotalSupply The stake amount
     function totalSupply(uint32 bankNodeId) external view returns (uint256) {
         return getStakedTokenAmountForInternalValue(_totalSupply[bankNodeId]);
     }
 
+    /// @notice Get the user's staked balance under the specified bank node
+    ///
+    /// @param account User address
+    /// @param bankNodeId The id of the bank node
+    /// @return StakedBalance User's staked balance
     function balanceOf(address account, uint32 bankNodeId) external view returns (uint256) {
         return getStakedTokenAmountForInternalValue(_balances[encodeUserBankNodeKey(account, bankNodeId)]);
     }
 
+    /// @notice Get the last time reward applicable of the specified bank node
+    ///
+    /// @param bankNodeId The id of the bank node
+    /// @return lastTimeRewardApplicable The last time reward applicable
     function lastTimeRewardApplicable(uint32 bankNodeId) public view returns (uint256) {
         return block.timestamp < periodFinish[bankNodeId] ? block.timestamp : periodFinish[bankNodeId];
     }
@@ -173,7 +212,7 @@ contract BankNodeRewardSystem is
     /// @notice Get reward amount with bank node id
     ///
     /// @param bankNodeId The id of the bank node
-    /// @return rewardPerToken Reward amount
+    /// @return rewardPerToken Reward per token amount
     function rewardPerToken(uint32 bankNodeId) public view returns (uint256) {
         if (_totalSupply[bankNodeId] == 0) {
             return rewardPerTokenStored[bankNodeId];

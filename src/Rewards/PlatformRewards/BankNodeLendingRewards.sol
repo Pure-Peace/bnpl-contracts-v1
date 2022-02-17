@@ -37,14 +37,15 @@ import {BankNodeRewardSystem} from "./BankNodeRewardSystem.sol";
 /// @title BNPL bank node lending rewards contract
 ///
 /// @notice
-/// - Users:
-///   **Stake**
-///   **Withdraw**
-///   **GetReward**
-/// - Manager:
-///   **SetRewardsDuration**
-/// - Distributor:
-///   **distribute BNPL tokens to BankNodes**
+/// - Features:
+///     - Users:
+///       **Stake**
+///       **Withdraw**
+///       **GetReward**
+///     - Manager:
+///       **SetRewardsDuration**
+///     - Distributor:
+///       **distribute BNPL tokens to BankNodes**
 ///
 /// @author BNPL
 contract BankNodeLendingRewards is Initializable, BankNodeRewardSystem {

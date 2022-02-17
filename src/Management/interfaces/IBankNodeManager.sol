@@ -108,10 +108,10 @@ interface IBankNodeManager {
     /// @return BankNodeContract The contract address of the node
     function getBankNodeContract(uint32 bankNodeId) external view returns (address);
 
-    /// @notice Get the token contract (ERC20) address of the specified bank node
+    /// @notice Get the lending pool token contract (ERC20) address of the specified bank node
     ///
-    /// @param bankNodeId The bank node id
-    /// @return BankNodeToken The token contract (ERC20) address of the node
+    /// @param bankNodeId Bank node id
+    /// @return BankNodeToken The lending pool token contract (ERC20) address of the node
     function getBankNodeToken(uint32 bankNodeId) external view returns (address);
 
     /// @notice Get the staking pool contract address of the specified bank node
@@ -173,7 +173,7 @@ interface IBankNodeManager {
     ///
     /// @param lendableTokenAddress The lendable token contract (ERC20) address
     /// @return tokenContract The lendable token contract (ERC20) address
-    /// @return swapMarket The configured swap market contract address
+    /// @return swapMarket The configured swap market contract address (ex. SushiSwap Router)
     /// @return swapMarketPoolFee The configured swap market fee
     /// @return decimals The decimals for lendable tokens
     /// @return valueMultiplier `USD_VALUE = amount * valueMultiplier / 10 ** 18`
@@ -234,7 +234,7 @@ interface IBankNodeManager {
         );
 
     /// @notice Get bank node id with bank node address
-    /// @return bankNodeAddressToId Bank node id
+    /// @return bankNodeId Bank node id
     function bankNodeAddressToId(address bankNodeAddressTo) external view returns (uint32);
 
     /// @notice Get BNPL platform protocol config contract
@@ -281,6 +281,7 @@ interface IBankNodeManager {
     function getBankNodeDetail(address bankNode) external view returns (BankNodeDetail memory);
 
     /// @dev Add support for a new ERC20 token to be used as lendable tokens for new bank nodes
+    ///
     /// - PRIVILEGES REQUIRED:
     ///     Admins with the role "CONFIGURE_NODE_MANAGER_ROLE"
     ///
@@ -288,9 +289,10 @@ interface IBankNodeManager {
     /// @param enabled `0` or `1`, Whether to enable (cannot be used to create bank node after disable)
     ///
     /// **`_lendableToken` parameters:**
+    ///
     /// ```solidity
     /// address tokenContract The lendable token contract (ERC20) address
-    /// address swapMarket The configured swap market contract address
+    /// address swapMarket The configured swap market contract address (ex. SushiSwap Router)
     /// uint24 swapMarketPoolFee The configured swap market fee
     /// uint8 decimals The decimals for lendable tokens
     /// uint256 valueMultiplier `USD_VALUE = amount * valueMultiplier / 10 ** 18`
@@ -304,6 +306,7 @@ interface IBankNodeManager {
     function addLendableToken(LendableToken calldata _lendableToken, uint8 enabled) external;
 
     /// @dev Enable/Disable support for ERC20 tokens to be used as lendable tokens for new bank nodes (does not effect existing nodes)
+    ///
     /// - PRIVILEGES REQUIRED:
     ///     Admins with the role "CONFIGURE_NODE_MANAGER_ROLE"
     ///
@@ -312,6 +315,7 @@ interface IBankNodeManager {
     function setLendableTokenStatus(address tokenContract, uint8 enabled) external;
 
     /// @dev Set the minimum BNPL to bond per node
+    ///
     /// - PRIVILEGES REQUIRED:
     ///     Admins with the role "CONFIGURE_NODE_MANAGER_ROLE"
     ///
@@ -319,6 +323,7 @@ interface IBankNodeManager {
     function setMinimumBankNodeBondedAmount(uint256 _minimumBankNodeBondedAmount) external;
 
     /// @dev Set the loan overdue grace period per node
+    ///
     /// - PRIVILEGES REQUIRED:
     ///     Admins with the role "CONFIGURE_NODE_MANAGER_ROLE"
     ///

@@ -19,19 +19,19 @@ import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/crypto
 contract BNPLKYCStore is Initializable, ReentrancyGuardUpgradeable {
     using ECDSAUpgradeable for bytes32;
 
-    /// @dev Domain ID => KYC public key
+    /// @dev [Domain id] => [KYC public key]
     mapping(uint32 => address) public publicKeys;
 
-    /// @dev encode(Domain, User) => Permissions
+    /// @dev [encode(Domain, User)] => [Permissions]
     mapping(uint256 => uint32) public domainPermissions;
 
-    /// @dev encode(Domain, User) => KYC status
+    /// @dev [encode(Domain, User)] => [KYC status]
     mapping(uint256 => uint32) public userKycStatuses;
 
-    /// @dev Used proof hashes
+    /// @dev [Proof hash] => [Use status]
     mapping(bytes32 => uint8) public proofUsed;
 
-    /// @dev Domain ID => KYC mode
+    /// @dev [Domain id] => [KYC mode]
     mapping(uint32 => uint256) public domainKycMode;
 
     uint32 public constant PROOF_MAGIC = 0xfc203827;

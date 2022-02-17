@@ -32,6 +32,7 @@ import {PRBMathUD60x18} from "../../Utils/Math/PRBMathUD60x18.sol";
 ///   **Redeem AAVE**
 ///   **Claim AAVE rewards**
 ///   **Cool down AAVE**
+///
 /// @author BNPL
 contract BNPLStakingPool is
     Initializable,
@@ -81,7 +82,11 @@ contract BNPLStakingPool is
 
     /// @notice Cumulative value of bonded tokens
     uint256 public override tokensBondedAllTime;
+
+    /// @notice Pool BNPL token effective supply
     uint256 public override poolTokenEffectiveSupply;
+
+    /// @notice Pool BNPL token balance
     uint256 public override virtualPoolTokensCount;
 
     /// @notice Cumulative value of donated tokens
@@ -90,10 +95,10 @@ contract BNPLStakingPool is
     /// @notice Cumulative value of shashed tokens
     uint256 public totalSlashedAllTime;
 
-    /// @dev BNPL KYC store contract
+    /// @notice The BNPL KYC store contract
     BNPLKYCStore public bnplKYCStore;
 
-    /// @dev BNPL KYC domain
+    /// @notice The corresponding id in the BNPL KYC store
     uint32 public kycDomainId;
 
     /// @dev StakingPool contract is created and initialized by the BankNodeManager contract
@@ -151,19 +156,19 @@ contract BNPLStakingPool is
     }
 
     /// @notice Returns pool tokens circulating
-    /// @return PoolTokensCirculating
+    /// @return poolTokensCirculating
     function poolTokensCirculating() external view override returns (uint256) {
         return poolTokenEffectiveSupply - POOL_LIQUIDITY_TOKEN.balanceOf(address(this));
     }
 
     /// @notice Returns unstake lockup period
-    /// @return UnstakeLockupPeriod
+    /// @return unstakeLockupPeriod
     function getUnstakeLockupPeriod() public pure override returns (uint256) {
         return 7 days;
     }
 
     /// @notice Returns pool total assets value
-    /// @return PoolTotalAssetsValue
+    /// @return poolTotalAssetsValue
     function getPoolTotalAssetsValue() public view override returns (uint256) {
         return baseTokenBalance;
     }
@@ -182,7 +187,7 @@ contract BNPLStakingPool is
     /// @notice Returns pool deposit conversion
     ///
     /// @param depositAmount The deposit tokens amount
-    /// @return PoolDepositConversion
+    /// @return poolDepositConversion
     function getPoolDepositConversion(uint256 depositAmount) public view returns (uint256) {
         uint256 poolTotalAssetsValue = getPoolTotalAssetsValue();
         return (depositAmount * poolTokenEffectiveSupply) / (poolTotalAssetsValue > 0 ? poolTotalAssetsValue : 1);
@@ -191,7 +196,7 @@ contract BNPLStakingPool is
     /// @notice Returns pool withdraw conversion
     ///
     /// @param withdrawAmount The withdraw tokens amount
-    /// @return getPoolWithdrawConversion
+    /// @return poolWithdrawConversion
     function getPoolWithdrawConversion(uint256 withdrawAmount) public view override returns (uint256) {
         return
             (withdrawAmount * getPoolTotalAssetsValue()) /
@@ -455,6 +460,7 @@ contract BNPLStakingPool is
         _removeLiquidity(msg.sender, unstakeAmount);
     }
 
+    /// @dev Handle slash
     function _slash(uint256 slashAmount, address recipient) private {
         require(slashAmount < getPoolTotalAssetsValue(), "cannot slash more than the pool balance");
         baseTokenBalance -= slashAmount;
