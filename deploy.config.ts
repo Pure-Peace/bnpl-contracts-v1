@@ -45,6 +45,8 @@ const BNPL_TOKEN_DECIMALS = 18
 const BNPL_TOKEN_ADDRESS_KOVAN = '0x0c6ec7437657cb501ae35718e5426815e83e9e00';
 const TUSD_KOVAN = '0x016750AC630F711882812f24Dba6c95b9D35856d';
 const A_TUSD_KOVAN = '0x39914AdBe5fDbC2b9ADeedE8Bcd444b20B039204';
+const USDT_KOVAN = '0x13512979ADE267AB5100878E2e0f485B568328a4'
+const A_USDT_KOVAN = '0xFF3c8bc103682FA918c954E84F5056aB4DD5189d'
 const SUSHISWAP_KOVAN = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
 const AAVE_LENDING_POOL_KOVAN = '0xE0fBa4Fc209b4948668006B2bE61711b7f465bAe'
 const STAKE_AAVE_KOVAN = '0xf2fbf9a6710afda1c4aab2e922de9d69e0c97fd2'
@@ -70,6 +72,51 @@ const swapMarketPoolFee = (amount: BigNumberish) => {
   return BigNumber.from(amount)
 }
 
+const LENDABLE_TOKEN_USDT_KOVAN = {
+  enabled: true,
+  tokenContract: USDT_KOVAN,
+  swapMarket: SUSHISWAP_KOVAN,
+  swapMarketPoolFee: swapMarketPoolFee(3000),
+  decimals: USDT_TOKEN_DECIMALS,
+  valueMultiplier: toTokenAmount(1, BNPL_TOKEN_DECIMALS), // 1000000000000000000
+  unusedFundsLendingMode: 1,
+  unusedFundsLendingContract: AAVE_LENDING_POOL_KOVAN,
+  unusedFundsLendingToken: A_USDT_KOVAN,
+  unusedFundsIncentivesController: AAVE_INCENTIVES_CONTROLLER_KOVAN,
+  symbol: 'USDT',
+  poolSymbol: 'pUSDT'
+}
+
+const LENDABLE_TOKEN_TUSD_KOVAN = {
+  enabled: true,
+  tokenContract: TUSD_KOVAN,
+  swapMarket: SUSHISWAP_KOVAN,
+  swapMarketPoolFee: swapMarketPoolFee(3000),
+  decimals: TUSD_TOKEN_DECIMALS,
+  valueMultiplier: toTokenAmount(1, TUSD_TOKEN_DECIMALS),
+  unusedFundsLendingMode: 1,
+  unusedFundsLendingContract: AAVE_LENDING_POOL_KOVAN,
+  unusedFundsLendingToken: A_TUSD_KOVAN,
+  unusedFundsIncentivesController: AAVE_INCENTIVES_CONTROLLER_KOVAN,
+  symbol: 'TUSD',
+  poolSymbol: 'pTUSD'
+}
+
+const LENDABLE_TOKEN_USDT_MAINNET = {
+  enabled: true,
+  tokenContract: USDT_MAINNET,
+  swapMarket: SUSHISWAP_MAINNET,
+  swapMarketPoolFee: swapMarketPoolFee(3000),
+  decimals: USDT_TOKEN_DECIMALS,
+  valueMultiplier: toTokenAmount(1, BNPL_TOKEN_DECIMALS), // 1000000000000000000
+  unusedFundsLendingMode: 1,
+  unusedFundsLendingContract: AAVE_LENDING_POOL_MAINNET,
+  unusedFundsLendingToken: A_USDT_MAINNET,
+  unusedFundsIncentivesController: AAVE_INCENTIVES_CONTROLLER_MAINNET,
+  symbol: 'USDT',
+  poolSymbol: 'pUSDT'
+}
+
 
 const config: { [key: string]: DeployConfig } = {
   'kovan': {
@@ -83,20 +130,7 @@ const config: { [key: string]: DeployConfig } = {
     managerAdmin: 'deployer',
     bankNodeManagerConfigurator: 'deployer',
     lendableTokens: [
-      {
-        enabled: true,
-        tokenContract: TUSD_KOVAN,
-        swapMarket: SUSHISWAP_KOVAN,
-        swapMarketPoolFee: swapMarketPoolFee(3000),
-        decimals: TUSD_TOKEN_DECIMALS,
-        valueMultiplier: toTokenAmount(1, TUSD_TOKEN_DECIMALS),
-        unusedFundsLendingMode: 1,
-        unusedFundsLendingContract: AAVE_LENDING_POOL_KOVAN,
-        unusedFundsLendingToken: A_TUSD_KOVAN,
-        unusedFundsIncentivesController: AAVE_INCENTIVES_CONTROLLER_KOVAN,
-        symbol: 'TUSD',
-        poolSymbol: 'pTUSD'
-      }
+      LENDABLE_TOKEN_USDT_KOVAN, LENDABLE_TOKEN_TUSD_KOVAN
     ]
   },
   'mainnet': {
@@ -110,20 +144,7 @@ const config: { [key: string]: DeployConfig } = {
     managerAdmin: 'deployer',
     bankNodeManagerConfigurator: 'deployer',
     lendableTokens: [
-      {
-        enabled: true,
-        tokenContract: USDT_MAINNET,
-        swapMarket: SUSHISWAP_MAINNET,
-        swapMarketPoolFee: swapMarketPoolFee(3000),
-        decimals: USDT_TOKEN_DECIMALS,
-        valueMultiplier: toTokenAmount(1, BNPL_TOKEN_DECIMALS), // 1000000000000000000
-        unusedFundsLendingMode: 1,
-        unusedFundsLendingContract: AAVE_LENDING_POOL_MAINNET,
-        unusedFundsLendingToken: A_USDT_MAINNET,
-        unusedFundsIncentivesController: AAVE_INCENTIVES_CONTROLLER_MAINNET,
-        symbol: 'USDT',
-        poolSymbol: 'pUSDT'
-      }
+      LENDABLE_TOKEN_USDT_MAINNET
     ]
   }
 }
