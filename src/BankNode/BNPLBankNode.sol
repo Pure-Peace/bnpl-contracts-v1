@@ -737,7 +737,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             BankNodeUtils.getSwapExactTokensPath(address(baseLiquidityToken), address(bnplToken)),
             address(this),
             block.timestamp
-        )[1];
+        )[2];
         require(amountOut >= minTokenOut, "swap amount must >= minTokenOut");
         TransferHelper.safeApprove(address(bnplToken), address(nodeStakingPool), amountOut);
         nodeStakingPool.donateNotCountedInTotal(amountOut);
@@ -753,7 +753,7 @@ contract BNPLBankNode is Initializable, AccessControlEnumerableUpgradeable, Reen
             BankNodeUtils.getSwapExactTokensPath(address(bnplToken), address(baseLiquidityToken)),
             address(this),
             block.timestamp
-        )[1];
+        )[2];
         require(amountOut >= minTokenOut, "swap amount must >= minTokenOut");
         baseTokenBalance += amountOut;
     }

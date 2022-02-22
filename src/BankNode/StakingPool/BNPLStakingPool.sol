@@ -583,7 +583,7 @@ contract BNPLStakingPool is
             BankNodeUtils.getSwapExactTokensPath(address(swapToken), address(BASE_LIQUIDITY_TOKEN)),
             address(this),
             block.timestamp
-        )[1];
+        )[2];
         require(donateAmount > 0, "swap amount must be > 0");
 
         TransferHelper.safeApprove(address(BASE_LIQUIDITY_TOKEN), address(this), donateAmount);
